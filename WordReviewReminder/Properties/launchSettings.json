@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WordReviewReminder (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "WordReviewReminder (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

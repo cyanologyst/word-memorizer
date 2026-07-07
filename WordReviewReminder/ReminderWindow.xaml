@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="WordReviewReminder.ReminderWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Review reminder">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+        <Grid RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Review now" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="WordText" FontSize="32" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="MetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Button Grid.Column="1" Width="42" Height="42" Click="SpeakButton_Click">
+                    <FontIcon Glyph="&#xE767;" />
+                </Button>
+            </Grid>
+
+            <Border Grid.Row="1" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                <TextBlock x:Name="MeaningText" TextWrapping="WrapWholeWords" MaxLines="4" />
+            </Border>
+
+            <Grid Grid.Row="2" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.15*" />
+                    <ColumnDefinition Width="1.15*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button HorizontalAlignment="Stretch" Click="KnowButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE73E;" />
+                        <TextBlock Text="Know" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="LaterButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE916;" />
+                        <TextBlock Text="Later" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="2" Content="Skip" HorizontalAlignment="Stretch" Click="SkipButton_Click" />
+                <Button Grid.Column="3" Content="Details" HorizontalAlignment="Stretch" Click="DetailsButton_Click" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

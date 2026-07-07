@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="WordReviewReminder.Pages.WordlistsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
+
+    <Grid Padding="28,20,28,28" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Wordlists" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Import, enable, and maintain local JSON vocabulary databases" />
+            </StackPanel>
+            <CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
+                <AppBarButton Icon="Import" Label="Import" Click="ImportButton_Click" />
+                <AppBarButton Icon="Add" Label="Add word" Click="AddWordButton_Click" />
+                <AppBarButton Icon="Edit" Label="Edit" Click="EditWordButton_Click" />
+                <AppBarButton Icon="Delete" Label="Delete" Click="DeleteWordButton_Click" />
+                <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
+            </CommandBar>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnSpacing="18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListView x:Name="WordListView" SelectionChanged="WordListView_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,4,0,4" Padding="14" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="7" Height="58" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" />
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Source}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Id}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Grid RowSpacing="14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="SelectedListTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock x:Name="SelectedListMeta" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <ToggleSwitch x:Name="EnableSelectedToggle" Grid.Column="1" Header="Enabled" Toggled="EnableSelectedToggle_Toggled" />
+                    </Grid>
+                    <TextBox x:Name="SearchBox" Grid.Row="1" PlaceholderText="Search words, meanings, or part of speech" TextChanged="SearchBox_TextChanged" />
+                    <ListView x:Name="WordsView" Grid.Row="2">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,3,0,3" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="130" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding PartOfSpeech}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding ShortMeaning}" TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <TextBlock x:Name="StatusText" Grid.Row="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+    </Grid>
+</Page>

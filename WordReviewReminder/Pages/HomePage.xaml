@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="WordReviewReminder.Pages.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
+
+    <ScrollViewer>
+        <Grid Padding="28,20,28,28" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Spacing="18">
+                <Border Padding="22" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid ColumnSpacing="18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="8">
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Dashboard" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="A calm control center for keeping words warm in memory" TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+                        <CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
+                            <AppBarButton Icon="Play" Label="Review now" Click="ReviewNowButton_Click" />
+                            <AppBarButton Icon="Volume" Label="Listen" Click="SpeakButton_Click" />
+                            <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
+                        </CommandBar>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="8">
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Active words" />
+                            <TextBlock x:Name="ActiveWordsText" FontSize="30" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="8">
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Today" />
+                            <TextBlock x:Name="ReviewedTodayText" FontSize="30" FontWeight="SemiBold" />
+                            <ProgressBar x:Name="DailyGoalBar" Height="6" Maximum="100" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="8">
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Streak" />
+                            <TextBlock x:Name="StreakText" FontSize="30" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="8">
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Next reminder" />
+                            <TextBlock x:Name="NextReminderText" FontSize="18" FontWeight="SemiBold" TextWrapping="NoWrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Padding="22" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid ColumnSpacing="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Current review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="WordText" FontSize="44" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="WordMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="MeaningText" FontSize="16" TextWrapping="WrapWholeWords" MaxLines="3" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="KnowButton" HorizontalAlignment="Stretch" Click="KnowButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE73E;" />
+                                    <TextBlock Text="Know" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="LaterButton" HorizontalAlignment="Stretch" Click="LaterButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE916;" />
+                                    <TextBlock Text="Review Later" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="SkipButton" HorizontalAlignment="Stretch" Click="SkipButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE711;" />
+                                    <TextBlock Text="Skip" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="DetailsButton" HorizontalAlignment="Stretch" Click="DetailsButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE946;" />
+                                    <TextBlock Text="Open Details" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnSpacing="18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Weekly rhythm" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <ItemsRepeater x:Name="ActivityRepeater">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4,0,4" ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="44" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="34" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding DayLabel}" />
+                                            <ProgressBar Grid.Column="1" Height="7" Maximum="100" Value="{Binding Progress}" />
+                                            <TextBlock Grid.Column="2" HorizontalAlignment="Right" FontSize="12" Text="{Binding Count}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Enabled wordlists" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <ItemsRepeater x:Name="EnabledListsRepeater">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,3,0,3" ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="6" Height="28" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Source}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+
+            <Border Grid.Column="1" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <StackPanel Spacing="14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Word details" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <Button Grid.Column="1" Click="SpeakButton_Click">
+                            <FontIcon Glyph="&#xE767;" />
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="DetailWordText" FontSize="34" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="DetailMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="DetailMeaningText" TextWrapping="WrapWholeWords" />
+                    <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
+                    <TextBlock Text="Source" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="DetailSourceText" TextWrapping="WrapWholeWords" />
+                    <TextBlock Text="Review stats" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock x:Name="DetailKnownText" FontSize="22" FontWeight="SemiBold" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Known" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock x:Name="DetailLaterText" FontSize="22" FontWeight="SemiBold" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Later" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock x:Name="DetailSeenText" FontSize="22" FontWeight="SemiBold" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Seen" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>
