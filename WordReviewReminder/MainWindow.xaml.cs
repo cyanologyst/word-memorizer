@@ -14,7 +14,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new();
     private DateTimeOffset _nextReminderAt = DateTimeOffset.Now.AddSeconds(15);
-    private ReminderWindow? _reminderWindow;
+    private ReminderOverlayWindow? _reminderWindow;
 
     public MainWindow()
     {
@@ -99,7 +99,7 @@ public sealed partial class MainWindow : Window
         if (App.Data.Settings.NotificationMode is NotificationMode.Popup or NotificationMode.Both)
         {
             _reminderWindow?.Close();
-            _reminderWindow = new ReminderWindow(word, App.Data.Settings.PopupDurationSeconds, async action =>
+            _reminderWindow = new ReminderOverlayWindow(word, App.Data.Settings.PopupDurationSeconds, async action =>
             {
                 await App.Data.RecordReviewAsync(word, action);
                 if (NavFrame.Content is HomePage home)

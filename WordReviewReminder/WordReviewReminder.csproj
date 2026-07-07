@@ -60,6 +60,9 @@
   <ItemGroup>
     <ProjectReference Include="..\WordReviewReminder.Core\WordReviewReminder.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

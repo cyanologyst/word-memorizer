@@ -16,9 +16,11 @@ public static class ToastService
                       <toast launch="review">
                         <visual>
                           <binding template="ToastGeneric">
+                            <text>TOEFL Review</text>
                             <text>{Escape(word.Term)}</text>
                             <text>{Escape($"{word.PartOfSpeech} {word.Pronunciation}".Trim())}</text>
                             <text>{Escape(meaning)}</text>
+                            <text placement="attribution">WordReviewReminder</text>
                           </binding>
                         </visual>
                       </toast>

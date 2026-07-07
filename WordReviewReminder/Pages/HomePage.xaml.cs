@@ -8,7 +8,7 @@ namespace WordReviewReminder.Pages;
 public sealed partial class HomePage : Page
 {
     private readonly SpeechService _speech = new();
-    private ReminderWindow? _manualReminderWindow;
+    private ReminderOverlayWindow? _manualReminderWindow;
     private MiniWidgetWindow? _miniWidgetWindow;
     private WordEntry? _currentWord;
 
@@ -69,7 +69,7 @@ public sealed partial class HomePage : Page
         }
 
         _manualReminderWindow?.Close();
-        _manualReminderWindow = new ReminderWindow(_currentWord, App.Data.Settings.PopupDurationSeconds, async action =>
+        _manualReminderWindow = new ReminderOverlayWindow(_currentWord, App.Data.Settings.PopupDurationSeconds, async action =>
         {
             await App.Data.RecordReviewAsync(_currentWord, action);
             _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);

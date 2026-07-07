@@ -51,30 +51,37 @@
             <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                 <Setter Property="Background" Value="{StaticResource PremiumAccentBrush}" />
                 <Setter Property="Foreground" Value="White" />
-                <Setter Property="BorderBrush" Value="{StaticResource PremiumAccentBrush}" />
-                <Setter Property="MinHeight" Value="42" />
-                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="MinHeight" Value="40" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="CornerRadius" Value="6" />
             </Style>
 
             <Style x:Key="SuccessActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource PremiumSuccessSoftBrush}" />
-                <Setter Property="BorderBrush" Value="{StaticResource PremiumSuccessBrush}" />
+                <Setter Property="Background" Value="{StaticResource PremiumAccentBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="MinHeight" Value="40" />
-                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="CornerRadius" Value="6" />
             </Style>
 
             <Style x:Key="WarningActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource PremiumWarningSoftBrush}" />
-                <Setter Property="BorderBrush" Value="{StaticResource PremiumWarningBrush}" />
+                <Setter Property="Background" Value="{ThemeResource ButtonBackground}" />
+                <Setter Property="Foreground" Value="{ThemeResource ButtonForeground}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderBrush}" />
                 <Setter Property="MinHeight" Value="40" />
-                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="CornerRadius" Value="6" />
             </Style>
 
             <Style x:Key="DangerActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource PremiumDangerSoftBrush}" />
-                <Setter Property="BorderBrush" Value="{StaticResource PremiumDangerBrush}" />
+                <Setter Property="Background" Value="{ThemeResource ButtonBackground}" />
+                <Setter Property="Foreground" Value="{ThemeResource ButtonForeground}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderBrush}" />
                 <Setter Property="MinHeight" Value="40" />
-                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="CornerRadius" Value="6" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>
