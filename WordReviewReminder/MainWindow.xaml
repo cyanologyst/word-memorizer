@@ -45,9 +45,19 @@
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Review" Tag="review">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE768;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Wordlists" Tag="wordlists">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D2;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Statistics" Tag="statistics">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Logs" Tag="logs">

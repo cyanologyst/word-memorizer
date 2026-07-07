@@ -9,6 +9,7 @@ public sealed partial class HomePage : Page
 {
     private readonly SpeechService _speech = new();
     private ReminderWindow? _manualReminderWindow;
+    private MiniWidgetWindow? _miniWidgetWindow;
     private WordEntry? _currentWord;
 
     public HomePage()
@@ -67,6 +68,12 @@ public sealed partial class HomePage : Page
         {
             await _speech.SpeakAsync(_currentWord.Term);
         }
+    }
+
+    private void MiniButton_Click(object sender, RoutedEventArgs e)
+    {
+        _miniWidgetWindow ??= new MiniWidgetWindow();
+        _miniWidgetWindow.Activate();
     }
 
     private async void KnowButton_Click(object sender, RoutedEventArgs e)

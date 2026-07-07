@@ -29,6 +29,7 @@
                         <CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
                             <AppBarButton Icon="Play" Label="Review now" Click="ReviewNowButton_Click" />
                             <AppBarButton Icon="Volume" Label="Listen" Click="SpeakButton_Click" />
+                            <AppBarButton Icon="Pin" Label="Mini" Click="MiniButton_Click" />
                             <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
                         </CommandBar>
                     </Grid>
