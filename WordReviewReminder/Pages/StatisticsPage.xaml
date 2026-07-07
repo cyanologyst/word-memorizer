@@ -8,115 +8,154 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
-    <ScrollViewer>
+    <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
         <StackPanel Padding="28,20,28,28" Spacing="18">
-            <StackPanel>
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Statistics" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Momentum, mastery, and words that need attention" />
-            </StackPanel>
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromVerticalOffset="18" />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
+
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="360" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Statistics" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Momentum, mastery, and words that need attention" />
+                </StackPanel>
+                <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Next best action" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="InsightText" FontSize="18" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <Grid ColumnSpacing="14">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.15*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                    <Grid ColumnSpacing="14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ProgressRing x:Name="DailyGoalRing" Width="68" Height="68" IsIndeterminate="False" Maximum="100" />
+                        <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Daily goal" />
+                            <TextBlock x:Name="DailyGoalText" Style="{StaticResource MetricValueTextStyle}" />
+                            <ProgressBar x:Name="DailyGoalBar" Height="6" Maximum="100" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Daily goal" />
-                        <TextBlock x:Name="DailyGoalText" FontSize="30" FontWeight="SemiBold" />
-                        <ProgressBar x:Name="DailyGoalBar" Height="7" Maximum="100" />
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Streak" />
+                        <TextBlock x:Name="StreakText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Keep it alive today" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Column="2" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Streak" />
-                        <TextBlock x:Name="StreakText" FontSize="30" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
+                        <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Ready for review" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Column="3" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Due now" />
-                        <TextBlock x:Name="DueNowText" FontSize="30" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="3" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                    <StackPanel Spacing="8">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Total active" />
-                        <TextBlock x:Name="TotalActiveText" FontSize="30" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Total active" />
+                        <TextBlock x:Name="TotalActiveText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Enabled words" />
                     </StackPanel>
                 </Border>
             </Grid>
 
             <Grid ColumnSpacing="18">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="1.25*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Mastery levels" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Mastery distribution" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock x:Name="MasterySummaryText" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </Grid>
                         <StackPanel Spacing="12">
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="New" />
-                                <ProgressBar x:Name="NewBar" Grid.Column="1" Height="7" Maximum="100" />
+                                <ProgressBar x:Name="NewBar" Grid.Column="1" Height="9" Maximum="100" />
                                 <TextBlock x:Name="NewText" Grid.Column="2" HorizontalAlignment="Right" />
                             </Grid>
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Learning" />
-                                <ProgressBar x:Name="LearningBar" Grid.Column="1" Height="7" Maximum="100" />
+                                <ProgressBar x:Name="LearningBar" Grid.Column="1" Height="9" Maximum="100" />
                                 <TextBlock x:Name="LearningText" Grid.Column="2" HorizontalAlignment="Right" />
                             </Grid>
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Familiar" />
-                                <ProgressBar x:Name="FamiliarBar" Grid.Column="1" Height="7" Maximum="100" />
+                                <ProgressBar x:Name="FamiliarBar" Grid.Column="1" Height="9" Maximum="100" />
                                 <TextBlock x:Name="FamiliarText" Grid.Column="2" HorizontalAlignment="Right" />
                             </Grid>
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Mastered" />
-                                <ProgressBar x:Name="MasteredBar" Grid.Column="1" Height="7" Maximum="100" />
+                                <ProgressBar x:Name="MasteredBar" Grid.Column="1" Height="9" Maximum="100" />
                                 <TextBlock x:Name="MasteredText" Grid.Column="2" HorizontalAlignment="Right" />
                             </Grid>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="1" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Most missed" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Needs attention" Style="{StaticResource SubtitleTextBlockStyle}" />
                         <ItemsRepeater x:Name="MissedRepeater">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,5,0,5" ColumnSpacing="10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Misses}" />
-                                    </Grid>
+                                    <Border Margin="0,5,0,5" Padding="12" Background="{StaticResource PremiumLayerBrush}" CornerRadius="10">
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
+                                            <Border Grid.Column="1" Padding="8,3" Background="{StaticResource PremiumWarningSoftBrush}" CornerRadius="10">
+                                                <TextBlock FontSize="12" Text="{Binding Misses}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ItemsRepeater.ItemTemplate>
                         </ItemsRepeater>
@@ -125,9 +164,16 @@
                 </Border>
             </Grid>
 
-            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+            <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="14">
-                    <TextBlock Text="Weekly activity" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Weekly heat strip" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Last 7 days" />
+                    </Grid>
                     <ItemsRepeater x:Name="ActivityRepeater">
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate>
@@ -138,7 +184,7 @@
                                         <ColumnDefinition Width="44" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding DayLabel}" />
-                                    <ProgressBar Grid.Column="1" Height="8" Maximum="100" Value="{Binding Progress}" />
+                                    <ProgressBar Grid.Column="1" Height="10" Maximum="100" Value="{Binding Progress}" />
                                     <TextBlock Grid.Column="2" HorizontalAlignment="Right" Text="{Binding Count}" />
                                 </Grid>
                             </DataTemplate>

@@ -8,30 +8,65 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
-    <ScrollViewer>
+    <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid Padding="28,20,28,28" ColumnSpacing="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="340" />
+                <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
 
             <StackPanel Spacing="18">
-                <Border Padding="22" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="22" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
+
+                <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="8">
+
+                        <StackPanel Spacing="12">
                             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Dashboard" />
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="A calm control center for keeping words warm in memory" TextWrapping="WrapWholeWords" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Today&apos;s command center for keeping words warm in memory" TextWrapping="WrapWholeWords" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Border Padding="10,5" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="14">
+                                    <TextBlock x:Name="NextReminderChipText" FontSize="12" Text="Next in 5 min" />
+                                </Border>
+                                <Border Padding="10,5" Background="{StaticResource PremiumSuccessSoftBrush}" CornerRadius="14">
+                                    <TextBlock x:Name="DailyGoalChipText" FontSize="12" Text="Daily goal active" />
+                                </Border>
+                                <Border Padding="10,5" Background="{StaticResource PremiumLayerBrush}" CornerRadius="14">
+                                    <TextBlock x:Name="ModeChipText" FontSize="12" Text="Popup + toast" />
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
-                        <CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
-                            <AppBarButton Icon="Play" Label="Review now" Click="ReviewNowButton_Click" />
-                            <AppBarButton Icon="Volume" Label="Listen" Click="SpeakButton_Click" />
-                            <AppBarButton Icon="Pin" Label="Mini" Click="MiniButton_Click" />
-                            <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
-                        </CommandBar>
+
+                        <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
+                            <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Click="ReviewNowButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <FontIcon Glyph="&#xE768;" />
+                                    <TextBlock Text="Start review" />
+                                </StackPanel>
+                            </Button>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <Button ToolTipService.ToolTip="Listen to the current word" Click="SpeakButton_Click">
+                                    <FontIcon Glyph="&#xE767;" />
+                                </Button>
+                                <Button ToolTipService.ToolTip="Open the floating mini widget" Click="MiniButton_Click">
+                                    <FontIcon Glyph="&#xE840;" />
+                                </Button>
+                                <Button ToolTipService.ToolTip="Pause reminders for 30 minutes" Click="PauseQuickButton_Click">
+                                    <FontIcon Glyph="&#xE769;" />
+                                </Button>
+                                <Button ToolTipService.ToolTip="Refresh the dashboard" Click="RefreshButton_Click">
+                                    <FontIcon Glyph="&#xE72C;" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
@@ -43,59 +78,70 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Active words" />
-                            <TextBlock x:Name="ActiveWordsText" FontSize="30" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Active words" />
+                            <TextBlock x:Name="ActiveWordsText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Enabled across lists" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Today" />
-                            <TextBlock x:Name="ReviewedTodayText" FontSize="30" FontWeight="SemiBold" />
-                            <ProgressBar x:Name="DailyGoalBar" Height="6" Maximum="100" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Today" />
+                            <TextBlock x:Name="ReviewedTodayText" Style="{StaticResource MetricValueTextStyle}" />
+                            <ProgressBar x:Name="DailyGoalBar" Height="7" Maximum="100" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="2" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Grid.Column="2" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Streak" />
-                            <TextBlock x:Name="StreakText" FontSize="30" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Streak" />
+                            <TextBlock x:Name="StreakText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock x:Name="StreakHintText" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="3" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Grid.Column="3" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Next reminder" />
-                            <TextBlock x:Name="NextReminderText" FontSize="18" FontWeight="SemiBold" TextWrapping="NoWrap" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
+                            <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock x:Name="NextReminderText" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextWrapping="NoWrap" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <Border Padding="22" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
-                    <Grid ColumnSpacing="20">
+                <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">
+                    <Grid ColumnSpacing="22">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="220" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="12">
                             <TextBlock Text="Current review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="WordText" FontSize="44" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="WordText" FontSize="50" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                             <TextBlock x:Name="WordMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="MeaningText" FontSize="16" TextWrapping="WrapWholeWords" MaxLines="3" />
+                            <TextBlock x:Name="MeaningText" FontSize="17" TextWrapping="WrapWholeWords" MaxLines="3" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Padding="9,5" Background="{StaticResource PremiumLayerBrush}" CornerRadius="12">
+                                    <TextBlock x:Name="SourceChipText" FontSize="12" />
+                                </Border>
+                                <Border Padding="9,5" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="12">
+                                    <TextBlock x:Name="AttentionChipText" FontSize="12" Text="Due for review" />
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
-                            <Button x:Name="KnowButton" HorizontalAlignment="Stretch" Click="KnowButton_Click">
+                        <StackPanel Grid.Column="1" Spacing="9" VerticalAlignment="Center">
+                            <Button x:Name="KnowButton" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" Click="KnowButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE73E;" />
                                     <TextBlock Text="Know" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="LaterButton" HorizontalAlignment="Stretch" Click="LaterButton_Click">
+                            <Button x:Name="LaterButton" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" Click="LaterButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE916;" />
                                     <TextBlock Text="Review Later" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="SkipButton" HorizontalAlignment="Stretch" Click="SkipButton_Click">
+                            <Button x:Name="SkipButton" Style="{StaticResource DangerActionButtonStyle}" HorizontalAlignment="Stretch" Click="SkipButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE711;" />
                                     <TextBlock Text="Skip" />
@@ -116,9 +162,9 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Weekly rhythm" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Weekly heat strip" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <ItemsRepeater x:Name="ActivityRepeater">
                                 <ItemsRepeater.ItemTemplate>
                                     <DataTemplate>
@@ -129,7 +175,7 @@
                                                 <ColumnDefinition Width="34" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding DayLabel}" />
-                                            <ProgressBar Grid.Column="1" Height="7" Maximum="100" Value="{Binding Progress}" />
+                                            <ProgressBar Grid.Column="1" Height="8" Maximum="100" Value="{Binding Progress}" />
                                             <TextBlock Grid.Column="2" HorizontalAlignment="Right" FontSize="12" Text="{Binding Count}" />
                                         </Grid>
                                     </DataTemplate>
@@ -138,18 +184,18 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="1" Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Enabled wordlists" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <ItemsRepeater x:Name="EnabledListsRepeater">
                                 <ItemsRepeater.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,3,0,3" ColumnSpacing="10">
+                                        <Grid Margin="0,4,0,4" ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <Border Width="6" Height="28" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="3" />
+                                            <Border Width="6" Height="36" Background="{StaticResource PremiumAccentBrush}" CornerRadius="3" />
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Source}" TextTrimming="CharacterEllipsis" />
@@ -163,7 +209,7 @@
                 </Grid>
             </StackPanel>
 
-            <Border Grid.Column="1" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+            <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="14">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -171,11 +217,11 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Word details" Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <Button Grid.Column="1" Click="SpeakButton_Click">
+                        <Button Grid.Column="1" ToolTipService.ToolTip="Listen to pronunciation" Click="SpeakButton_Click">
                             <FontIcon Glyph="&#xE767;" />
                         </Button>
                     </Grid>
-                    <TextBlock x:Name="DetailWordText" FontSize="34" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="DetailWordText" FontSize="36" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
                     <TextBlock x:Name="DetailMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                     <TextBlock x:Name="DetailMeaningText" TextWrapping="WrapWholeWords" />
                     <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
@@ -188,19 +234,19 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                        <Border Padding="10" Style="{StaticResource PremiumLayerStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="DetailKnownText" FontSize="22" FontWeight="SemiBold" />
                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Known" />
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="1" Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                        <Border Grid.Column="1" Padding="10" Style="{StaticResource PremiumLayerStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="DetailLaterText" FontSize="22" FontWeight="SemiBold" />
                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Later" />
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="2" Padding="10" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                        <Border Grid.Column="2" Padding="10" Style="{StaticResource PremiumLayerStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="DetailSeenText" FontSize="22" FontWeight="SemiBold" />
                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Seen" />

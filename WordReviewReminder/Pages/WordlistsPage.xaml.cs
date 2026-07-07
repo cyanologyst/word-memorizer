@@ -54,6 +54,7 @@ public sealed partial class WordlistsPage : Page
             SelectedListMeta.Text = "";
             EnableSelectedToggle.IsEnabled = false;
             WordsView.ItemsSource = null;
+            RenderPreview(null);
             return;
         }
 
@@ -64,9 +65,14 @@ public sealed partial class WordlistsPage : Page
         RenderWords();
     }
 
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         RenderWords();
+    }
+
+    private void WordsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        RenderPreview(WordsView.SelectedItem as WordEntry);
     }
 
     private void RenderWords()
@@ -88,7 +94,32 @@ public sealed partial class WordlistsPage : Page
                 Contains(word.Pronunciation, query));
         }
 
-        WordsView.ItemsSource = words.OrderBy(word => word.Order ?? int.MaxValue).ToList();
+        var orderedWords = words.OrderBy(word => word.Order ?? int.MaxValue).ToList();
+        WordsView.ItemsSource = orderedWords;
+        if (WordsView.SelectedItem is not WordEntry selected || !orderedWords.Any(word => word.Id == selected.Id))
+        {
+            WordsView.SelectedIndex = orderedWords.Count > 0 ? 0 : -1;
+            RenderPreview(WordsView.SelectedItem as WordEntry);
+        }
+    }
+
+    private void RenderPreview(WordEntry? word)
+    {
+        if (word is null)
+        {
+            PreviewTermText.Text = "Select a word";
+            PreviewMetaText.Text = "";
+            PreviewMeaningText.Text = "Preview meaning, chapter, tags, and pronunciation before editing.";
+            PreviewChapterText.Text = "No chapter";
+            PreviewTagsText.Text = "No tags";
+            return;
+        }
+
+        PreviewTermText.Text = word.Term;
+        PreviewMetaText.Text = $"{word.PartOfSpeech}  {word.Pronunciation}".Trim();
+        PreviewMeaningText.Text = word.ShortMeaning ?? "";
+        PreviewChapterText.Text = word.Chapter is null ? "No chapter" : $"Chapter {word.Chapter}";
+        PreviewTagsText.Text = word.Tags is null || word.Tags.Count == 0 ? "No tags" : string.Join(", ", word.Tags.Take(3));
     }
 
     private async void ImportButton_Click(object sender, RoutedEventArgs e)

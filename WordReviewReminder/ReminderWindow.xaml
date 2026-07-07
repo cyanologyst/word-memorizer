@@ -8,7 +8,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Border Padding="18" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+    <Border Padding="18" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14">
         <Grid RowSpacing="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -26,12 +26,12 @@
                     <TextBlock x:Name="WordText" FontSize="32" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock x:Name="MetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <Button Grid.Column="1" Width="42" Height="42" Click="SpeakButton_Click">
+                <Button Grid.Column="1" Width="42" Height="42" ToolTipService.ToolTip="Listen" Click="SpeakButton_Click">
                     <FontIcon Glyph="&#xE767;" />
                 </Button>
             </Grid>
 
-            <Border Grid.Row="1" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+            <Border Grid.Row="1" Padding="12" Background="{StaticResource PremiumSurfaceStrongBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
                 <TextBlock x:Name="MeaningText" TextWrapping="WrapWholeWords" MaxLines="4" />
             </Border>
 
@@ -42,19 +42,19 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button HorizontalAlignment="Stretch" Click="KnowButton_Click">
+                <Button Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" Click="KnowButton_Click">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE73E;" />
                         <TextBlock Text="Know" />
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="LaterButton_Click">
+                <Button Grid.Column="1" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" Click="LaterButton_Click">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE916;" />
                         <TextBlock Text="Later" />
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="2" Content="Skip" HorizontalAlignment="Stretch" Click="SkipButton_Click" />
+                <Button Grid.Column="2" Style="{StaticResource DangerActionButtonStyle}" Content="Skip" HorizontalAlignment="Stretch" Click="SkipButton_Click" />
                 <Button Grid.Column="3" Content="Details" HorizontalAlignment="Stretch" Click="DetailsButton_Click" />
             </Grid>
         </Grid>

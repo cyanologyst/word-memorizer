@@ -14,22 +14,50 @@ public sealed partial class LogsPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
+        FilterBox.SelectedIndex = 0;
         await RefreshAsync();
     }
 
     private async Task RefreshAsync()
     {
         await App.Data.RefreshAsync();
-        LogsView.ItemsSource = App.Data.RecentEvents
-            .Select(review => new
+        var selectedFilter = FilterBox.SelectedIndex switch
+        {
+            1 => "Known",
+            2 => "Later",
+            3 => "Skipped",
+            _ => ""
+        };
+        var events = App.Data.RecentEvents.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(selectedFilter))
+        {
+            events = events.Where(review => review.Action.ToString().Equals(selectedFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var timeline = events
+            .Select(review =>
             {
-                Timestamp = review.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
-                review.Term,
-                review.Action,
-                review.WordListId
+                var local = review.Timestamp.ToLocalTime();
+                return new
+                {
+                    Date = local.ToString("yyyy-MM-dd"),
+                    Time = local.ToString("HH:mm"),
+                    review.Term,
+                    review.Action,
+                    review.WordListId
+                };
             })
             .ToList();
-        StatusText.Text = $"{App.Data.RecentEvents.Count} recent events";
+        LogsView.ItemsSource = timeline;
+        StatusText.Text = $"{timeline.Count} visible events - {App.Data.RecentEvents.Count} total";
+    }
+
+    private async void FilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            await RefreshAsync();
+        }
     }
 
     private async void ExportButton_Click(object sender, RoutedEventArgs e)

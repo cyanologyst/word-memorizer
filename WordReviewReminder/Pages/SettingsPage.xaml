@@ -8,82 +8,136 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
-    <ScrollViewer>
-        <StackPanel Padding="28,20,28,28" Spacing="20">
-            <StackPanel>
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Reminder timing and notification behavior" />
+    <Grid Background="{StaticResource PremiumPageBackgroundBrush}">
+        <ScrollViewer>
+            <StackPanel Padding="28,20,28,88" Spacing="18">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="18" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Reminder timing, quiet hours, and notification behavior" />
+                </StackPanel>
+
+                <Grid ColumnSpacing="18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="330" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Spacing="18">
+                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                            <StackPanel Spacing="16">
+                                <TextBlock Text="Reminder behavior" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <Grid ColumnSpacing="16" RowSpacing="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="190" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Interval" />
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="How often reminders appear" />
+                                    </StackPanel>
+                                    <Slider x:Name="IntervalSlider" Grid.Column="1" Minimum="1" Maximum="180" StepFrequency="1" ValueChanged="IntervalSlider_ValueChanged" />
+                                    <NumberBox x:Name="IntervalBox" Grid.Column="2" Minimum="1" Maximum="180" SmallChange="1" LargeChange="5" ValueChanged="IntervalBox_ValueChanged" />
+
+                                    <StackPanel Grid.Row="1">
+                                        <TextBlock Text="Notification mode" />
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Popup, toast, or both" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="NotificationModeBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" MinWidth="260" SelectionChanged="PreviewControl_Changed">
+                                        <ComboBoxItem Content="Popup" />
+                                        <ComboBoxItem Content="Toast" />
+                                        <ComboBoxItem Content="Both" />
+                                    </ComboBox>
+
+                                    <StackPanel Grid.Row="2">
+                                        <TextBlock Text="Popup duration" />
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Seconds before a card closes" />
+                                    </StackPanel>
+                                    <Slider x:Name="PopupDurationSlider" Grid.Row="2" Grid.Column="1" Minimum="5" Maximum="120" StepFrequency="1" ValueChanged="PopupDurationSlider_ValueChanged" />
+                                    <NumberBox x:Name="PopupDurationBox" Grid.Row="2" Grid.Column="2" Minimum="5" Maximum="120" SmallChange="1" LargeChange="5" ValueChanged="PopupDurationBox_ValueChanged" />
+
+                                    <StackPanel Grid.Row="3">
+                                        <TextBlock Text="Word selection" />
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Prioritize due words or shuffle" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="SelectionModeBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" MinWidth="260">
+                                        <ComboBoxItem Content="Due first" />
+                                        <ComboBoxItem Content="Random" />
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                            <StackPanel Spacing="16">
+                                <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <ToggleSwitch x:Name="QuietHoursToggle" Header="Pause reminders during quiet hours" Toggled="PreviewControl_Changed" />
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="220" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="Start" />
+                                        <TimePicker x:Name="QuietStartPicker" ClockIdentifier="24HourClock" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6">
+                                        <TextBlock Text="End" />
+                                        <TimePicker x:Name="QuietEndPicker" ClockIdentifier="24HourClock" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                            <StackPanel Spacing="16">
+                                <TextBlock Text="System" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}" VerticalAlignment="Top">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <Border Padding="16" Background="{StaticResource PremiumSurfaceStrongBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Review now" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="Refuge" FontSize="30" FontWeight="SemiBold" />
+                                    <TextBlock Text="shelter, asylum, haven" TextWrapping="WrapWholeWords" />
+                                    <ProgressBar x:Name="PreviewDurationBar" Height="6" Maximum="120" />
+                                </StackPanel>
+                            </Border>
+                            <TextBlock x:Name="PreviewSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="15 min" Click="Preset15Button_Click" />
+                                <Button Content="30 min" Click="Preset30Button_Click" />
+                                <Button Content="60 min" Click="Preset60Button_Click" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </StackPanel>
+        </ScrollViewer>
 
-            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Reminder behavior" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <Grid ColumnSpacing="16" RowSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="220" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock VerticalAlignment="Center" Text="Interval minutes" />
-                        <NumberBox x:Name="IntervalBox" Grid.Column="1" Minimum="1" Maximum="180" SmallChange="1" LargeChange="5" />
-
-                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Notification mode" />
-                        <ComboBox x:Name="NotificationModeBox" Grid.Row="1" Grid.Column="1" MinWidth="220">
-                            <ComboBoxItem Content="Popup" />
-                            <ComboBoxItem Content="Toast" />
-                            <ComboBoxItem Content="Both" />
-                        </ComboBox>
-
-                        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Popup duration seconds" />
-                        <NumberBox x:Name="PopupDurationBox" Grid.Row="2" Grid.Column="1" Minimum="5" Maximum="120" SmallChange="1" LargeChange="5" />
-
-                        <TextBlock Grid.Row="3" VerticalAlignment="Center" Text="Word selection" />
-                        <ComboBox x:Name="SelectionModeBox" Grid.Row="3" Grid.Column="1" MinWidth="220">
-                            <ComboBoxItem Content="Due first" />
-                            <ComboBoxItem Content="Random" />
-                        </ComboBox>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <ToggleSwitch x:Name="QuietHoursToggle" Header="Pause reminders during quiet hours" />
-                    <Grid ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="220" />
-                            <ColumnDefinition Width="220" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Start" />
-                            <TimePicker x:Name="QuietStartPicker" ClockIdentifier="24HourClock" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Spacing="6">
-                            <TextBlock Text="End" />
-                            <TimePicker x:Name="QuietEndPicker" ClockIdentifier="24HourClock" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="System" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" />
-                </StackPanel>
-            </Border>
-
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <Button Content="Save settings" Click="SaveButton_Click" />
+        <Border VerticalAlignment="Bottom" Padding="28,14" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                 <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" Click="SaveButton_Click" />
             </StackPanel>
-        </StackPanel>
-    </ScrollViewer>
+        </Border>
+    </Grid>
 </Page>

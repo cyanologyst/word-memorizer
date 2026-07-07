@@ -25,8 +25,8 @@ public sealed partial class MiniWidgetWindow : Window
 
     private void ConfigureWindow()
     {
-        const int width = 380;
-        const int height = 116;
+        const int width = 430;
+        const int height = 150;
 
         AppWindow.Resize(new SizeInt32(width, height));
         if (AppWindow.Presenter is OverlappedPresenter presenter)
@@ -48,10 +48,14 @@ public sealed partial class MiniWidgetWindow : Window
 
     private void Render()
     {
+        var word = App.Data.PickNextWord(DateTimeOffset.Now);
+        CurrentWordText.Text = word?.Term ?? "No word due";
         StatusText.Text = App.Data.IsPaused(DateTimeOffset.Now)
             ? $"Paused until {App.Data.PausedUntil?.ToLocalTime():HH:mm}"
             : $"Next in {App.Data.Settings.ReminderIntervalMinutes} min";
 
+        DueText.Text = $"{App.Data.DueNowCount:N0} due";
+        DailyProgressBar.Value = App.Data.DailyGoalProgress;
         MetaText.Text = $"{App.Data.ReviewStreakDays}d streak - {App.Data.DueNowCount:N0} due";
     }
 
@@ -60,9 +64,30 @@ public sealed partial class MiniWidgetWindow : Window
         App.MainWindow?.Activate();
     }
 
-    private void PauseButton_Click(object sender, RoutedEventArgs e)
+    private void Pause15Button_Click(object sender, RoutedEventArgs e)
     {
-        App.Data.PauseFor(TimeSpan.FromMinutes(30));
+        PauseFor(TimeSpan.FromMinutes(15));
+    }
+
+    private void Pause30Button_Click(object sender, RoutedEventArgs e)
+    {
+        PauseFor(TimeSpan.FromMinutes(30));
+    }
+
+    private void Pause60Button_Click(object sender, RoutedEventArgs e)
+    {
+        PauseFor(TimeSpan.FromHours(1));
+    }
+
+    private void PauseTomorrowButton_Click(object sender, RoutedEventArgs e)
+    {
+        var tomorrowMorning = new DateTimeOffset(DateTimeOffset.Now.Date.AddDays(1).AddHours(8));
+        PauseFor(tomorrowMorning - DateTimeOffset.Now);
+    }
+
+    private void PauseFor(TimeSpan duration)
+    {
+        App.Data.PauseFor(duration);
         Render();
     }
 }

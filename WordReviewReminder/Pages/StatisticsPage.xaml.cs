@@ -20,12 +20,17 @@ public sealed partial class StatisticsPage : Page
     {
         DailyGoalText.Text = $"{App.Data.ReviewedToday:N0}/{App.Data.DailyGoalCount}";
         DailyGoalBar.Value = App.Data.DailyGoalProgress;
+        DailyGoalRing.Value = App.Data.DailyGoalProgress;
         StreakText.Text = $"{App.Data.ReviewStreakDays:N0} days";
         DueNowText.Text = App.Data.DueNowCount.ToString("N0");
         TotalActiveText.Text = App.Data.TotalWords.ToString("N0");
+        InsightText.Text = App.Data.ReviewedToday >= App.Data.DailyGoalCount
+            ? "Goal complete. Keep the streak warm or take a clean break."
+            : $"{Math.Max(0, App.Data.DailyGoalCount - App.Data.ReviewedToday):N0} reviews left to finish today's goal.";
 
         var mastery = App.Data.GetMasterySummary();
         var total = Math.Max(1, App.Data.TotalWords);
+        MasterySummaryText.Text = $"{mastery.Mastered:N0} mastered";
         RenderMastery(NewText, NewBar, mastery.New, total);
         RenderMastery(LearningText, LearningBar, mastery.Learning, total);
         RenderMastery(FamiliarText, FamiliarBar, mastery.Familiar, total);

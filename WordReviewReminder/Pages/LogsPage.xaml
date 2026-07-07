@@ -8,43 +8,71 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
-    <Grid Padding="28,20,28,28" RowSpacing="16">
+    <Grid Padding="28,20,28,28" RowSpacing="16" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Logs" />
-            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Recent review activity and JSONL export" />
-        </StackPanel>
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Logs" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Recent review activity, streak moments, and JSONL export" />
+            </StackPanel>
+            <ComboBox x:Name="FilterBox" Grid.Column="1" MinWidth="160" SelectionChanged="FilterBox_SelectionChanged">
+                <ComboBoxItem Content="All events" />
+                <ComboBoxItem Content="Known" />
+                <ComboBoxItem Content="Later" />
+                <ComboBoxItem Content="Skipped" />
+            </ComboBox>
+        </Grid>
 
-        <Border Grid.Row="1" Padding="14" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+        <Border Grid.Row="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
             <ListView x:Name="LogsView">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="4" ColumnSpacing="12">
+                        <Grid Margin="0,3,0,3" ColumnSpacing="14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="170" />
-                                <ColumnDefinition Width="160" />
-                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="26" />
+                                <ColumnDefinition Width="150" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="130" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Timestamp}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="2" Text="{Binding Action}" />
-                            <TextBlock Grid.Column="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding WordListId}" TextTrimming="CharacterEllipsis" />
+                            <Grid>
+                                <Rectangle Width="2" Fill="{ThemeResource CardStrokeColorDefaultBrush}" HorizontalAlignment="Center" />
+                                <Ellipse Width="12" Height="12" Fill="{StaticResource PremiumAccentBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Time}" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="{Binding Date}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding WordListId}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <Border Grid.Column="3" Padding="10,5" Background="{StaticResource PremiumLayerBrush}" CornerRadius="12" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding Action}" />
+                            </Border>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
         </Border>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
+        <Grid Grid.Row="2" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Button Content="Export logs" Click="ExportButton_Click" />
-            <Button Content="Refresh" Click="RefreshButton_Click" />
-            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-        </StackPanel>
+            <Button Grid.Column="1" Content="Refresh" Click="RefreshButton_Click" />
+            <TextBlock x:Name="StatusText" Grid.Column="2" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Grid>
     </Grid>
 </Page>

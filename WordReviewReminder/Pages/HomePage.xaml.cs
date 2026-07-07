@@ -23,10 +23,26 @@ public sealed partial class HomePage : Page
         ActiveWordsText.Text = App.Data.TotalWords.ToString("N0");
         ReviewedTodayText.Text = $"{App.Data.ReviewedToday:N0}/{App.Data.DailyGoalCount}";
         DailyGoalBar.Value = App.Data.DailyGoalProgress;
+        DailyGoalChipText.Text = App.Data.ReviewedToday >= App.Data.DailyGoalCount
+            ? "Daily goal complete"
+            : $"{Math.Max(0, App.Data.DailyGoalCount - App.Data.ReviewedToday):N0} left today";
         StreakText.Text = $"{App.Data.ReviewStreakDays:N0}d";
+        StreakHintText.Text = App.Data.ReviewStreakDays > 0 ? "Momentum active" : "Start a streak";
+        DueNowText.Text = App.Data.DueNowCount.ToString("N0");
         NextReminderText.Text = App.Data.IsQuietTime(DateTimeOffset.Now)
             ? "Quiet hours"
             : $"{App.Data.Settings.ReminderIntervalMinutes} min";
+        NextReminderChipText.Text = App.Data.IsPaused(DateTimeOffset.Now)
+            ? $"Paused until {App.Data.PausedUntil?.ToLocalTime():HH:mm}"
+            : App.Data.IsQuietTime(DateTimeOffset.Now)
+                ? "Quiet hours active"
+                : $"Next in {App.Data.Settings.ReminderIntervalMinutes} min";
+        ModeChipText.Text = App.Data.Settings.NotificationMode switch
+        {
+            NotificationMode.Popup => "Popup mode",
+            NotificationMode.Toast => "Toast mode",
+            _ => "Popup + toast"
+        };
         EnabledListsRepeater.ItemsSource = App.Data.WordLists.Where(list => list.IsEnabled).ToList();
         ActivityRepeater.ItemsSource = App.Data.GetWeeklyActivity();
 
@@ -76,6 +92,12 @@ public sealed partial class HomePage : Page
         _miniWidgetWindow.Activate();
     }
 
+    private async void PauseQuickButton_Click(object sender, RoutedEventArgs e)
+    {
+        App.Data.PauseFor(TimeSpan.FromMinutes(30));
+        await RefreshAsync();
+    }
+
     private async void KnowButton_Click(object sender, RoutedEventArgs e)
     {
         await RecordAsync(ReviewAction.Known);
@@ -123,6 +145,8 @@ public sealed partial class HomePage : Page
         WordText.Text = _currentWord.Term;
         WordMetaText.Text = $"{_currentWord.PartOfSpeech}  {_currentWord.Pronunciation}".Trim();
         MeaningText.Text = _currentWord.ShortMeaning ?? "";
+        SourceChipText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "Unknown source";
+        AttentionChipText.Text = "Due for review";
         RenderDetails(_currentWord);
     }
 
@@ -134,7 +158,7 @@ public sealed partial class HomePage : Page
         DetailWordText.Text = word.Term;
         DetailMetaText.Text = $"{word.PartOfSpeech}  {word.Pronunciation}".Trim();
         DetailMeaningText.Text = word.ShortMeaning ?? "";
-        DetailSourceText.Text = $"{list?.Title ?? "Unknown"} · Chapter {word.Chapter?.ToString() ?? "-"} · #{word.Order?.ToString() ?? "-"}";
+        DetailSourceText.Text = $"{list?.Title ?? "Unknown"} - Chapter {word.Chapter?.ToString() ?? "-"} - #{word.Order?.ToString() ?? "-"}";
         DetailKnownText.Text = (progress?.TimesKnown ?? 0).ToString("N0");
         DetailLaterText.Text = (progress?.TimesLater ?? 0).ToString("N0");
         DetailSeenText.Text = (progress?.TimesSeen ?? 0).ToString("N0");

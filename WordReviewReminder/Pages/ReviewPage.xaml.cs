@@ -37,11 +37,15 @@ public sealed partial class ReviewPage : Page
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
         _revealed = false;
         Render();
+        CardEntranceStoryboard.Begin();
     }
 
     private void Render()
     {
         var hasWord = _currentWord is not null;
+        var sessionComplete = _sessionCount >= SessionGoal;
+        CompletionPanel.Visibility = sessionComplete ? Visibility.Visible : Visibility.Collapsed;
+        FocusCard.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
         KnowButton.IsEnabled = hasWord;
         LaterButton.IsEnabled = hasWord;
         SkipButton.IsEnabled = hasWord;
@@ -49,28 +53,35 @@ public sealed partial class ReviewPage : Page
         ProgressText.Text = $"{_sessionCount} / {SessionGoal}";
         SessionProgressBar.Value = _sessionCount;
 
+        if (sessionComplete)
+        {
+            StatusText.Text = "Session complete";
+            return;
+        }
+
         if (_currentWord is null)
         {
             WordText.Text = "No words due";
             MetaText.Text = "Enable or import a wordlist to start reviewing.";
-            HiddenPromptText.Text = "";
             MeaningText.Text = "";
+            HiddenPromptText.Visibility = Visibility.Collapsed;
             return;
         }
 
         WordText.Text = _currentWord.Term;
         MetaText.Text = $"{_currentWord.PartOfSpeech}  {_currentWord.Pronunciation}".Trim();
+        SourceText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "Wordlist";
         HiddenPromptText.Visibility = _revealed ? Visibility.Collapsed : Visibility.Visible;
-        MeaningText.Visibility = _revealed ? Visibility.Visible : Visibility.Collapsed;
+        HiddenPromptText.Opacity = _revealed ? 0 : 1;
+        MeaningText.Opacity = _revealed ? 1 : 0;
         MeaningText.Text = _currentWord.ShortMeaning ?? "";
-        RevealButton.Content = _revealed ? "Meaning Revealed" : "Reveal Meaning";
+        RevealButtonText.Text = _revealed ? "Meaning Revealed" : "Reveal Meaning";
         StatusText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "";
     }
 
     private void RevealButton_Click(object sender, RoutedEventArgs e)
     {
-        _revealed = true;
-        Render();
+        RevealMeaning();
     }
 
     private async void SpeakButton_Click(object sender, RoutedEventArgs e)
@@ -108,6 +119,30 @@ public sealed partial class ReviewPage : Page
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
         _revealed = false;
         Render();
+        if (_sessionCount < SessionGoal)
+        {
+            CardEntranceStoryboard.Begin();
+        }
+    }
+
+    private async void RestartSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        await LoadNextAsync(resetSession: true);
+    }
+
+    private void RevealMeaning()
+    {
+        if (_currentWord is null || _revealed)
+        {
+            return;
+        }
+
+        _revealed = true;
+        HiddenPromptText.Visibility = Visibility.Visible;
+        MeaningText.Opacity = 0;
+        MeaningTransform.TranslateY = 14;
+        RevealButtonText.Text = "Meaning Revealed";
+        RevealStoryboard.Begin();
     }
 
     private async void Page_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -115,8 +150,7 @@ public sealed partial class ReviewPage : Page
         switch (e.Key)
         {
             case VirtualKey.Space:
-                _revealed = true;
-                Render();
+                RevealMeaning();
                 e.Handled = true;
                 break;
             case VirtualKey.Number1:

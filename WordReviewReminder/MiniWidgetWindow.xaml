@@ -8,23 +8,38 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Border Padding="14" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14">
+    <Border Padding="14" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="16">
         <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="3">
-                <TextBlock Text="Word Review" FontWeight="SemiBold" />
+            <StackPanel Spacing="5">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Word Review" FontWeight="SemiBold" />
+                    <Border Padding="7,2" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="8">
+                        <TextBlock x:Name="DueText" FontSize="11" />
+                    </Border>
+                </StackPanel>
+                <TextBlock x:Name="CurrentWordText" FontSize="18" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                 <TextBlock x:Name="StatusText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <ProgressBar x:Name="DailyProgressBar" Height="5" Maximum="100" />
                 <TextBlock x:Name="MetaText" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <Button Width="38" Height="34" Click="ReviewButton_Click">
+                <Button Width="40" Height="36" ToolTipService.ToolTip="Open Review Mode" Click="ReviewButton_Click">
                     <FontIcon Glyph="&#xE768;" />
                 </Button>
-                <Button Width="38" Height="34" Click="PauseButton_Click">
+                <Button Width="40" Height="36" ToolTipService.ToolTip="Snooze reminders">
                     <FontIcon Glyph="&#xE769;" />
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="15 minutes" Click="Pause15Button_Click" />
+                            <MenuFlyoutItem Text="30 minutes" Click="Pause30Button_Click" />
+                            <MenuFlyoutItem Text="1 hour" Click="Pause60Button_Click" />
+                            <MenuFlyoutItem Text="Until tomorrow" Click="PauseTomorrowButton_Click" />
+                        </MenuFlyout>
+                    </Button.Flyout>
                 </Button>
             </StackPanel>
         </Grid>
