@@ -11,9 +11,10 @@
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="PremiumPageBackgroundBrush" Color="#171014" />
-            <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="#2A2225" />
-            <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#33282B" />
-            <SolidColorBrush x:Key="PremiumLayerBrush" Color="#3A3033" />
+            <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="#292124" />
+            <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#31272A" />
+            <SolidColorBrush x:Key="PremiumLayerBrush" Color="#392F32" />
+            <SolidColorBrush x:Key="PremiumSubtleBrush" Color="#21191D" />
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="#FF7A5F" />
             <SolidColorBrush x:Key="PremiumAccentSoftBrush" Color="#33FF7A5F" />
             <SolidColorBrush x:Key="PremiumSuccessBrush" Color="#62D187" />
@@ -25,20 +26,32 @@
 
             <Style x:Key="PremiumPanelStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource PremiumSurfaceBrush}" />
-                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-                <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="8" />
             </Style>
 
             <Style x:Key="PremiumLayerStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource PremiumLayerBrush}" />
-                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-                <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="6" />
+            </Style>
+
+            <Style x:Key="CompactIconButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Width" Value="36" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="4" />
+            </Style>
+
+            <Style x:Key="PageSectionTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontWeight" Value="SemiBold" />
             </Style>
 
             <Style x:Key="MetricValueTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="32" />
+                <Setter Property="FontSize" Value="30" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="TextWrapping" Value="NoWrap" />
             </Style>
@@ -54,7 +67,7 @@
                 <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="14,0" />
-                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="CornerRadius" Value="4" />
             </Style>
 
             <Style x:Key="SuccessActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
@@ -63,7 +76,7 @@
                 <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="14,0" />
-                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="CornerRadius" Value="4" />
             </Style>
 
             <Style x:Key="WarningActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
@@ -72,7 +85,7 @@
                 <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderBrush}" />
                 <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="14,0" />
-                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="CornerRadius" Value="4" />
             </Style>
 
             <Style x:Key="DangerActionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
@@ -81,7 +94,7 @@
                 <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderBrush}" />
                 <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="14,0" />
-                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="CornerRadius" Value="4" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

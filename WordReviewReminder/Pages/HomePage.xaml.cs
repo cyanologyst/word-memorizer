@@ -11,6 +11,7 @@ public sealed partial class HomePage : Page
     private ReminderOverlayWindow? _manualReminderWindow;
     private MiniWidgetWindow? _miniWidgetWindow;
     private WordEntry? _currentWord;
+    private bool _detailsPaneOpen = true;
 
     public HomePage()
     {
@@ -178,6 +179,20 @@ public sealed partial class HomePage : Page
 
     private void DetailsButton_Click(object sender, RoutedEventArgs e)
     {
-        RenderWord();
+        _detailsPaneOpen = !_detailsPaneOpen;
+        UpdateDetailsPane(ActualWidth);
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateDetailsPane(e.NewSize.Width);
+    }
+
+    private void UpdateDetailsPane(double width)
+    {
+        var showDetails = _detailsPaneOpen && width >= 1080;
+        DetailsPane.Visibility = showDetails ? Visibility.Visible : Visibility.Collapsed;
+        DetailsColumn.Width = showDetails ? new GridLength(310) : new GridLength(0);
+        DetailsButtonText.Text = showDetails ? "Hide Details" : "Show Details";
     }
 }

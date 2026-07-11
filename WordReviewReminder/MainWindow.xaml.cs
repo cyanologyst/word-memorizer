@@ -87,6 +87,17 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    public void NavigateTo(string tag)
+    {
+        var item = NavView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(candidate => string.Equals(candidate.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        if (item is not null)
+        {
+            NavView.SelectedItem = item;
+        }
+    }
+
     private void Data_AchievementUnlocked(object? sender, AchievementUnlockedEventArgs e)
     {
         DispatcherQueue.TryEnqueue(() => ShowAchievementUnlock(e.Achievement));

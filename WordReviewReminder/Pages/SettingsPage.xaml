@@ -6,14 +6,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
     <Grid Background="{StaticResource PremiumPageBackgroundBrush}">
         <ScrollViewer>
-            <StackPanel Padding="28,20,28,88" Spacing="18">
+            <StackPanel Padding="24,18,24,80" Spacing="14">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
-                        <EntranceThemeTransition FromVerticalOffset="18" />
+                        <EntranceThemeTransition FromVerticalOffset="10" />
                     </TransitionCollection>
                 </StackPanel.ChildrenTransitions>
 
@@ -25,11 +26,11 @@
                 <Grid ColumnSpacing="18">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="330" />
+                        <ColumnDefinition x:Name="PreviewColumn" Width="300" />
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Spacing="18">
-                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                        <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                             <StackPanel Spacing="16">
                                 <TextBlock Text="Reminder behavior" Style="{StaticResource SubtitleTextBlockStyle}" />
                                 <Grid ColumnSpacing="16" RowSpacing="14">
@@ -73,7 +74,7 @@
                                         <TextBlock Text="Word selection" />
                                         <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Prioritize due words or shuffle" />
                                     </StackPanel>
-                                    <ComboBox x:Name="SelectionModeBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" MinWidth="260">
+                                    <ComboBox x:Name="SelectionModeBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" MinWidth="260" SelectionChanged="PreviewControl_Changed">
                                         <ComboBoxItem Content="Due first" />
                                         <ComboBoxItem Content="Random" />
                                     </ComboBox>
@@ -81,7 +82,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                        <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                             <StackPanel Spacing="16">
                                 <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
                                 <ToggleSwitch x:Name="QuietHoursToggle" Header="Pause reminders during quiet hours" Toggled="PreviewControl_Changed" />
@@ -92,28 +93,28 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="6">
                                         <TextBlock Text="Start" />
-                                        <TimePicker x:Name="QuietStartPicker" ClockIdentifier="24HourClock" />
+                                        <TimePicker x:Name="QuietStartPicker" ClockIdentifier="24HourClock" SelectedTimeChanged="QuietTimePicker_SelectedTimeChanged" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Spacing="6">
                                         <TextBlock Text="End" />
-                                        <TimePicker x:Name="QuietEndPicker" ClockIdentifier="24HourClock" />
+                                        <TimePicker x:Name="QuietEndPicker" ClockIdentifier="24HourClock" SelectedTimeChanged="QuietTimePicker_SelectedTimeChanged" />
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
-                        <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                        <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                             <StackPanel Spacing="16">
                                 <TextBlock Text="System" Style="{StaticResource SubtitleTextBlockStyle}" />
-                                <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" />
+                                <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" Toggled="PreviewControl_Changed" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
 
-                    <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}" VerticalAlignment="Top">
+                    <Border x:Name="PreviewPane" Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}" VerticalAlignment="Top">
                         <StackPanel Spacing="16">
                             <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <Border Padding="16" Background="{StaticResource PremiumSurfaceStrongBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14">
+                            <Border Padding="16" Background="{StaticResource PremiumSurfaceStrongBrush}" CornerRadius="8">
                                 <StackPanel Spacing="10">
                                     <TextBlock Text="Review now" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="Refuge" FontSize="30" FontWeight="SemiBold" />
@@ -133,7 +134,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border VerticalAlignment="Bottom" Padding="28,14" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+        <Border x:Name="SaveBar" VerticalAlignment="Bottom" Padding="24,12" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                 <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" Click="SaveButton_Click" />

@@ -12,38 +12,17 @@
 
     <Page.Resources>
         <Storyboard x:Name="CardEntranceStoryboard">
-            <DoubleAnimation Storyboard.TargetName="FocusCard"
-                             Storyboard.TargetProperty="Opacity"
-                             From="0"
-                             To="1"
-                             Duration="0:0:0.28" />
-            <DoubleAnimation Storyboard.TargetName="FocusCardTransform"
-                             Storyboard.TargetProperty="TranslateY"
-                             From="18"
-                             To="0"
-                             Duration="0:0:0.32">
+            <DoubleAnimation Storyboard.TargetName="FocusCard" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.18" />
+            <DoubleAnimation Storyboard.TargetName="FocusCardTransform" Storyboard.TargetProperty="TranslateY" From="10" To="0" Duration="0:0:0.20">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
         <Storyboard x:Name="RevealStoryboard">
-            <DoubleAnimation Storyboard.TargetName="HiddenPromptText"
-                             Storyboard.TargetProperty="Opacity"
-                             To="0"
-                             Duration="0:0:0.14" />
-            <DoubleAnimation Storyboard.TargetName="MeaningText"
-                             Storyboard.TargetProperty="Opacity"
-                             From="0"
-                             To="1"
-                             Duration="0:0:0.32"
-                             BeginTime="0:0:0.08" />
-            <DoubleAnimation Storyboard.TargetName="MeaningTransform"
-                             Storyboard.TargetProperty="TranslateY"
-                             From="14"
-                             To="0"
-                             Duration="0:0:0.32"
-                             BeginTime="0:0:0.08">
+            <DoubleAnimation Storyboard.TargetName="HiddenPromptText" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.10" />
+            <DoubleAnimation Storyboard.TargetName="MeaningText" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" BeginTime="0:0:0.05" />
+            <DoubleAnimation Storyboard.TargetName="MeaningTransform" Storyboard.TargetProperty="TranslateY" From="8" To="0" Duration="0:0:0.22" BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -51,134 +30,122 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid Padding="28" RowSpacing="18" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="24,18,24,20" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid ColumnSpacing="16">
+        <Grid ColumnSpacing="24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="220" />
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="6">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Review Mode" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Reveal, decide, and move through a focused session" />
+            <StackPanel Spacing="4">
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Review" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Focus on one word, reveal its meaning, then rate your recall" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Spacing="7">
-                <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" />
-                <ProgressBar x:Name="SessionProgressBar" Height="8" Maximum="20" />
+            <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" FontSize="16" FontWeight="SemiBold" />
+                <ProgressBar x:Name="SessionProgressBar" Height="5" Maximum="20" />
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="240" />
-            </Grid.ColumnDefinitions>
+        <Border x:Name="FocusCard" Grid.Row="1" MaxWidth="1020" Padding="28,24" HorizontalAlignment="Stretch" Style="{StaticResource PremiumPanelStyle}" Opacity="0">
+            <Border.RenderTransform>
+                <CompositeTransform x:Name="FocusCardTransform" />
+            </Border.RenderTransform>
+            <Grid RowSpacing="18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" MinHeight="170" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <Border x:Name="FocusCard" Padding="36" Style="{StaticResource PremiumPanelStyle}" Opacity="0">
-                <Border.RenderTransform>
-                    <CompositeTransform x:Name="FocusCardTransform" />
-                </Border.RenderTransform>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Focus card" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="WordText" FontSize="70" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
-                            <TextBlock x:Name="MetaText" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                        <Border Grid.Column="1" Padding="12,7" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="16" VerticalAlignment="Top">
-                            <TextBlock x:Name="SourceText" FontSize="12" Text="TOEFL" />
-                        </Border>
-                    </Grid>
-
-                    <Border Grid.Row="1" Margin="0,24,0,18" Padding="28" Background="{StaticResource PremiumSurfaceStrongBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="16">
-                        <Grid>
-                            <StackPanel x:Name="HiddenPromptText" Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="1">
-                                <FontIcon Glyph="&#xE8D7;" FontSize="28" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock HorizontalAlignment="Center" FontSize="20" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Meaning hidden" />
-                                <TextBlock HorizontalAlignment="Center" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Press Space or reveal when ready" />
-                            </StackPanel>
-                            <TextBlock x:Name="MeaningText" FontSize="24" TextWrapping="WrapWholeWords" VerticalAlignment="Center" Opacity="0">
-                                <TextBlock.RenderTransform>
-                                    <CompositeTransform x:Name="MeaningTransform" />
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
-
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                        <Button x:Name="RevealButton" Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="170" Click="RevealButton_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE890;" />
-                                <TextBlock x:Name="RevealButtonText" Text="Reveal Meaning" />
-                            </StackPanel>
-                        </Button>
-                        <Button MinWidth="120" Click="SpeakButton_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE767;" />
-                                <TextBlock Text="Listen" />
-                            </StackPanel>
-                        </Button>
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="6">
+                        <TextBlock x:Name="WordText" FontSize="56" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
+                        <TextBlock x:Name="MetaText" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
+                    <Border Grid.Column="1" Padding="10,5" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="8" VerticalAlignment="Top">
+                        <TextBlock x:Name="SourceText" FontSize="12" Text="TOEFL" MaxWidth="250" TextTrimming="CharacterEllipsis" />
+                    </Border>
                 </Grid>
-            </Border>
 
-            <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
-                <StackPanel Spacing="14">
-                    <TextBlock Text="Confidence" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <Button x:Name="KnowButton" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" Click="KnowButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Grid.Row="1" Padding="24" Background="{StaticResource PremiumSurfaceStrongBrush}" CornerRadius="8">
+                    <Grid>
+                        <StackPanel x:Name="HiddenPromptText" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="1">
+                            <FontIcon Glyph="&#xE8D7;" FontSize="24" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock HorizontalAlignment="Center" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Meaning hidden" />
+                            <TextBlock HorizontalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Press Space when ready" />
+                        </StackPanel>
+                        <TextBlock x:Name="MeaningText" MaxWidth="760" FontSize="22" TextWrapping="WrapWholeWords" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Opacity="0">
+                            <TextBlock.RenderTransform>
+                                <CompositeTransform x:Name="MeaningTransform" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="RevealButton" Style="{StaticResource PrimaryActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Reveal meaning, Space" Click="RevealButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE890;" />
+                            <TextBlock x:Name="RevealButtonText" Text="Reveal" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="Listen to pronunciation" Click="SpeakButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE767;" />
+                            <TextBlock Text="Listen" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="KnowButton" Grid.Column="2" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Mark known, 1" Click="KnowButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE73E;" />
                             <TextBlock Text="Know" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="LaterButton" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" Click="LaterButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="LaterButton" Grid.Column="3" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Review later, 2" Click="LaterButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE916;" />
                             <TextBlock Text="Later" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="SkipButton" Style="{StaticResource DangerActionButtonStyle}" HorizontalAlignment="Stretch" Click="SkipButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="SkipButton" Grid.Column="4" Style="{StaticResource DangerActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Skip word, 3" Click="SkipButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE711;" />
                             <TextBlock Text="Skip" />
                         </StackPanel>
                     </Button>
-                    <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
-                    <StackPanel Spacing="8">
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Shortcuts" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Space - reveal" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="1 - know" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="2 - later" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="3 - skip" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+                </Grid>
+            </Grid>
+        </Border>
 
-            <Border x:Name="CompletionPanel" Grid.ColumnSpan="2" Padding="34" Style="{StaticResource PremiumPanelStyle}" Visibility="Collapsed">
-                <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="520">
-                    <FontIcon Glyph="&#xE930;" FontSize="44" Foreground="{StaticResource PremiumSuccessBrush}" />
-                    <TextBlock HorizontalAlignment="Center" Text="Session complete" FontSize="34" FontWeight="SemiBold" />
-                    <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Nice rhythm. You hit the review target for this session." TextWrapping="WrapWholeWords" />
-                    <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Content="Start another session" Click="RestartSessionButton_Click" />
-                </StackPanel>
-            </Border>
+        <Border x:Name="CompletionPanel" Grid.Row="1" MaxWidth="720" Padding="34" HorizontalAlignment="Stretch" Style="{StaticResource PremiumPanelStyle}" Visibility="Collapsed">
+            <StackPanel Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <FontIcon Glyph="&#xE930;" FontSize="40" Foreground="{StaticResource PremiumSuccessBrush}" />
+                <TextBlock HorizontalAlignment="Center" Text="Session complete" FontSize="30" FontWeight="SemiBold" />
+                <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="You completed 20 focused reviews." />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Content="Start another session" Click="RestartSessionButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <TextBlock x:Name="StatusText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            <TextBlock HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Space reveal   1 know   2 later   3 skip" />
         </Grid>
-
-        <TextBlock x:Name="StatusText" Grid.Row="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </Grid>
 </Page>

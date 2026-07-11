@@ -18,7 +18,7 @@
                     <Setter Target="HeaderSummaryPanel.Visibility" Value="Collapsed" />
                     <Setter Target="CollectionPanel.Visibility" Value="Collapsed" />
                     <Setter Target="CollectionColumn.Width" Value="0" />
-                    <Setter Target="HeroBadgeColumn.Width" Value="128" />
+                    <Setter Target="HeroBadgeColumn.Width" Value="100" />
                 </VisualState.Setters>
             </VisualState>
             <VisualState x:Name="WideWidth">
@@ -29,7 +29,7 @@
                     <Setter Target="HeaderSummaryPanel.Visibility" Value="Visible" />
                     <Setter Target="CollectionPanel.Visibility" Value="Visible" />
                     <Setter Target="CollectionColumn.Width" Value="190" />
-                    <Setter Target="HeroBadgeColumn.Width" Value="140" />
+                    <Setter Target="HeroBadgeColumn.Width" Value="112" />
                 </VisualState.Setters>
             </VisualState>
         </VisualStateGroup>
@@ -50,7 +50,7 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="CornerRadius" Value="8" />
             <Setter Property="UseSystemFocusVisuals" Value="True" />
             <Setter Property="FocusVisualMargin" Value="-2" />
         </Style>
@@ -60,7 +60,7 @@
         <StackPanel Padding="24,18,24,30" Spacing="16">
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
-                    <EntranceThemeTransition FromVerticalOffset="18" />
+                    <EntranceThemeTransition FromVerticalOffset="10" />
                 </TransitionCollection>
             </StackPanel.ChildrenTransitions>
 
@@ -92,18 +92,18 @@
             <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                 <Grid ColumnSpacing="20">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Name="HeroBadgeColumn" Width="140" />
+                        <ColumnDefinition x:Name="HeroBadgeColumn" Width="112" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition x:Name="CollectionColumn" Width="190" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Width="124" Height="124" VerticalAlignment="Center">
+                    <Grid Width="100" Height="100" VerticalAlignment="Center">
                         <Ellipse Fill="#181F3655" />
                         <Ellipse Margin="13" Stroke="#44F4C768" StrokeThickness="1" />
                         <Image
                             x:Name="FeaturedBadgeImage"
-                            Width="116"
-                            Height="116"
+                            Width="94"
+                            Height="94"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Stretch="Uniform" />
@@ -184,7 +184,7 @@
                                 Background="{Binding CardBackgroundBrush}"
                                 BorderBrush="{Binding CardBorderBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10">
+                                CornerRadius="8">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />

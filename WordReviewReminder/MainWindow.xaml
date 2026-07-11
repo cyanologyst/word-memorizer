@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:WordReviewReminder"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="WordReviewReminder"
+    Title="Word Review Reminder"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -20,7 +20,7 @@
 
         <TitleBar
             x:Name="AppTitleBar"
-            Title="WordReviewReminder"
+            Title="Word Review"
             BackRequested="TitleBar_BackRequested"
             IsBackButtonVisible="{x:Bind NavFrame.CanGoBack, Mode=OneWay}"
             IsPaneToggleButtonVisible="True"
@@ -119,6 +119,7 @@
                     VerticalAlignment="Top"
                     Background="Transparent"
                     BorderBrush="Transparent"
+                    AutomationProperties.Name="Dismiss achievement notification"
                     Click="UnlockToastClose_Click"
                     ToolTipService.ToolTip="Dismiss achievement notification">
                     <FontIcon FontSize="13" Glyph="&#xE711;" />

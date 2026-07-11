@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using WordReviewReminder.Core;
 using WordReviewReminder.Services;
@@ -11,8 +12,10 @@ namespace WordReviewReminder;
 
 public sealed class ReminderOverlayWindow : System.Windows.Window
 {
-    private const double CardWidth = 560;
-    private const double CardHeight = 328;
+    private const double WindowWidth = 560;
+    private const double WindowHeight = 326;
+    private const double CardWidth = 540;
+    private const double CardHeight = 306;
 
     private readonly Func<ReviewAction, Task> _recordActionAsync;
     private readonly SpeechService _speech = new();
@@ -21,6 +24,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     private readonly int _durationSeconds;
     private Border? _feedbackOverlay;
     private ScaleTransform? _timerScale;
+    private Border? _card;
+    private TranslateTransform? _cardTranslate;
     private bool _recorded;
 
     public ReminderOverlayWindow(WordEntry word, int durationSeconds, Func<ReviewAction, Task> recordActionAsync)
@@ -36,13 +41,14 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         SizeToContent = SizeToContent.Manual;
         Topmost = true;
         WindowStyle = WindowStyle.None;
-        Width = CardWidth;
-        Height = CardHeight;
+        Width = WindowWidth;
+        Height = WindowHeight;
         Content = BuildCard();
 
         Loaded += (_, _) =>
         {
             PositionWindow();
+            StartEntranceAnimation();
             StartTimerAnimation();
         };
 
@@ -69,36 +75,48 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var root = new Grid
         {
-            Width = Width,
-            Height = Height,
+            Width = WindowWidth,
+            Height = WindowHeight,
             Margin = new Thickness(0)
         };
 
-        var card = new Border
+        _card = new Border
         {
             Width = CardWidth,
             Height = CardHeight,
+            Margin = new Thickness(10),
             Background = Brush("#2A2225"),
             BorderThickness = new Thickness(0),
-            CornerRadius = new CornerRadius(20),
-            SnapsToDevicePixels = true
+            CornerRadius = new CornerRadius(14),
+            SnapsToDevicePixels = true,
+            Opacity = 0,
+            Effect = new DropShadowEffect
+            {
+                BlurRadius = 24,
+                ShadowDepth = 6,
+                Direction = 270,
+                Opacity = 0.34,
+                Color = Colors.Black
+            }
         };
-        root.Children.Add(card);
+        _cardTranslate = new TranslateTransform(0, 10);
+        _card.RenderTransform = _cardTranslate;
+        root.Children.Add(_card);
 
         var layout = new Grid();
         layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
         layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        card.Child = layout;
+        _card.Child = layout;
 
         layout.Children.Add(new Border
         {
             Background = Brush("#FF7A5F"),
-            CornerRadius = new CornerRadius(20, 0, 0, 20)
+            CornerRadius = new CornerRadius(14, 0, 0, 14)
         });
 
         var body = new Grid
         {
-            Margin = new Thickness(24, 20, 20, 18)
+            Margin = new Thickness(22, 16, 18, 16)
         };
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -116,6 +134,23 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         root.Children.Add(_feedbackOverlay);
 
         return root;
+    }
+
+    private void StartEntranceAnimation()
+    {
+        if (_card is null || _cardTranslate is null)
+        {
+            return;
+        }
+
+        _card.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(170))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        });
+        _cardTranslate.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(10, 0, TimeSpan.FromMilliseconds(190))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        });
     }
 
     private UIElement BuildTopStrip()
@@ -164,13 +199,13 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildHeader()
     {
-        var grid = new Grid { Margin = new Thickness(0, 10, 0, 12) };
+        var grid = new Grid { Margin = new Thickness(0, 8, 0, 10) };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetRow(grid, 1);
 
         var copy = new StackPanel { Orientation = Orientation.Vertical };
-        var chips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 12) };
+        var chips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
         chips.Children.Add(BuildChip("TOEFL Review", "#5B3333"));
         chips.Children.Add(BuildChip(BuildSourceText(_word), "#3A3033", new Thickness(8, 0, 0, 0)));
 
@@ -180,9 +215,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Text = _word.Term,
             Foreground = Brushes.White,
             FontFamily = new FontFamily("Segoe UI Variable Display, Segoe UI"),
-            FontSize = 37,
+            FontSize = 34,
             FontWeight = FontWeights.SemiBold,
-            LineHeight = 42,
+            LineHeight = 38,
             TextTrimming = TextTrimming.CharacterEllipsis
         });
         copy.Children.Add(new TextBlock
@@ -212,11 +247,10 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         var panel = new Border
         {
             Background = Brush("#34282C"),
-            BorderBrush = Brush("#3E3035"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(14),
-            Padding = new Thickness(16, 14, 16, 14),
-            Margin = new Thickness(0, 0, 0, 16)
+            BorderThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(16, 12, 16, 12),
+            Margin = new Thickness(0, 0, 0, 12)
         };
         Grid.SetRow(panel, 2);
 
@@ -224,8 +258,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Text = _word.ShortMeaning ?? "",
             Foreground = Brushes.White,
-            FontSize = 16,
-            LineHeight = 24,
+            FontSize = 15,
+            LineHeight = 22,
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Top
         };
@@ -235,9 +269,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildActions()
     {
-        var grid = new Grid { Height = 46 };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.18, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.18, GridUnitType.Star) });
+        var grid = new Grid { Height = 42 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         Grid.SetRow(grid, 3);
@@ -253,6 +287,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     private Border BuildAction(string label, string icon, string background, string stroke, ReviewAction action, int column, bool isPrimary = false)
     {
         var button = BuildActionShell(background, stroke, column);
+        System.Windows.Automation.AutomationProperties.SetName(button, label);
         button.Child = BuildActionContent(label, icon, isPrimary);
         button.MouseLeftButtonUp += async (_, _) => await RecordAndCloseAsync(action);
         return button;
@@ -262,7 +297,13 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var button = BuildActionShell("#342C30", "#342C30", 3);
         button.Child = BuildActionContent("Details", "\uE946");
-        button.MouseLeftButtonUp += (_, _) => App.MainWindow?.Activate();
+        System.Windows.Automation.AutomationProperties.SetName(button, "Open word details");
+        button.MouseLeftButtonUp += (_, _) =>
+        {
+            _closeTimer.Stop();
+            App.MainWindow?.Activate();
+            Close();
+        };
         return button;
     }
 
@@ -270,12 +311,12 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var button = new Border
         {
-            Height = 40,
+            Height = 38,
             Margin = new Thickness(column == 0 ? 0 : 8, 0, 0, 0),
             Background = Brush(background),
             BorderBrush = Brush(stroke),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(7),
+            CornerRadius = new CornerRadius(5),
             Cursor = Cursors.Hand,
             SnapsToDevicePixels = true
         };
@@ -315,15 +356,16 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var button = new Border
         {
-            Width = 50,
-            Height = 50,
-            Margin = new Thickness(16, 0, 0, 0),
+            Width = 44,
+            Height = 44,
+            Margin = new Thickness(14, 0, 0, 0),
             Background = Brush("#3A3033"),
-            CornerRadius = new CornerRadius(10),
+            CornerRadius = new CornerRadius(6),
             Cursor = Cursors.Hand,
             ToolTip = accessibleName,
             SnapsToDevicePixels = true
         };
+        System.Windows.Automation.AutomationProperties.SetName(button, accessibleName);
 
         button.Child = new TextBlock
         {
@@ -344,8 +386,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Width = CardWidth,
             Height = CardHeight,
+            Margin = new Thickness(10),
             Background = Brush("#CC2A2225"),
-            CornerRadius = new CornerRadius(20),
+            CornerRadius = new CornerRadius(14),
             Visibility = Visibility.Collapsed
         };
 

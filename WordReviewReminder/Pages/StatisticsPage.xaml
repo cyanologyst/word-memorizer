@@ -9,27 +9,36 @@
     Loaded="Page_Loaded">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <StackPanel Padding="28,20,28,28" Spacing="18">
+        <StackPanel Padding="24,18,24,24" Spacing="14">
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
-                    <EntranceThemeTransition FromVerticalOffset="18" />
+                    <EntranceThemeTransition FromVerticalOffset="10" />
                 </TransitionCollection>
             </StackPanel.ChildrenTransitions>
 
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="360" />
+                    <ColumnDefinition Width="330" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="6">
                     <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Statistics" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Momentum, mastery, and words that need attention" />
                 </StackPanel>
-                <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
-                    <StackPanel Spacing="6">
+                <Border Grid.Column="1" Padding="14" Style="{StaticResource PremiumPanelStyle}">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4">
                         <TextBlock Text="Next best action" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="InsightText" FontSize="18" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
-                    </StackPanel>
+                        <TextBlock x:Name="InsightText" FontSize="16" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource CompactIconButtonStyle}" AutomationProperties.Name="Start a review session" ToolTipService.ToolTip="Start review" Click="StartReviewButton_Click">
+                            <FontIcon Glyph="&#xE768;" />
+                        </Button>
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -40,7 +49,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                <Border Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="76" />
@@ -54,21 +63,21 @@
                         </StackPanel>
                     </Grid>
                 </Border>
-                <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Streak" />
                         <TextBlock x:Name="StreakText" Style="{StaticResource MetricValueTextStyle}" />
                         <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Keep it alive today" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                <Border Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
                         <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
                         <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Ready for review" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="3" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                <Border Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Total active" />
                         <TextBlock x:Name="TotalActiveText" Style="{StaticResource MetricValueTextStyle}" />

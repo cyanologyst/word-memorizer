@@ -1,5 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
+using WordReviewReminder.Core;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
@@ -44,7 +47,19 @@ public sealed partial class LogsPage : Page
                     Time = local.ToString("HH:mm"),
                     review.Term,
                     review.Action,
-                    review.WordListId
+                    review.WordListId,
+                    ActionGlyph = review.Action switch
+                    {
+                        ReviewAction.Known => "\uE73E",
+                        ReviewAction.Later => "\uE916",
+                        _ => "\uE711"
+                    },
+                    ActionBrush = new SolidColorBrush(review.Action switch
+                    {
+                        ReviewAction.Known => Color.FromArgb(255, 98, 209, 135),
+                        ReviewAction.Later => Color.FromArgb(255, 242, 195, 107),
+                        _ => Color.FromArgb(255, 255, 139, 139)
+                    })
                 };
             })
             .ToList();

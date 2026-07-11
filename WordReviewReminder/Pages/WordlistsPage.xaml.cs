@@ -22,6 +22,14 @@ public sealed partial class WordlistsPage : Page
         await RefreshAsync();
     }
 
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var showPreview = e.NewSize.Width >= 1120;
+        PreviewPane.Visibility = showPreview ? Visibility.Visible : Visibility.Collapsed;
+        PreviewColumn.Width = showPreview ? new GridLength(280) : new GridLength(0);
+        ListsColumn.Width = e.NewSize.Width >= 900 ? new GridLength(240) : new GridLength(210);
+    }
+
     private async Task RefreshAsync()
     {
         _loading = true;

@@ -6,9 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
-    <Grid Padding="28,20,28,28" RowSpacing="16" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="24,18,24,24" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -24,7 +25,7 @@
                 <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Wordlists" />
                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Import, enable, and maintain local JSON vocabulary databases" />
             </StackPanel>
-            <CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
+            <CommandBar Grid.Column="1" Background="Transparent" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
                 <AppBarButton Icon="Import" Label="Import" Click="ImportButton_Click" />
                 <AppBarButton Icon="Add" Label="Add word" Click="AddWordButton_Click" />
                 <AppBarButton Icon="Edit" Label="Edit" Click="EditWordButton_Click" />
@@ -33,28 +34,28 @@
             </CommandBar>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="18">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition x:Name="ListsColumn" Width="240" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="290" />
+                <ColumnDefinition x:Name="PreviewColumn" Width="280" />
             </Grid.ColumnDefinitions>
 
-            <ListView x:Name="WordListView" SelectionChanged="WordListView_SelectionChanged">
+            <ListView x:Name="WordListView" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="WordListView_SelectionChanged">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="0,4,0,4" Padding="14" Style="{StaticResource PremiumPanelStyle}">
+                        <Border Margin="0,2" Padding="10" Background="Transparent" CornerRadius="6">
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="7" Height="62" Background="{StaticResource PremiumAccentBrush}" CornerRadius="4" />
+                                <Border Width="4" Height="52" Background="{StaticResource PremiumAccentBrush}" CornerRadius="2" />
                                 <StackPanel Grid.Column="1" Spacing="5">
                                     <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Source}" TextTrimming="CharacterEllipsis" />
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Border Padding="7,3" Background="{StaticResource PremiumLayerBrush}" CornerRadius="9">
+                                        <Border Padding="7,3" Background="{StaticResource PremiumLayerBrush}" CornerRadius="6">
                                             <TextBlock FontSize="11" Text="{Binding Id}" TextTrimming="CharacterEllipsis" />
                                         </Border>
                                     </StackPanel>
@@ -65,7 +66,7 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+            <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                 <Grid RowSpacing="14">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -81,10 +82,10 @@
                             <TextBlock x:Name="SelectedListTitle" Style="{StaticResource SubtitleTextBlockStyle}" MaxLines="2" TextWrapping="WrapWholeWords" />
                             <TextBlock x:Name="SelectedListMeta" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Padding="8,4" Background="{StaticResource PremiumSuccessSoftBrush}" CornerRadius="10">
+                                <Border Padding="8,4" Background="{StaticResource PremiumSuccessSoftBrush}" CornerRadius="6">
                                     <TextBlock FontSize="12" Text="Schema checked" />
                                 </Border>
-                                <Border Padding="8,4" Background="{StaticResource PremiumWarningSoftBrush}" CornerRadius="10">
+                                <Border Padding="8,4" Background="{StaticResource PremiumWarningSoftBrush}" CornerRadius="6">
                                     <TextBlock FontSize="12" Text="No dupes" />
                                 </Border>
                             </StackPanel>
@@ -92,10 +93,15 @@
                         <ToggleSwitch x:Name="EnableSelectedToggle" Grid.Column="1" Header="Enabled" Toggled="EnableSelectedToggle_Toggled" />
                     </Grid>
                     <AutoSuggestBox x:Name="SearchBox" Grid.Row="1" PlaceholderText="Search words, meanings, pronunciation, or part of speech" TextChanged="SearchBox_TextChanged" QueryIcon="Find" />
-                    <ListView x:Name="WordsView" Grid.Row="2" SelectionChanged="WordsView_SelectionChanged">
+                    <ListView x:Name="WordsView" Grid.Row="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="WordsView_SelectionChanged">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,3,0,3" Padding="12" Background="{StaticResource PremiumLayerBrush}" CornerRadius="10">
+                                <Border Margin="0,2" Padding="10" Background="{StaticResource PremiumLayerBrush}" CornerRadius="6">
                                     <StackPanel Spacing="6">
                                         <Grid ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
@@ -106,7 +112,7 @@
                                                 <TextBlock FontWeight="SemiBold" Text="{Binding Term}" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="{Binding Pronunciation}" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
-                                            <Border Grid.Column="1" Padding="8,4" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="10" VerticalAlignment="Top">
+                                            <Border Grid.Column="1" Padding="8,4" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="6" VerticalAlignment="Top">
                                                 <TextBlock FontSize="12" Text="{Binding PartOfSpeech}" TextTrimming="CharacterEllipsis" />
                                             </Border>
                                         </Grid>
@@ -119,7 +125,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="2" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+            <Border x:Name="PreviewPane" Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="13">
                     <TextBlock Text="Word preview" Style="{StaticResource SubtitleTextBlockStyle}" />
                     <TextBlock x:Name="PreviewTermText" FontSize="32" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
@@ -127,10 +133,10 @@
                     <TextBlock x:Name="PreviewMeaningText" TextWrapping="WrapWholeWords" />
                     <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Padding="8,4" Background="{StaticResource PremiumLayerBrush}" CornerRadius="10">
+                        <Border Padding="8,4" Background="{StaticResource PremiumLayerBrush}" CornerRadius="6">
                             <TextBlock x:Name="PreviewChapterText" FontSize="12" />
                         </Border>
-                        <Border Padding="8,4" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="10">
+                        <Border Padding="8,4" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="6">
                             <TextBlock x:Name="PreviewTagsText" FontSize="12" />
                         </Border>
                     </StackPanel>

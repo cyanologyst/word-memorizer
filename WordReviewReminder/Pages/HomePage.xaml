@@ -6,23 +6,24 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <Grid Padding="28,20,28,28" ColumnSpacing="20">
+        <Grid x:Name="DashboardLayout" Padding="24,18,24,24" ColumnSpacing="16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="350" />
+                <ColumnDefinition x:Name="DetailsColumn" Width="310" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Spacing="18">
+            <StackPanel Spacing="14">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
-                        <EntranceThemeTransition FromVerticalOffset="22" />
+                        <EntranceThemeTransition FromVerticalOffset="12" />
                     </TransitionCollection>
                 </StackPanel.ChildrenTransitions>
 
-                <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">
+                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -52,25 +53,17 @@
                                     <TextBlock Text="Start review" />
                                 </StackPanel>
                             </Button>
-                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                                <Button ToolTipService.ToolTip="Listen to the current word" Click="SpeakButton_Click">
-                                    <FontIcon Glyph="&#xE767;" />
-                                </Button>
-                                <Button ToolTipService.ToolTip="Open the floating mini widget" Click="MiniButton_Click">
-                                    <FontIcon Glyph="&#xE840;" />
-                                </Button>
-                                <Button ToolTipService.ToolTip="Pause reminders for 30 minutes" Click="PauseQuickButton_Click">
-                                    <FontIcon Glyph="&#xE769;" />
-                                </Button>
-                                <Button ToolTipService.ToolTip="Refresh the dashboard" Click="RefreshButton_Click">
-                                    <FontIcon Glyph="&#xE72C;" />
-                                </Button>
-                            </StackPanel>
+                            <CommandBar Background="Transparent" DefaultLabelPosition="Collapsed" IsDynamicOverflowEnabled="False" HorizontalAlignment="Right">
+                                <AppBarButton Icon="Volume" Label="Listen" AutomationProperties.Name="Listen to current word" Click="SpeakButton_Click" />
+                                <AppBarButton Icon="Pin" Label="Mini widget" AutomationProperties.Name="Open floating mini widget" Click="MiniButton_Click" />
+                                <AppBarButton Icon="Pause" Label="Pause" AutomationProperties.Name="Pause reminders for 30 minutes" Click="PauseQuickButton_Click" />
+                                <AppBarButton Icon="Refresh" Label="Refresh" AutomationProperties.Name="Refresh dashboard" Click="RefreshButton_Click" />
+                            </CommandBar>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <Grid ColumnSpacing="14">
+                <Grid ColumnSpacing="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -78,28 +71,28 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                    <Border Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
                             <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Active words" />
                             <TextBlock x:Name="ActiveWordsText" Style="{StaticResource MetricValueTextStyle}" />
                             <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Enabled across lists" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                    <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
                             <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Today" />
                             <TextBlock x:Name="ReviewedTodayText" Style="{StaticResource MetricValueTextStyle}" />
                             <ProgressBar x:Name="DailyGoalBar" Height="7" Maximum="100" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="2" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                    <Border Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
                             <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Streak" />
                             <TextBlock x:Name="StreakText" Style="{StaticResource MetricValueTextStyle}" />
                             <TextBlock x:Name="StreakHintText" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="3" Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                    <Border Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
                             <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
                             <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
@@ -108,7 +101,7 @@
                     </Border>
                 </Grid>
 
-                <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">
+                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="22">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -116,7 +109,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Spacing="12">
                             <TextBlock Text="Current review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="WordText" FontSize="50" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock x:Name="WordText" FontSize="44" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                             <TextBlock x:Name="WordMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="MeaningText" FontSize="17" TextWrapping="WrapWholeWords" MaxLines="3" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -147,10 +140,10 @@
                                     <TextBlock Text="Skip" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="DetailsButton" HorizontalAlignment="Stretch" Click="DetailsButton_Click">
+                            <Button x:Name="DetailsButton" HorizontalAlignment="Stretch" AutomationProperties.Name="Toggle word details panel" Click="DetailsButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE946;" />
-                                    <TextBlock Text="Open Details" />
+                                    <TextBlock x:Name="DetailsButtonText" Text="Hide Details" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -209,7 +202,7 @@
                 </Grid>
             </StackPanel>
 
-            <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
+            <Border x:Name="DetailsPane" Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="14">
                     <Grid>
                         <Grid.ColumnDefinitions>

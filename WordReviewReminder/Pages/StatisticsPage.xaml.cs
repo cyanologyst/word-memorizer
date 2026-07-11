@@ -47,4 +47,9 @@ public sealed partial class StatisticsPage : Page
         label.Text = value.ToString("N0");
         bar.Value = value * 100.0 / total;
     }
+
+    private void StartReviewButton_Click(object sender, RoutedEventArgs e)
+    {
+        (App.MainWindow as MainWindow)?.NavigateTo("review");
+    }
 }

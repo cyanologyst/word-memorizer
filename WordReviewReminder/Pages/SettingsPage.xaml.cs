@@ -34,7 +34,14 @@ public sealed partial class SettingsPage : Page
         QuietEndPicker.Time = settings.QuietHoursEnd.ToTimeSpan();
         StartWithWindowsToggle.IsOn = settings.StartWithWindows;
         _loading = false;
-        UpdatePreview();
+        UpdatePreview(markDirty: false);
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var showPreview = e.NewSize.Width >= 1080;
+        PreviewPane.Visibility = showPreview ? Visibility.Visible : Visibility.Collapsed;
+        PreviewColumn.Width = showPreview ? new GridLength(300) : new GridLength(0);
     }
 
     private void IntervalSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
@@ -89,6 +96,14 @@ public sealed partial class SettingsPage : Page
         }
     }
 
+    private void QuietTimePicker_SelectedTimeChanged(TimePicker sender, TimePickerSelectedValueChangedEventArgs args)
+    {
+        if (!_loading)
+        {
+            UpdatePreview();
+        }
+    }
+
     private void Preset15Button_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         SetIntervalPreset(15);
@@ -111,7 +126,7 @@ public sealed partial class SettingsPage : Page
         UpdatePreview();
     }
 
-    private void UpdatePreview()
+    private void UpdatePreview(bool markDirty = true)
     {
         var interval = Math.Max(1, (int)Math.Round(IntervalBox.Value));
         var duration = Math.Max(5, (int)Math.Round(PopupDurationBox.Value));
@@ -125,6 +140,11 @@ public sealed partial class SettingsPage : Page
         PreviewDurationBar.Value = duration;
         PreviewSummaryText.Text = $"Every {interval} min, show a {mode} for {duration} sec"
             + (QuietHoursToggle.IsOn ? ", except during quiet hours." : ".");
+        if (markDirty && !_loading)
+        {
+            StatusText.Text = "Unsaved changes";
+            SaveBar.Visibility = Visibility.Visible;
+        }
     }
 
     private async void SaveButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -149,6 +169,7 @@ public sealed partial class SettingsPage : Page
         await App.Data.SaveSettingsAsync(settings);
         StartupService.SetStartWithWindows(settings.StartWithWindows);
         StatusText.Text = "Saved";
-        UpdatePreview();
+        UpdatePreview(markDirty: false);
+        SaveBar.Visibility = Visibility.Collapsed;
     }
 }

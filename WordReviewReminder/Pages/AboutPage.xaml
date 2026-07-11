@@ -5,22 +5,72 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
 
-    <ScrollViewer>
-        <StackPanel Padding="28,20,28,28" Spacing="18">
-            <StackPanel>
+    <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
+        <StackPanel Padding="24,18,24,24" Spacing="14">
+            <StackPanel Spacing="4">
                 <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="About" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="A local Windows 11 vocabulary reminder for focused review" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Product information, documentation, and local storage" />
             </StackPanel>
 
-            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Word Review Reminder" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <TextBlock TextWrapping="WrapWholeWords" Text="The app ships with the TOEFL 550 March 2026 seed list extracted from the provided PDF. Additional databases can be imported from .wordlist.json files documented in docs/wordlist-json-format.md." />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Storage: %LOCALAPPDATA%\WordReviewReminder" />
-                </StackPanel>
+            <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">
+                <Grid ColumnSpacing="18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="84" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="72" Height="72" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="8">
+                        <FontIcon Glyph="&#xE8D2;" FontSize="34" Foreground="{StaticResource PremiumAccentBrush}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">
+                        <TextBlock Text="Word Review Reminder" FontSize="26" FontWeight="SemiBold" />
+                        <TextBlock Text="A focused Windows 11 vocabulary companion" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="VersionText" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Grid>
             </Border>
+
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Wordlists and documentation" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" Text="The app includes the TOEFL 550 seed list and supports additional validated .wordlist.json databases." />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button AutomationProperties.Name="Open wordlist format documentation" Click="DocumentationButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8A5;" />
+                                    <TextBlock Text="Format guide" />
+                                </StackPanel>
+                            </Button>
+                            <Button AutomationProperties.Name="Open project on GitHub" Click="GitHubButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE943;" />
+                                    <TextBlock Text="GitHub" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Local data" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Settings, progress, wordlists, achievements, and review history remain on this PC." TextWrapping="WrapWholeWords" />
+                        <TextBlock x:Name="StoragePathText" FontFamily="Cascadia Mono" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="WrapWholeWords" />
+                        <Button HorizontalAlignment="Left" AutomationProperties.Name="Open local data folder" Click="OpenStorageButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE8B7;" />
+                                <TextBlock Text="Open folder" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Page>
