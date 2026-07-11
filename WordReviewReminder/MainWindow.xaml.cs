@@ -1,6 +1,10 @@
+using System.Numerics;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media.Imaging;
 using WordReviewReminder.Core;
 using WordReviewReminder.Pages;
 using WordReviewReminder.Services;
@@ -15,6 +19,8 @@ public sealed partial class MainWindow : Window
     private readonly DispatcherTimer _timer = new();
     private DateTimeOffset _nextReminderAt = DateTimeOffset.Now.AddSeconds(15);
     private ReminderOverlayWindow? _reminderWindow;
+    private readonly DispatcherTimer _achievementDismissTimer = new();
+    private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
 
     public MainWindow()
     {
@@ -26,6 +32,9 @@ public sealed partial class MainWindow : Window
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
         NavFrame.Navigate(typeof(HomePage));
+        App.Data.AchievementUnlocked += Data_AchievementUnlocked;
+        _achievementDismissTimer.Interval = TimeSpan.FromSeconds(5.5);
+        _achievementDismissTimer.Tick += AchievementDismissTimer_Tick;
         _timer.Interval = TimeSpan.FromSeconds(5);
         _timer.Tick += Timer_Tick;
         _timer.Start();
@@ -63,6 +72,9 @@ public sealed partial class MainWindow : Window
                 case "statistics":
                     NavFrame.Navigate(typeof(StatisticsPage));
                     break;
+                case "achievements":
+                    NavFrame.Navigate(typeof(AchievementsPage));
+                    break;
                 case "logs":
                     NavFrame.Navigate(typeof(LogsPage));
                     break;
@@ -73,6 +85,91 @@ public sealed partial class MainWindow : Window
                     throw new InvalidOperationException($"Unknown navigation item tag: {item.Tag}");
             }
         }
+    }
+
+    private void Data_AchievementUnlocked(object? sender, AchievementUnlockedEventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() => ShowAchievementUnlock(e.Achievement));
+    }
+
+    private void ShowAchievementUnlock(AchievementSnapshot achievement)
+    {
+        UnlockBadgeImage.Source = new BitmapImage(new Uri($"ms-appx:///Assets/Achievements/{achievement.Definition.IconFileName}"));
+        UnlockTitleText.Text = achievement.Definition.Title;
+        UnlockDescriptionText.Text = achievement.Definition.Description;
+        UnlockCelebrationHost.Visibility = Visibility.Visible;
+        _achievementDismissTimer.Stop();
+        _achievementDismissTimer.Start();
+
+        if (!_animationsEnabled)
+        {
+            return;
+        }
+
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ElementCompositionPreview.SetIsTranslationEnabled(UnlockCelebrationHost, true);
+            var visual = ElementCompositionPreview.GetElementVisual(UnlockCelebrationHost);
+            visual.CenterPoint = new Vector3((float)UnlockCelebrationHost.ActualWidth, 0, 0);
+            visual.Opacity = 0;
+            visual.Scale = new Vector3(0.96f, 0.96f, 1);
+            var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+
+            var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+            opacity.InsertKeyFrame(1, 1, easing);
+            opacity.Duration = TimeSpan.FromMilliseconds(300);
+            var scale = visual.Compositor.CreateVector3KeyFrameAnimation();
+            scale.InsertKeyFrame(1, Vector3.One, easing);
+            scale.Duration = TimeSpan.FromMilliseconds(420);
+            var translation = visual.Compositor.CreateScalarKeyFrameAnimation();
+            translation.InsertKeyFrame(0, -14);
+            translation.InsertKeyFrame(1, 0, easing);
+            translation.Duration = TimeSpan.FromMilliseconds(420);
+
+            visual.StartAnimation("Opacity", opacity);
+            visual.StartAnimation("Scale", scale);
+            visual.StartAnimation("Translation.Y", translation);
+        });
+    }
+
+    private void AchievementDismissTimer_Tick(object? sender, object e)
+    {
+        _achievementDismissTimer.Stop();
+        HideAchievementUnlock();
+    }
+
+    private void UnlockToastClose_Click(object sender, RoutedEventArgs e)
+    {
+        _achievementDismissTimer.Stop();
+        HideAchievementUnlock();
+    }
+
+    private void HideAchievementUnlock()
+    {
+        if (UnlockCelebrationHost.Visibility != Visibility.Visible)
+        {
+            return;
+        }
+
+        if (!_animationsEnabled)
+        {
+            UnlockCelebrationHost.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var visual = ElementCompositionPreview.GetElementVisual(UnlockCelebrationHost);
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 0);
+        opacity.Duration = TimeSpan.FromMilliseconds(220);
+        visual.StartAnimation("Opacity", opacity);
+
+        var collapseTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(240) };
+        collapseTimer.Tick += (_, _) =>
+        {
+            collapseTimer.Stop();
+            UnlockCelebrationHost.Visibility = Visibility.Collapsed;
+        };
+        collapseTimer.Start();
     }
 
     private void Timer_Tick(object? sender, object e)

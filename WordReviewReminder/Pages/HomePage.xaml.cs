@@ -83,6 +83,7 @@ public sealed partial class HomePage : Page
         if (_currentWord is not null)
         {
             await _speech.SpeakAsync(_currentWord.Term);
+            await App.Data.RecordPronunciationAsync(_currentWord);
         }
     }
 

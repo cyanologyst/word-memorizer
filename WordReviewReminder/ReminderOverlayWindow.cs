@@ -196,7 +196,11 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         grid.Children.Add(copy);
 
         var listenButton = BuildIconButton("\uE767", "Listen");
-        listenButton.MouseLeftButtonUp += async (_, _) => await _speech.SpeakAsync(_word.Term);
+        listenButton.MouseLeftButtonUp += async (_, _) =>
+        {
+            await _speech.SpeakAsync(_word.Term);
+            await App.Data.RecordPronunciationAsync(_word);
+        };
         Grid.SetColumn(listenButton, 1);
         grid.Children.Add(listenButton);
 

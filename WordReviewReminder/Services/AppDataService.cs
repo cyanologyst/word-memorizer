@@ -21,9 +21,14 @@ public sealed class AppDataService
     public ReviewLogService LogService { get; }
     public UserSettings Settings { get; private set; } = new();
     public ReviewProgress Progress { get; private set; } = new();
+    public AchievementState AchievementState { get; private set; } = new();
+    public IReadOnlyList<AchievementSnapshot> Achievements { get; private set; } = [];
     public List<WordList> WordLists { get; private set; } = [];
     public IReadOnlyList<ReviewEvent> RecentEvents { get; private set; } = [];
     public DateTimeOffset? PausedUntil { get; private set; }
+    public event EventHandler<AchievementUnlockedEventArgs>? AchievementUnlocked;
+
+    public int UnlockedAchievementCount => Achievements.Count(item => item.IsUnlocked);
 
     public int TotalWords => WordLists.Where(list => list.IsEnabled).Sum(list => list.Words.Count);
 
@@ -121,7 +126,9 @@ public sealed class AppDataService
         await Store.SeedWordListsAsync(seedDirectory);
         Settings = await Store.LoadSettingsAsync();
         Progress = await Store.LoadProgressAsync();
+        AchievementState = await Store.LoadAchievementStateAsync();
         await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: false);
     }
 
     public async Task RefreshAsync()
@@ -185,6 +192,71 @@ public sealed class AppDataService
         });
 
         await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: true);
+    }
+
+    public async Task RecordPronunciationAsync(WordEntry word)
+    {
+        if (!AchievementState.PronouncedWordIds.Add(word.Id))
+        {
+            return;
+        }
+
+        await EvaluateAchievementsAsync(raiseEvents: true);
+    }
+
+    public async Task RecordReviewSessionAsync(
+        DateTimeOffset startedAt,
+        DateTimeOffset completedAt,
+        IReadOnlyList<ReviewAction> actions)
+    {
+        if (actions.Count == 0)
+        {
+            return;
+        }
+
+        AchievementState.Sessions.Add(new ReviewSessionRecord
+        {
+            StartedAt = startedAt,
+            CompletedAt = completedAt,
+            Actions = [.. actions]
+        });
+
+        if (AchievementState.Sessions.Count > 200)
+        {
+            AchievementState.Sessions.RemoveRange(0, AchievementState.Sessions.Count - 200);
+        }
+
+        await EvaluateAchievementsAsync(raiseEvents: true);
+    }
+
+    public Task RefreshAchievementsAsync()
+    {
+        return EvaluateAchievementsAsync(raiseEvents: false);
+    }
+
+    private async Task EvaluateAchievementsAsync(bool raiseEvents)
+    {
+        var allEvents = await LogService.ReadAllAsync();
+        var evaluation = AchievementEvaluator.Evaluate(
+            AchievementState,
+            allEvents,
+            Progress,
+            WordLists,
+            DateTimeOffset.UtcNow);
+
+        Achievements = evaluation.Snapshots;
+        await Store.SaveAchievementStateAsync(AchievementState);
+
+        if (!raiseEvents)
+        {
+            return;
+        }
+
+        foreach (var achievement in evaluation.NewlyUnlocked)
+        {
+            AchievementUnlocked?.Invoke(this, new AchievementUnlockedEventArgs(achievement));
+        }
     }
 
     public async Task SaveSettingsAsync(UserSettings settings)
@@ -197,12 +269,14 @@ public sealed class AppDataService
     {
         await Store.ImportWordListAsync(filePath, WordLists);
         await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: false);
     }
 
     public async Task SaveWordListAsync(WordList list)
     {
         await Store.SaveWordListAsync(list);
         await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: false);
     }
 }
 

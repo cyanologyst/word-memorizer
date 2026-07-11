@@ -14,6 +14,8 @@ public sealed partial class ReviewPage : Page
     private WordEntry? _currentWord;
     private int _sessionCount;
     private bool _revealed;
+    private DateTimeOffset _sessionStartedAt;
+    private readonly List<ReviewAction> _sessionActions = [];
 
     public ReviewPage()
     {
@@ -32,6 +34,8 @@ public sealed partial class ReviewPage : Page
         if (resetSession)
         {
             _sessionCount = 0;
+            _sessionActions.Clear();
+            _sessionStartedAt = DateTimeOffset.UtcNow;
         }
 
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
@@ -89,6 +93,7 @@ public sealed partial class ReviewPage : Page
         if (_currentWord is not null)
         {
             await _speech.SpeakAsync(_currentWord.Term);
+            await App.Data.RecordPronunciationAsync(_currentWord);
         }
     }
 
@@ -115,7 +120,12 @@ public sealed partial class ReviewPage : Page
         }
 
         await App.Data.RecordReviewAsync(_currentWord, action);
+        _sessionActions.Add(action);
         _sessionCount = Math.Min(SessionGoal, _sessionCount + 1);
+        if (_sessionCount == SessionGoal)
+        {
+            await App.Data.RecordReviewSessionAsync(_sessionStartedAt, DateTimeOffset.UtcNow, _sessionActions);
+        }
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
         _revealed = false;
         Render();

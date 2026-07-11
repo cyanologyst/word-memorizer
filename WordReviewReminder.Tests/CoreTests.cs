@@ -111,8 +111,110 @@ public sealed class CoreTests
         }
     }
 
+    [Fact]
+    public void AchievementsUnlockFromUniqueReviewProgress()
+    {
+        var now = new DateTimeOffset(2026, 7, 10, 12, 0, 0, TimeSpan.Zero);
+        var events = Enumerable.Range(1, 10)
+            .Select(index => NewReviewEvent($"word-{index}", now.AddMinutes(index), ReviewAction.Known))
+            .ToList();
+
+        var result = AchievementEvaluator.Evaluate(
+            new AchievementState(),
+            events,
+            new ReviewProgress(),
+            [NewList()],
+            now.AddHours(1));
+
+        Assert.True(result.Snapshots.Single(item => item.Definition.Id == "first-review").IsUnlocked);
+        Assert.True(result.Snapshots.Single(item => item.Definition.Id == "words-10").IsUnlocked);
+        Assert.False(result.Snapshots.Single(item => item.Definition.Id == "words-50").IsUnlocked);
+    }
+
+    [Fact]
+    public void AchievementsUseLongestHistoricalStreak()
+    {
+        var start = new DateTimeOffset(2026, 7, 1, 9, 0, 0, TimeSpan.Zero);
+        var events = Enumerable.Range(0, 7)
+            .Select(index => NewReviewEvent($"word-{index}", start.AddDays(index), ReviewAction.Known))
+            .ToList();
+
+        var result = AchievementEvaluator.Evaluate(
+            new AchievementState(),
+            events,
+            new ReviewProgress(),
+            [NewList()],
+            start.AddDays(8));
+
+        Assert.True(result.Snapshots.Single(item => item.Definition.Id == "streak-7").IsUnlocked);
+        Assert.False(result.Snapshots.Single(item => item.Definition.Id == "streak-30").IsUnlocked);
+    }
+
+    [Fact]
+    public void AchievementsResolveWordsReviewedLater()
+    {
+        var now = new DateTimeOffset(2026, 7, 10, 12, 0, 0, TimeSpan.Zero);
+        var events = new List<ReviewEvent>();
+        for (var index = 0; index < 25; index++)
+        {
+            events.Add(NewReviewEvent($"word-{index}", now.AddMinutes(index * 2), ReviewAction.Later));
+            events.Add(NewReviewEvent($"word-{index}", now.AddMinutes(index * 2 + 1), ReviewAction.Known));
+        }
+
+        var result = AchievementEvaluator.Evaluate(
+            new AchievementState(),
+            events,
+            new ReviewProgress(),
+            [NewList()],
+            now.AddHours(2));
+
+        Assert.True(result.Snapshots.Single(item => item.Definition.Id == "later-resolved").IsUnlocked);
+    }
+
+    [Fact]
+    public async Task AchievementStateRoundTrips()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new LocalDataStore(root);
+            var state = new AchievementState();
+            state.PronouncedWordIds.Add("word-1");
+            state.Unlocks["first-review"] = new AchievementUnlockRecord
+            {
+                AchievementId = "first-review",
+                UnlockedAt = new DateTimeOffset(2026, 7, 10, 12, 0, 0, TimeSpan.Zero)
+            };
+
+            await store.SaveAchievementStateAsync(state);
+            var loaded = await store.LoadAchievementStateAsync();
+
+            Assert.Contains("word-1", loaded.PronouncedWordIds);
+            Assert.True(loaded.Unlocks.ContainsKey("first-review"));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
     private static WordList NewList(params WordEntry[] words)
     {
         return new WordList(1, "test-list", "Test List", "en", null, [.. words]);
+    }
+
+    private static ReviewEvent NewReviewEvent(string wordId, DateTimeOffset timestamp, ReviewAction action)
+    {
+        return new ReviewEvent
+        {
+            Timestamp = timestamp,
+            WordListId = "test-list",
+            WordId = wordId,
+            Term = wordId,
+            Action = action
+        };
     }
 }

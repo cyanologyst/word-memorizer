@@ -10,6 +10,7 @@ public sealed class LocalDataStore
         WordListsPath = Path.Combine(rootPath, "wordlists");
         SettingsPath = Path.Combine(rootPath, "settings.json");
         ProgressPath = Path.Combine(rootPath, "progress.json");
+        AchievementsPath = Path.Combine(rootPath, "achievements.json");
         LogsPath = Path.Combine(rootPath, "review-log.jsonl");
     }
 
@@ -17,6 +18,7 @@ public sealed class LocalDataStore
     public string WordListsPath { get; }
     public string SettingsPath { get; }
     public string ProgressPath { get; }
+    public string AchievementsPath { get; }
     public string LogsPath { get; }
 
     public void EnsureCreated()
@@ -105,6 +107,26 @@ public sealed class LocalDataStore
         EnsureCreated();
         await using var stream = File.Create(ProgressPath);
         await JsonSerializer.SerializeAsync(stream, progress, JsonOptions.Default, cancellationToken);
+    }
+
+    public async Task<AchievementState> LoadAchievementStateAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+        if (!File.Exists(AchievementsPath))
+        {
+            return new AchievementState();
+        }
+
+        await using var stream = File.OpenRead(AchievementsPath);
+        return await JsonSerializer.DeserializeAsync<AchievementState>(stream, JsonOptions.Default, cancellationToken)
+               ?? new AchievementState();
+    }
+
+    public async Task SaveAchievementStateAsync(AchievementState state, CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+        await using var stream = File.Create(AchievementsPath);
+        await JsonSerializer.SerializeAsync(stream, state, JsonOptions.Default, cancellationToken);
     }
 
     public async Task SeedWordListsAsync(string seedDirectory, CancellationToken cancellationToken = default)
