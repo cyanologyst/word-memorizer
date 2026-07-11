@@ -4,6 +4,7 @@ using System.Text.Json;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using WordReviewReminder.Core;
+using WordReviewReminder.Services;
 
 namespace WordReviewReminder.Pages;
 
@@ -128,6 +129,17 @@ public sealed partial class WordlistsPage : Page
         PreviewMeaningText.Text = word.ShortMeaning ?? "";
         PreviewChapterText.Text = word.Chapter is null ? "No chapter" : $"Chapter {word.Chapter}";
         PreviewTagsText.Text = word.Tags is null || word.Tags.Count == 0 ? "No tags" : string.Join(", ", word.Tags.Take(3));
+    }
+
+    private async void OpenWordDetailsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (WordsView.SelectedItem is not WordEntry word)
+        {
+            return;
+        }
+
+        await WordDetailsDialog.ShowAsync(this, word);
+        await RefreshAsync();
     }
 
     private async void ImportButton_Click(object sender, RoutedEventArgs e)

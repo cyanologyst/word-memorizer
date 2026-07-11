@@ -13,6 +13,9 @@
     </Window.SystemBackdrop>
 
     <Grid>
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="K" Modifiers="Control" Invoked="CommandPaletteAccelerator_Invoked" />
+        </Grid.KeyboardAccelerators>
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
             <RowDefinition Height="*" />
@@ -52,6 +55,11 @@
                         <FontIcon Glyph="&#xE768;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Mistake Lab" Tag="mistakes">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7BA;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Wordlists" Tag="wordlists">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D2;" />
@@ -60,6 +68,11 @@
                 <NavigationViewItem Content="Statistics" Tag="statistics">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE9D2;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Activity" Tag="calendar">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE787;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="AchievementsNavItem" Content="Achievements" Tag="achievements">

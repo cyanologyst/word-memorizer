@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using WordReviewReminder.Core;
 using WordReviewReminder.Services;
@@ -9,64 +10,128 @@ namespace WordReviewReminder.Pages;
 
 public sealed partial class ReviewPage : Page
 {
-    private const int SessionGoal = 20;
     private readonly SpeechService _speech = new();
+    private readonly DispatcherTimer _recallTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly List<ReviewAction> _sessionActions = [];
+    private readonly HashSet<string> _reviewedWordIds = new(StringComparer.OrdinalIgnoreCase);
     private WordEntry? _currentWord;
+    private ReviewSessionOptions _options = new();
+    private ReviewSessionOptions? _pendingOptions;
     private int _sessionCount;
+    private int _sessionGoal = 20;
+    private int _secondsRemaining;
     private bool _revealed;
     private DateTimeOffset _sessionStartedAt;
-    private readonly List<ReviewAction> _sessionActions = [];
+    private DateTimeOffset _wordShownAt;
 
     public ReviewPage()
     {
         InitializeComponent();
+        _recallTimer.Tick += RecallTimer_Tick;
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _pendingOptions = e.Parameter as ReviewSessionOptions;
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        Focus(FocusState.Programmatic);
-        await LoadNextAsync(resetSession: true);
+        await App.Data.RefreshAsync();
+        SessionWordListBox.ItemsSource = new[] { new WordListOption(null, "All enabled wordlists") }
+            .Concat(App.Data.WordLists.Where(list => list.IsEnabled).Select(list => new WordListOption(list.Id, list.Title)))
+            .ToList();
+        SessionWordListBox.SelectedIndex = 0;
+        SessionGoalBox.Value = App.Data.Settings.DefaultSessionSize;
+
+        if (_pendingOptions is not null)
+        {
+            ApplyOptionsToControls(_pendingOptions);
+            await StartSessionAsync(_pendingOptions);
+            _pendingOptions = null;
+        }
     }
 
-    private async Task LoadNextAsync(bool resetSession = false)
+    private void Page_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _recallTimer.Stop();
+        (App.MainWindow as MainWindow)?.SetFocusMode(false);
+        (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
+    }
+
+    private async void StartConfiguredSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedList = SessionWordListBox.SelectedItem as WordListOption;
+        var options = new ReviewSessionOptions
+        {
+            Goal = Math.Max(5, (int)SessionGoalBox.Value),
+            WordListId = selectedList?.Id,
+            DifficultOnly = SessionModeBox.SelectedIndex == 1,
+            Timed = TimedSessionToggle.IsOn,
+            FocusMode = FocusModeToggle.IsOn
+        };
+        await StartSessionAsync(options);
+    }
+
+    private async Task StartSessionAsync(ReviewSessionOptions options)
+    {
+        _options = options;
+        _sessionGoal = Math.Clamp(options.Goal, 5, 100);
+        _sessionCount = 0;
+        _sessionActions.Clear();
+        _reviewedWordIds.Clear();
+        _sessionStartedAt = DateTimeOffset.UtcNow;
+        SessionSetupPanel.Visibility = Visibility.Collapsed;
+        CompletionPanel.Visibility = Visibility.Collapsed;
+        FocusCard.Visibility = Visibility.Visible;
+        (App.MainWindow as MainWindow)?.SetFocusMode(options.FocusMode);
+        await LoadNextAsync();
+        Focus(FocusState.Programmatic);
+    }
+
+    private async Task LoadNextAsync()
     {
         await App.Data.RefreshAsync();
-        if (resetSession)
+        _currentWord = App.Data.PickNextWord(DateTimeOffset.Now, _options, _reviewedWordIds);
+        if (_currentWord is null && _reviewedWordIds.Count > 0)
         {
-            _sessionCount = 0;
-            _sessionActions.Clear();
-            _sessionStartedAt = DateTimeOffset.UtcNow;
+            _reviewedWordIds.Clear();
+            _currentWord = App.Data.PickNextWord(DateTimeOffset.Now, _options, _reviewedWordIds);
         }
 
-        _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
         _revealed = false;
+        _wordShownAt = DateTimeOffset.UtcNow;
         Render();
+        StartRecallTimer();
         CardEntranceStoryboard.Begin();
     }
 
     private void Render()
     {
         var hasWord = _currentWord is not null;
-        var sessionComplete = _sessionCount >= SessionGoal;
+        var sessionComplete = _sessionCount >= _sessionGoal;
         CompletionPanel.Visibility = sessionComplete ? Visibility.Visible : Visibility.Collapsed;
         FocusCard.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
         KnowButton.IsEnabled = hasWord;
         LaterButton.IsEnabled = hasWord;
         SkipButton.IsEnabled = hasWord;
         RevealButton.IsEnabled = hasWord;
-        ProgressText.Text = $"{_sessionCount} / {SessionGoal}";
+        ProgressText.Text = $"{_sessionCount} / {_sessionGoal}";
+        SessionProgressBar.Maximum = _sessionGoal;
         SessionProgressBar.Value = _sessionCount;
+        (App.MainWindow as MainWindow)?.SetTaskbarProgress(_sessionCount, _sessionGoal);
 
         if (sessionComplete)
         {
-            StatusText.Text = "Session complete";
+            RenderSummary();
             return;
         }
 
         if (_currentWord is null)
         {
-            WordText.Text = "No words due";
-            MetaText.Text = "Enable or import a wordlist to start reviewing.";
+            WordText.Text = "No matching words";
+            MetaText.Text = "Change the session filters and try again.";
             MeaningText.Text = "";
             HiddenPromptText.Visibility = Visibility.Collapsed;
             return;
@@ -79,14 +144,51 @@ public sealed partial class ReviewPage : Page
         HiddenPromptText.Opacity = _revealed ? 0 : 1;
         MeaningText.Opacity = _revealed ? 1 : 0;
         MeaningText.Text = _currentWord.ShortMeaning ?? "";
-        RevealButtonText.Text = _revealed ? "Meaning Revealed" : "Reveal Meaning";
+        RevealButtonText.Text = _revealed ? "Revealed" : "Reveal";
         StatusText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "";
     }
 
-    private void RevealButton_Click(object sender, RoutedEventArgs e)
+    private void RenderSummary()
     {
-        RevealMeaning();
+        _recallTimer.Stop();
+        (App.MainWindow as MainWindow)?.SetFocusMode(false);
+        (App.MainWindow as MainWindow)?.SetTaskbarProgress(_sessionGoal, _sessionGoal);
+        var known = _sessionActions.Count(action => action == ReviewAction.Known);
+        var later = _sessionActions.Count(action => action == ReviewAction.Later);
+        var skipped = _sessionActions.Count(action => action == ReviewAction.Skipped);
+        var duration = DateTimeOffset.UtcNow - _sessionStartedAt;
+        var summary = new SessionSummary(_sessionActions.Count, known, later, skipped, duration);
+        SessionSummaryText.Text = $"{summary.Accuracy:N0}% recall accuracy in {duration:mm\\:ss}.";
+        SessionBreakdownText.Text = $"{known} known   {later} later   {skipped} skipped";
+        StatusText.Text = "Session complete";
+        SoundService.Play("session-complete");
     }
+
+    private void StartRecallTimer()
+    {
+        _recallTimer.Stop();
+        if (!_options.Timed || _currentWord is null)
+        {
+            return;
+        }
+
+        _secondsRemaining = 15;
+        StatusText.Text = $"15 seconds to decide";
+        _recallTimer.Start();
+    }
+
+    private async void RecallTimer_Tick(object? sender, object e)
+    {
+        _secondsRemaining--;
+        StatusText.Text = $"{Math.Max(0, _secondsRemaining)} seconds to decide";
+        if (_secondsRemaining <= 0)
+        {
+            _recallTimer.Stop();
+            await RecordAsync(ReviewAction.Skipped);
+        }
+    }
+
+    private void RevealButton_Click(object sender, RoutedEventArgs e) => RevealMeaning();
 
     private async void SpeakButton_Click(object sender, RoutedEventArgs e)
     {
@@ -97,47 +199,45 @@ public sealed partial class ReviewPage : Page
         }
     }
 
-    private async void KnowButton_Click(object sender, RoutedEventArgs e)
-    {
-        await RecordAsync(ReviewAction.Known);
-    }
-
-    private async void LaterButton_Click(object sender, RoutedEventArgs e)
-    {
-        await RecordAsync(ReviewAction.Later);
-    }
-
-    private async void SkipButton_Click(object sender, RoutedEventArgs e)
-    {
-        await RecordAsync(ReviewAction.Skipped);
-    }
+    private async void KnowButton_Click(object sender, RoutedEventArgs e) => await RecordAsync(ReviewAction.Known);
+    private async void LaterButton_Click(object sender, RoutedEventArgs e) => await RecordAsync(ReviewAction.Later);
+    private async void SkipButton_Click(object sender, RoutedEventArgs e) => await RecordAsync(ReviewAction.Skipped);
 
     private async Task RecordAsync(ReviewAction action)
     {
-        if (_currentWord is null)
+        if (_currentWord is null || _sessionCount >= _sessionGoal)
         {
             return;
         }
 
-        await App.Data.RecordReviewAsync(_currentWord, action);
+        _recallTimer.Stop();
+        var responseSeconds = Math.Max(0, (DateTimeOffset.UtcNow - _wordShownAt).TotalSeconds);
+        var reviewedWord = _currentWord;
+        await App.Data.RecordReviewAsync(reviewedWord, action, responseSeconds);
+        _reviewedWordIds.Add(reviewedWord.Id);
         _sessionActions.Add(action);
-        _sessionCount = Math.Min(SessionGoal, _sessionCount + 1);
-        if (_sessionCount == SessionGoal)
+        _sessionCount = Math.Min(_sessionGoal, _sessionCount + 1);
+        SoundService.Play(action == ReviewAction.Known ? "review-known" : "review-later");
+
+        if (_sessionCount == _sessionGoal)
         {
             await App.Data.RecordReviewSessionAsync(_sessionStartedAt, DateTimeOffset.UtcNow, _sessionActions);
+            _currentWord = null;
+            Render();
+            return;
         }
-        _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
-        _revealed = false;
-        Render();
-        if (_sessionCount < SessionGoal)
-        {
-            CardEntranceStoryboard.Begin();
-        }
+
+        await LoadNextAsync();
     }
 
-    private async void RestartSessionButton_Click(object sender, RoutedEventArgs e)
+    private void RestartSessionButton_Click(object sender, RoutedEventArgs e)
     {
-        await LoadNextAsync(resetSession: true);
+        _recallTimer.Stop();
+        (App.MainWindow as MainWindow)?.SetFocusMode(false);
+        (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
+        CompletionPanel.Visibility = Visibility.Collapsed;
+        FocusCard.Visibility = Visibility.Collapsed;
+        SessionSetupPanel.Visibility = Visibility.Visible;
     }
 
     private void RevealMeaning()
@@ -150,8 +250,8 @@ public sealed partial class ReviewPage : Page
         _revealed = true;
         HiddenPromptText.Visibility = Visibility.Visible;
         MeaningText.Opacity = 0;
-        MeaningTransform.TranslateY = 14;
-        RevealButtonText.Text = "Meaning Revealed";
+        MeaningTransform.TranslateY = 8;
+        RevealButtonText.Text = "Revealed";
         RevealStoryboard.Begin();
     }
 
@@ -180,4 +280,18 @@ public sealed partial class ReviewPage : Page
                 break;
         }
     }
+
+    private void ApplyOptionsToControls(ReviewSessionOptions options)
+    {
+        SessionGoalBox.Value = options.Goal;
+        SessionModeBox.SelectedIndex = options.DifficultOnly ? 1 : 0;
+        TimedSessionToggle.IsOn = options.Timed;
+        FocusModeToggle.IsOn = options.FocusMode;
+        if (!string.IsNullOrWhiteSpace(options.WordListId))
+        {
+            SessionWordListBox.SelectedItem = (SessionWordListBox.ItemsSource as IEnumerable<WordListOption>)?.FirstOrDefault(item => item.Id == options.WordListId);
+        }
+    }
+
+    private sealed record WordListOption(string? Id, string Title);
 }

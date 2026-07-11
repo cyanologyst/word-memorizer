@@ -40,6 +40,8 @@ public sealed class ReviewScheduler
             })
             .Where(item => item.Progress is null || item.Progress.DueAt <= now)
             .OrderBy(item => item.Progress?.DueAt ?? DateTimeOffset.MinValue)
+            .ThenByDescending(item => item.Progress?.Lapses ?? 0)
+            .ThenByDescending(item => item.Progress?.MemoryDifficulty ?? 5)
             .ThenBy(item => item.Progress?.TimesSeen ?? 0)
             .FirstOrDefault();
 
@@ -83,7 +85,7 @@ public sealed class ReviewScheduler
             : current >= start || current < end;
     }
 
-    public void RecordReview(ReviewProgress progress, WordEntry word, ReviewAction action, DateTimeOffset now)
+    public void RecordReview(ReviewProgress progress, WordEntry word, ReviewAction action, DateTimeOffset now, double responseSeconds = 0)
     {
         if (!progress.Entries.TryGetValue(word.Id, out var entry))
         {
@@ -93,19 +95,31 @@ public sealed class ReviewScheduler
 
         entry.TimesSeen++;
         entry.LastReviewedAt = now;
+        entry.LastResponseSeconds = Math.Max(0, responseSeconds);
 
         switch (action)
         {
             case ReviewAction.Known:
                 entry.TimesKnown++;
-                entry.DueAt = now.AddDays(Math.Min(30, Math.Max(1, entry.TimesKnown * 2)));
+                entry.ConsecutiveCorrect++;
+                entry.MemoryDifficulty = Math.Clamp(entry.MemoryDifficulty - (responseSeconds is > 0 and < 4 ? 0.35 : 0.18), 1, 10);
+                var growth = 1.65 + (10 - entry.MemoryDifficulty) * 0.08 + Math.Min(0.5, entry.ConsecutiveCorrect * 0.05);
+                entry.StabilityDays = Math.Clamp(entry.StabilityDays * growth, 1, 365);
+                entry.DueAt = now.AddDays(Math.Max(1, Math.Round(entry.StabilityDays, 1)));
                 break;
             case ReviewAction.Later:
                 entry.TimesLater++;
+                entry.ConsecutiveCorrect = 0;
+                entry.MemoryDifficulty = Math.Clamp(entry.MemoryDifficulty + 0.45, 1, 10);
+                entry.StabilityDays = Math.Max(0.5, entry.StabilityDays * 0.72);
                 entry.DueAt = now.AddMinutes(10);
                 break;
             case ReviewAction.Skipped:
                 entry.TimesSkipped++;
+                entry.Lapses++;
+                entry.ConsecutiveCorrect = 0;
+                entry.MemoryDifficulty = Math.Clamp(entry.MemoryDifficulty + 0.7, 1, 10);
+                entry.StabilityDays = Math.Max(0.25, entry.StabilityDays * 0.45);
                 entry.DueAt = now.AddMinutes(5);
                 break;
         }

@@ -4,6 +4,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using WordReviewReminder.Core;
 using WordReviewReminder.Pages;
@@ -21,6 +22,12 @@ public sealed partial class MainWindow : Window
     private ReminderOverlayWindow? _reminderWindow;
     private readonly DispatcherTimer _achievementDismissTimer = new();
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
+    private ReviewSessionOptions? _pendingReviewOptions;
+    private readonly HotKeyService _hotKeyService = new();
+    private readonly ClipboardMonitorService _clipboardMonitor = new();
+    private readonly TrayService _trayService;
+    private readonly TaskbarProgressService _taskbarProgress;
+    private MiniWidgetWindow? _miniWidgetWindow;
 
     public MainWindow()
     {
@@ -31,13 +38,27 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
+        var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        _taskbarProgress = new TaskbarProgressService(windowHandle);
+        _hotKeyService.Pressed += (_, _) => DispatcherQueue.TryEnqueue(ReviewNow);
+        _clipboardMonitor.WordDetected += ClipboardMonitor_WordDetected;
+        _trayService = new TrayService(
+            () => DispatcherQueue.TryEnqueue(ReviewNow),
+            () => DispatcherQueue.TryEnqueue(() => App.Data.PauseFor(TimeSpan.FromMinutes(30))),
+            () => DispatcherQueue.TryEnqueue(OpenMiniWidget),
+            () => DispatcherQueue.TryEnqueue(async () => await CreateQuickBackupAsync()),
+            () => DispatcherQueue.TryEnqueue(() => App.Current.Exit()));
+        UpdateWindowsIntegrations();
+
         NavFrame.Navigate(typeof(HomePage));
         App.Data.AchievementUnlocked += Data_AchievementUnlocked;
+        App.Data.SettingsChanged += Data_SettingsChanged;
         _achievementDismissTimer.Interval = TimeSpan.FromSeconds(5.5);
         _achievementDismissTimer.Tick += AchievementDismissTimer_Tick;
         _timer.Interval = TimeSpan.FromSeconds(5);
         _timer.Tick += Timer_Tick;
         _timer.Start();
+        Closed += MainWindow_Closed;
     }
 
     private void TitleBar_PaneToggleRequested(TitleBar sender, object args)
@@ -64,13 +85,20 @@ public sealed partial class MainWindow : Window
                     NavFrame.Navigate(typeof(HomePage));
                     break;
                 case "review":
-                    NavFrame.Navigate(typeof(ReviewPage));
+                    NavFrame.Navigate(typeof(ReviewPage), _pendingReviewOptions);
+                    _pendingReviewOptions = null;
+                    break;
+                case "mistakes":
+                    NavFrame.Navigate(typeof(MistakeLabPage));
                     break;
                 case "wordlists":
                     NavFrame.Navigate(typeof(WordlistsPage));
                     break;
                 case "statistics":
                     NavFrame.Navigate(typeof(StatisticsPage));
+                    break;
+                case "calendar":
+                    NavFrame.Navigate(typeof(CalendarPage));
                     break;
                 case "achievements":
                     NavFrame.Navigate(typeof(AchievementsPage));
@@ -97,6 +125,170 @@ public sealed partial class MainWindow : Window
             NavView.SelectedItem = item;
         }
     }
+
+    public void StartReviewSession(ReviewSessionOptions options)
+    {
+        _pendingReviewOptions = options;
+        var reviewItem = NavView.MenuItems.OfType<NavigationViewItem>().First(item => item.Tag?.ToString() == "review");
+        if (ReferenceEquals(NavView.SelectedItem, reviewItem))
+        {
+            NavFrame.Navigate(typeof(ReviewPage), options);
+            _pendingReviewOptions = null;
+        }
+        else
+        {
+            NavView.SelectedItem = reviewItem;
+        }
+    }
+
+    public void SetFocusMode(bool enabled)
+    {
+        NavView.IsPaneVisible = !enabled;
+        AppTitleBar.IsPaneToggleButtonVisible = !enabled;
+    }
+
+    public void SetTaskbarProgress(int value, int maximum) => _taskbarProgress.Set(value, maximum);
+
+    public void ClearTaskbarProgress() => _taskbarProgress.Clear();
+
+    private void ReviewNow()
+    {
+        Activate();
+        StartReviewSession(new ReviewSessionOptions
+        {
+            Goal = App.Data.Settings.DefaultSessionSize,
+            FocusMode = true
+        });
+    }
+
+    private async void CommandPaletteAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        await ShowCommandPaletteAsync();
+    }
+
+    private async Task ShowCommandPaletteAsync()
+    {
+        var entries = new List<PaletteEntry>
+        {
+            new("Dashboard", "Page", async () => { NavigateTo("home"); await Task.CompletedTask; }),
+            new("Review", "Page", async () => { NavigateTo("review"); await Task.CompletedTask; }),
+            new("Mistake Lab", "Page", async () => { NavigateTo("mistakes"); await Task.CompletedTask; }),
+            new("Wordlists", "Page", async () => { NavigateTo("wordlists"); await Task.CompletedTask; }),
+            new("Statistics", "Page", async () => { NavigateTo("statistics"); await Task.CompletedTask; }),
+            new("Activity", "Page", async () => { NavigateTo("calendar"); await Task.CompletedTask; }),
+            new("Achievements", "Page", async () => { NavigateTo("achievements"); await Task.CompletedTask; }),
+            new("Logs", "Page", async () => { NavigateTo("logs"); await Task.CompletedTask; }),
+            new("Start focused review", "Command", async () => { ReviewNow(); await Task.CompletedTask; }),
+            new("Pause reminders for 30 minutes", "Command", async () => { App.Data.PauseFor(TimeSpan.FromMinutes(30)); await Task.CompletedTask; })
+        };
+        entries.AddRange(App.Data.AllEnabledWords.Take(1000).Select(word => new PaletteEntry(
+            word.Term,
+            word.ShortMeaning ?? "Word",
+            async () =>
+            {
+                if (NavFrame.Content is Page page)
+                {
+                    await WordDetailsDialog.ShowAsync(page, word);
+                }
+            })));
+
+        var search = new AutoSuggestBox { PlaceholderText = "Search words, pages, and commands", QueryIcon = new SymbolIcon(Symbol.Find) };
+        var results = new ListView { Height = 360, SelectionMode = ListViewSelectionMode.Single, DisplayMemberPath = "Label" };
+        void Filter()
+        {
+            var query = search.Text.Trim();
+            results.ItemsSource = entries
+                .Where(entry => query.Length == 0 || entry.Label.Contains(query, StringComparison.OrdinalIgnoreCase) || entry.Context.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Take(40)
+                .ToList();
+            results.SelectedIndex = results.Items.Count > 0 ? 0 : -1;
+        }
+        search.TextChanged += (_, _) => Filter();
+        Filter();
+        var content = new StackPanel { Spacing = 10, Width = 560 };
+        content.Children.Add(search);
+        content.Children.Add(results);
+        var dialog = new ContentDialog
+        {
+            XamlRoot = NavFrame.XamlRoot,
+            Title = "Command palette",
+            Content = content,
+            PrimaryButtonText = "Open",
+            CloseButtonText = "Close",
+            DefaultButton = ContentDialogButton.Primary
+        };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary && results.SelectedItem is PaletteEntry selected)
+        {
+            await selected.Action();
+        }
+    }
+
+    private void OpenMiniWidget()
+    {
+        _miniWidgetWindow ??= new MiniWidgetWindow();
+        _miniWidgetWindow.Activate();
+    }
+
+    private async Task CreateQuickBackupAsync()
+    {
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Word Review Backups");
+        Directory.CreateDirectory(folder);
+        var destination = Path.Combine(folder, $"word-review-{DateTimeOffset.Now:yyyyMMdd-HHmm}.wordreview.zip");
+        await App.Data.BackupService.CreateAsync(destination);
+    }
+
+    private void Data_SettingsChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(UpdateWindowsIntegrations);
+    }
+
+    private void UpdateWindowsIntegrations()
+    {
+        _hotKeyService.Unregister();
+        if (App.Data.Settings.GlobalHotkeyEnabled)
+        {
+            _hotKeyService.Register(WinRT.Interop.WindowNative.GetWindowHandle(this));
+        }
+
+        _clipboardMonitor.Update(App.Data.Settings.ClipboardQuickAddEnabled);
+    }
+
+    private void ClipboardMonitor_WordDetected(object? sender, string word)
+    {
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = NavFrame.XamlRoot,
+                Title = "Add copied word?",
+                Content = $"Add “{word}” to Personal Words and look up its details?",
+                PrimaryButtonText = "Add word",
+                CloseButtonText = "Not now",
+                DefaultButton = ContentDialogButton.Primary
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            var draft = new WordEntry("clipboard-preview", word, null, null, null, null, null, null);
+            var details = await App.Data.EnrichmentService.GetAsync(draft, App.Data.Settings.DictionaryLookupEnabled);
+            await App.Data.AddPersonalWordAsync(word, details);
+        });
+    }
+
+    private void MainWindow_Closed(object sender, WindowEventArgs args)
+    {
+        _timer.Stop();
+        _achievementDismissTimer.Stop();
+        _trayService.Dispose();
+        _hotKeyService.Dispose();
+        _clipboardMonitor.Update(false);
+        _taskbarProgress.Clear();
+    }
+
+    private sealed record PaletteEntry(string Label, string Context, Func<Task> Action);
 
     private void Data_AchievementUnlocked(object? sender, AchievementUnlockedEventArgs e)
     {
@@ -206,6 +398,8 @@ public sealed partial class MainWindow : Window
 
         if (App.Data.Settings.NotificationMode is NotificationMode.Popup or NotificationMode.Both)
         {
+            var compact = App.Data.Settings.CompactNotificationsWhenFullscreen &&
+                          FullscreenDetector.IsForegroundAppFullscreen(WinRT.Interop.WindowNative.GetWindowHandle(this));
             _reminderWindow?.Close();
             _reminderWindow = new ReminderOverlayWindow(word, App.Data.Settings.PopupDurationSeconds, async action =>
             {
@@ -214,7 +408,10 @@ public sealed partial class MainWindow : Window
                 {
                     await home.RefreshAsync();
                 }
-            });
+            },
+            duration => App.Data.SnoozeWordAsync(word, duration),
+            compact);
+            SoundService.Play("reminder-arrived");
             _reminderWindow.Activate();
         }
     }

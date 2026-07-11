@@ -50,7 +50,7 @@
                             <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Click="ReviewNowButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="9">
                                     <FontIcon Glyph="&#xE768;" />
-                                    <TextBlock Text="Start review" />
+                                    <TextBlock Text="Review now" />
                                 </StackPanel>
                             </Button>
                             <CommandBar Background="Transparent" DefaultLabelPosition="Collapsed" IsDynamicOverflowEnabled="False" HorizontalAlignment="Right">
@@ -246,6 +246,12 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+                    <Button HorizontalAlignment="Stretch" Click="ShowFullDetailsButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE946;" />
+                            <TextBlock Text="Open rich details" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

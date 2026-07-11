@@ -107,6 +107,52 @@
                             <StackPanel Spacing="16">
                                 <TextBlock Text="System" Style="{StaticResource SubtitleTextBlockStyle}" />
                                 <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" Toggled="PreviewControl_Changed" />
+                                <ToggleSwitch x:Name="GlobalHotkeyToggle" Header="Global review shortcut" OffContent="Off" OnContent="Ctrl+Alt+R" Toggled="PreviewControl_Changed" />
+                                <ToggleSwitch x:Name="ClipboardQuickAddToggle" Header="Clipboard quick-add prompts" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                <ToggleSwitch x:Name="CompactFullscreenToggle" Header="Compact reminders during fullscreen activity" Toggled="PreviewControl_Changed" />
+                                <ToggleSwitch x:Name="SoundToggle" Header="Sound cues" OffContent="Silent" OnContent="On" Toggled="PreviewControl_Changed" />
+                                <NumberBox x:Name="DefaultSessionSizeBox" Header="Default session size" Minimum="5" Maximum="100" SmallChange="5" ValueChanged="DefaultSessionSizeBox_ValueChanged" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Pronunciation" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <ComboBox x:Name="VoiceBox" Header="Windows voice" SelectionChanged="PreviewControl_Changed" />
+                                <Grid ColumnSpacing="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Slider x:Name="SpeechRateSlider" Header="Speaking rate" Minimum="0.5" Maximum="2" StepFrequency="0.1" ValueChanged="SpeechRateSlider_ValueChanged" />
+                                    <Button Grid.Column="1" VerticalAlignment="Bottom" AutomationProperties.Name="Test pronunciation voice" Click="TestVoiceButton_Click">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE767;" />
+                                            <TextBlock Text="Test" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Backup and restore" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Create one portable archive containing wordlists, progress, settings, achievements, enrichment cache, and logs." TextWrapping="WrapWholeWords" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Click="BackupButton_Click">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE74E;" />
+                                            <TextBlock Text="Create backup" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="RestoreButton_Click">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE777;" />
+                                            <TextBlock Text="Restore backup" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>

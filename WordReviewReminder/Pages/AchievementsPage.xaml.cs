@@ -8,6 +8,9 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI;
 using WordReviewReminder.Core;
+using WordReviewReminder.Services;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace WordReviewReminder.Pages;
 
@@ -159,10 +162,21 @@ public sealed partial class AchievementsPage : Page
             XamlRoot = XamlRoot,
             Title = item.Title,
             Content = content,
+            PrimaryButtonText = item.IsUnlocked ? "Export milestone card" : null,
             CloseButtonText = "Close",
             DefaultButton = ContentDialogButton.Close
         };
-        await dialog.ShowAsync();
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            var picker = new FileSavePicker { SuggestedFileName = $"{item.Title.ToLowerInvariant().Replace(' ', '-')}" };
+            picker.FileTypeChoices.Add("PNG image", [".png"]);
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(App.MainWindow));
+            var file = await picker.PickSaveFileAsync();
+            if (file is not null)
+            {
+                await MilestoneCardService.ExportAsync(item.Snapshot, file.Path);
+            }
+        }
     }
 
     private void BadgeCard_Loaded(object sender, RoutedEventArgs e)

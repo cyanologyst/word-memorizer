@@ -1,6 +1,6 @@
 <div align="center">
 
-# WordReviewReminder
+# Word Review Reminder
 
 **A calm Windows 11 vocabulary companion for building durable recall.**
 
@@ -18,10 +18,12 @@ WordReviewReminder is a local-first WinUI 3 desktop app that surfaces vocabulary
 
 - Fluent Windows 11 interface with Mica, native navigation, and responsive layouts
 - Popup cards, Windows toast notifications, quiet hours, and configurable schedules
-- Focused review sessions with Know, Review Later, Skip, pronunciation, and details
-- Spaced-review progress, streaks, activity history, statistics, and JSONL logs
-- 25 illustrated achievements with progress tracking, filters, unlock celebrations, and subtle motion
-- Local JSON storage with no account or cloud dependency
+- Adaptive review sessions with configurable goals, timed recall, focus mode, and taskbar progress
+- Offline-first word details with optional dictionary enrichment, examples, related words, and personal notes
+- Mistake Lab, a 13-week activity calendar, streaks, statistics, and inspectable JSONL history
+- Global `Ctrl+Alt+R` review shortcut, system tray controls, a mini widget, and optional clipboard quick-add
+- 25 illustrated achievements with progress tracking, unlock celebrations, and exportable milestone cards
+- Portable backup and restore with local JSON storage and no account or cloud dependency
 
 ## Run Locally
 

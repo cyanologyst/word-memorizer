@@ -81,6 +81,80 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void KnownReviewsGrowStabilityAndScheduleLongerIntervals()
+    {
+        var scheduler = new ReviewScheduler(seed: 1);
+        var progress = new ReviewProgress();
+        var word = new WordEntry("word-1", "Dissolve", "verb", null, null, null, 1, null);
+        var firstReview = new DateTimeOffset(2026, 7, 7, 12, 0, 0, TimeSpan.Zero);
+
+        scheduler.RecordReview(progress, word, ReviewAction.Known, firstReview, responseSeconds: 4.5);
+        var firstStability = progress.Entries[word.Id].StabilityDays;
+        var firstDueAt = progress.Entries[word.Id].DueAt;
+
+        scheduler.RecordReview(progress, word, ReviewAction.Known, firstDueAt, responseSeconds: 2.2);
+        var entry = progress.Entries[word.Id];
+
+        Assert.True(entry.StabilityDays > firstStability);
+        Assert.True(entry.DueAt > firstDueAt.AddDays(firstStability));
+        Assert.Equal(2, entry.ConsecutiveCorrect);
+        Assert.Equal(2.2, entry.LastResponseSeconds);
+    }
+
+    [Fact]
+    public void SkippedReviewsIncreaseLapsesAndDifficulty()
+    {
+        var scheduler = new ReviewScheduler(seed: 1);
+        var progress = new ReviewProgress();
+        var word = new WordEntry("word-1", "Dissolve", "verb", null, null, null, 1, null);
+        var now = new DateTimeOffset(2026, 7, 7, 12, 0, 0, TimeSpan.Zero);
+
+        scheduler.RecordReview(progress, word, ReviewAction.Skipped, now);
+        var entry = progress.Entries[word.Id];
+
+        Assert.Equal(1, entry.Lapses);
+        Assert.True(entry.MemoryDifficulty > 5);
+        Assert.Equal(0, entry.ConsecutiveCorrect);
+        Assert.Equal(now.AddMinutes(5), entry.DueAt);
+    }
+
+    [Fact]
+    public async Task EnrichedWordFieldsRoundTripThroughJsonStorage()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new LocalDataStore(root);
+            var word = new WordEntry("word-1", "Dissolve", "verb", "/dɪˈzɑːlv/", "melt", 1, 1, ["TOEFL"])
+            {
+                ExampleSentences = ["The tablet will dissolve in water."],
+                Synonyms = ["melt"],
+                Antonyms = ["solidify"],
+                Notes = "Review the second meaning.",
+                Difficulty = 3,
+                EnrichmentSource = "dictionaryapi.dev"
+            };
+
+            await store.SaveWordListAsync(NewList(word));
+            var loaded = (await store.LoadWordListsAsync()).Single().Words.Single();
+
+            Assert.Equal(word.ExampleSentences, loaded.ExampleSentences);
+            Assert.Equal(word.Synonyms, loaded.Synonyms);
+            Assert.Equal(word.Antonyms, loaded.Antonyms);
+            Assert.Equal(word.Notes, loaded.Notes);
+            Assert.Equal(word.Difficulty, loaded.Difficulty);
+            Assert.Equal(word.EnrichmentSource, loaded.EnrichmentSource);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public async Task ReviewLogRoundTripsEvents()
     {
         var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));

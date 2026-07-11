@@ -12,6 +12,7 @@ public sealed class LocalDataStore
         ProgressPath = Path.Combine(rootPath, "progress.json");
         AchievementsPath = Path.Combine(rootPath, "achievements.json");
         LogsPath = Path.Combine(rootPath, "review-log.jsonl");
+        EnrichmentCachePath = Path.Combine(rootPath, "word-enrichment-cache.json");
     }
 
     public string RootPath { get; }
@@ -20,6 +21,7 @@ public sealed class LocalDataStore
     public string ProgressPath { get; }
     public string AchievementsPath { get; }
     public string LogsPath { get; }
+    public string EnrichmentCachePath { get; }
 
     public void EnsureCreated()
     {
@@ -107,6 +109,26 @@ public sealed class LocalDataStore
         EnsureCreated();
         await using var stream = File.Create(ProgressPath);
         await JsonSerializer.SerializeAsync(stream, progress, JsonOptions.Default, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, WordEnrichment>> LoadEnrichmentCacheAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+        if (!File.Exists(EnrichmentCachePath))
+        {
+            return new Dictionary<string, WordEnrichment>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        await using var stream = File.OpenRead(EnrichmentCachePath);
+        return await JsonSerializer.DeserializeAsync<Dictionary<string, WordEnrichment>>(stream, JsonOptions.Default, cancellationToken)
+               ?? new Dictionary<string, WordEnrichment>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task SaveEnrichmentCacheAsync(Dictionary<string, WordEnrichment> cache, CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+        await using var stream = File.Create(EnrichmentCachePath);
+        await JsonSerializer.SerializeAsync(stream, cache, JsonOptions.Default, cancellationToken);
     }
 
     public async Task<AchievementState> LoadAchievementStateAsync(CancellationToken cancellationToken = default)

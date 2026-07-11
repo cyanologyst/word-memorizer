@@ -13,37 +13,48 @@ namespace WordReviewReminder;
 public sealed class ReminderOverlayWindow : System.Windows.Window
 {
     private const double WindowWidth = 560;
-    private const double WindowHeight = 326;
     private const double CardWidth = 540;
-    private const double CardHeight = 306;
+    private double CardHeight => _compact ? 260 : 306;
+    private double WindowHeight => CardHeight + 20;
 
     private readonly Func<ReviewAction, Task> _recordActionAsync;
     private readonly SpeechService _speech = new();
     private readonly WordEntry _word;
     private readonly DispatcherTimer _closeTimer = new();
     private readonly int _durationSeconds;
+    private readonly Func<TimeSpan, Task>? _snoozeAsync;
+    private readonly bool _compact;
     private Border? _feedbackOverlay;
     private ScaleTransform? _timerScale;
     private Border? _card;
     private TranslateTransform? _cardTranslate;
     private bool _recorded;
 
-    public ReminderOverlayWindow(WordEntry word, int durationSeconds, Func<ReviewAction, Task> recordActionAsync)
+    public ReminderOverlayWindow(
+        WordEntry word,
+        int durationSeconds,
+        Func<ReviewAction, Task> recordActionAsync,
+        Func<TimeSpan, Task>? snoozeAsync = null,
+        bool compact = false)
     {
         _word = word;
         _recordActionAsync = recordActionAsync;
         _durationSeconds = Math.Max(5, durationSeconds);
+        _snoozeAsync = snoozeAsync;
+        _compact = compact;
 
         AllowsTransparency = true;
         Background = Brushes.Transparent;
         ResizeMode = ResizeMode.NoResize;
         ShowInTaskbar = false;
+        Title = "Word review card";
         SizeToContent = SizeToContent.Manual;
         Topmost = true;
         WindowStyle = WindowStyle.None;
         Width = WindowWidth;
         Height = WindowHeight;
         Content = BuildCard();
+        KeyDown += Window_KeyDown;
 
         Loaded += (_, _) =>
         {
@@ -59,6 +70,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Close();
         };
         _closeTimer.Start();
+        Closed += async (_, _) => await App.Data.SavePopupPositionAsync(Left, Top);
     }
 
     public new bool Activate()
@@ -199,7 +211,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildHeader()
     {
-        var grid = new Grid { Margin = new Thickness(0, 8, 0, 10) };
+        var grid = new Grid { Margin = new Thickness(0, _compact ? 4 : 8, 0, _compact ? 5 : 10), Cursor = Cursors.SizeAll };
+        grid.MouseLeftButtonDown += Header_MouseLeftButtonDown;
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetRow(grid, 1);
@@ -215,7 +228,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Text = _word.Term,
             Foreground = Brushes.White,
             FontFamily = new FontFamily("Segoe UI Variable Display, Segoe UI"),
-            FontSize = 34,
+            FontSize = _compact ? 28 : 34,
             FontWeight = FontWeights.SemiBold,
             LineHeight = 38,
             TextTrimming = TextTrimming.CharacterEllipsis
@@ -254,15 +267,33 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         };
         Grid.SetRow(panel, 2);
 
-        panel.Child = new TextBlock
+        var content = new StackPanel();
+        content.Children.Add(new TextBlock
         {
             Text = _word.ShortMeaning ?? "",
             Foreground = Brushes.White,
             FontSize = 15,
             LineHeight = 22,
             TextWrapping = TextWrapping.Wrap,
-            VerticalAlignment = VerticalAlignment.Top
-        };
+            VerticalAlignment = VerticalAlignment.Top,
+            MaxHeight = _compact ? 48 : 66,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+        if (!_compact && _word.ExampleSentences.FirstOrDefault() is { } example)
+        {
+            content.Children.Add(new TextBlock
+            {
+                Text = $"Example: {example}",
+                Foreground = Brush("#C7B9BD"),
+                FontSize = 12,
+                Margin = new Thickness(0, 7, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                MaxHeight = 38,
+                TextTrimming = TextTrimming.CharacterEllipsis
+            });
+        }
+
+        panel.Child = content;
 
         return panel;
     }
@@ -274,11 +305,13 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) });
         Grid.SetRow(grid, 3);
 
         grid.Children.Add(BuildAction("Know", "\uE73E", "#FF7A5F", "#FF7A5F", ReviewAction.Known, 0, true));
         grid.Children.Add(BuildAction("Later", "\uE916", "#3A3033", "#4A3F43", ReviewAction.Later, 1));
         grid.Children.Add(BuildAction("Skip", "\uE711", "#3A3033", "#4A3F43", ReviewAction.Skipped, 2));
+        grid.Children.Add(BuildSnoozeAction());
         grid.Children.Add(BuildDetailsAction());
 
         return grid;
@@ -295,7 +328,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private Border BuildDetailsAction()
     {
-        var button = BuildActionShell("#342C30", "#342C30", 3);
+        var button = BuildActionShell("#342C30", "#342C30", 4);
         button.Child = BuildActionContent("Details", "\uE946");
         System.Windows.Automation.AutomationProperties.SetName(button, "Open word details");
         button.MouseLeftButtonUp += (_, _) =>
@@ -304,6 +337,23 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             App.MainWindow?.Activate();
             Close();
         };
+        return button;
+    }
+
+    private Border BuildSnoozeAction()
+    {
+        var button = BuildActionShell("#342C30", "#342C30", 3);
+        button.Child = BuildActionContent("Snooze", "\uE823");
+        System.Windows.Automation.AutomationProperties.SetName(button, "Snooze for 15 minutes");
+        button.MouseLeftButtonUp += async (_, _) => await SnoozeAndCloseAsync(TimeSpan.FromMinutes(15));
+        var menu = new ContextMenu();
+        foreach (var minutes in new[] { 5, 15, 30 })
+        {
+            var item = new MenuItem { Header = $"Snooze {minutes} minutes", Tag = minutes };
+            item.Click += async (_, _) => await SnoozeAndCloseAsync(TimeSpan.FromMinutes((int)item.Tag));
+            menu.Items.Add(item);
+        }
+        button.ContextMenu = menu;
         return button;
     }
 
@@ -465,6 +515,80 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         Close();
     }
 
+    private async Task SnoozeAndCloseAsync(TimeSpan duration)
+    {
+        if (_recorded)
+        {
+            return;
+        }
+
+        _recorded = true;
+        _closeTimer.Stop();
+        if (_snoozeAsync is not null)
+        {
+            await _snoozeAsync(duration);
+        }
+        else
+        {
+            await App.Data.SnoozeWordAsync(_word, duration);
+        }
+
+        Close();
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState != MouseButtonState.Pressed || IsInteractiveSource(e.OriginalSource as DependencyObject))
+        {
+            return;
+        }
+
+        DragMove();
+    }
+
+    private static bool IsInteractiveSource(DependencyObject? source)
+    {
+        for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is Border border && border.Cursor == Cursors.Hand)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.D1:
+            case Key.NumPad1:
+                await RecordAndCloseAsync(ReviewAction.Known);
+                break;
+            case Key.D2:
+            case Key.NumPad2:
+                await RecordAndCloseAsync(ReviewAction.Later);
+                break;
+            case Key.D3:
+            case Key.NumPad3:
+                await RecordAndCloseAsync(ReviewAction.Skipped);
+                break;
+            case Key.S:
+                await SnoozeAndCloseAsync(TimeSpan.FromMinutes(15));
+                break;
+            case Key.L:
+                await _speech.SpeakAsync(_word.Term);
+                await App.Data.RecordPronunciationAsync(_word);
+                break;
+            case Key.Escape:
+                _closeTimer.Stop();
+                Close();
+                break;
+        }
+    }
+
     private void ShowFeedback(ReviewAction action)
     {
         if (_feedbackOverlay?.Child is not Border pill || pill.Child is not StackPanel stack)
@@ -486,8 +610,14 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     private void PositionWindow()
     {
         var workArea = SystemParameters.WorkArea;
-        Left = workArea.Right - Width - 22;
-        Top = workArea.Bottom - Height - 22;
+        var preferredLeft = App.Data.Settings.PopupLeft;
+        var preferredTop = App.Data.Settings.PopupTop;
+        Left = preferredLeft.HasValue
+            ? Math.Clamp(preferredLeft.Value, workArea.Left, Math.Max(workArea.Left, workArea.Right - Width))
+            : workArea.Right - Width - 22;
+        Top = preferredTop.HasValue
+            ? Math.Clamp(preferredTop.Value, workArea.Top, Math.Max(workArea.Top, workArea.Bottom - Height))
+            : workArea.Bottom - Height - 22;
     }
 
     private static SolidColorBrush Brush(string color)

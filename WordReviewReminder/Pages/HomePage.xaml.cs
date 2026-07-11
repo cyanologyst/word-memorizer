@@ -69,13 +69,14 @@ public sealed partial class HomePage : Page
             return;
         }
 
+        var reminderWord = _currentWord;
         _manualReminderWindow?.Close();
-        _manualReminderWindow = new ReminderOverlayWindow(_currentWord, App.Data.Settings.PopupDurationSeconds, async action =>
+        _manualReminderWindow = new ReminderOverlayWindow(reminderWord, App.Data.Settings.PopupDurationSeconds, async action =>
         {
-            await App.Data.RecordReviewAsync(_currentWord, action);
+            await App.Data.RecordReviewAsync(reminderWord, action);
             _currentWord = App.Data.PickNextWord(DateTimeOffset.Now);
             await RefreshAsync();
-        });
+        }, duration => App.Data.SnoozeWordAsync(reminderWord, duration));
         _manualReminderWindow.Activate();
     }
 
@@ -181,6 +182,17 @@ public sealed partial class HomePage : Page
     {
         _detailsPaneOpen = !_detailsPaneOpen;
         UpdateDetailsPane(ActualWidth);
+    }
+
+    private async void ShowFullDetailsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentWord is null)
+        {
+            return;
+        }
+
+        _currentWord = await WordDetailsDialog.ShowAsync(this, _currentWord);
+        RenderWord();
     }
 
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)

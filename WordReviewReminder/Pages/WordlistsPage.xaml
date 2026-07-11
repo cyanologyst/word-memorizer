@@ -141,6 +141,12 @@
                         </Border>
                     </StackPanel>
                     <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Select a row to inspect it before editing or deleting." TextWrapping="WrapWholeWords" />
+                    <Button HorizontalAlignment="Stretch" Click="OpenWordDetailsButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE946;" />
+                            <TextBlock Text="Open rich details" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

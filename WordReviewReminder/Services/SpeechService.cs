@@ -16,6 +16,18 @@ public sealed class SpeechService
         }
 
         using var synthesizer = new SpeechSynthesizer();
+        var settings = App.Data.Settings;
+        if (!string.IsNullOrWhiteSpace(settings.VoiceName))
+        {
+            var voice = SpeechSynthesizer.AllVoices.FirstOrDefault(candidate =>
+                string.Equals(candidate.DisplayName, settings.VoiceName, StringComparison.OrdinalIgnoreCase));
+            if (voice is not null)
+            {
+                synthesizer.Voice = voice;
+            }
+        }
+
+        synthesizer.Options.SpeakingRate = Math.Clamp(settings.SpeechRate, 0.5, 2.0);
         var stream = await synthesizer.SynthesizeTextToStreamAsync(text);
         _player.Source = MediaSource.CreateFromStream(stream, stream.ContentType);
         _player.Play();

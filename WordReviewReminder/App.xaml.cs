@@ -27,6 +27,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        UnhandledException += (_, args) => LogFatalException(args.Exception);
     }
 
     /// <summary>
@@ -35,9 +36,35 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        await Data.InitializeAsync();
-        _window = new MainWindow();
-        MainWindow = _window;
-        _window.Activate();
+        try
+        {
+            await Data.InitializeAsync();
+            _window = new MainWindow();
+            MainWindow = _window;
+            _window.Activate();
+        }
+        catch (Exception exception)
+        {
+            LogFatalException(exception);
+            Exit();
+        }
+    }
+
+    private static void LogFatalException(Exception exception)
+    {
+        try
+        {
+            var folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "WordReviewReminder");
+            Directory.CreateDirectory(folder);
+            File.AppendAllText(
+                Path.Combine(folder, "startup-errors.log"),
+                $"[{DateTimeOffset.Now:O}] {exception}\n\n");
+        }
+        catch
+        {
+            // Startup diagnostics must never replace the original failure.
+        }
     }
 }

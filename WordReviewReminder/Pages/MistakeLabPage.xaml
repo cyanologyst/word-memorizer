@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="WordReviewReminder.Pages.MistakeLabPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Loaded="Page_Loaded">
+    <Grid Padding="24,18,24,22" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <StackPanel Spacing="4">
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Mistake Lab" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Words that need more deliberate practice" />
+            </StackPanel>
+            <Button HorizontalAlignment="Right" Style="{StaticResource PrimaryActionButtonStyle}" Click="StartPracticeButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE768;" />
+                    <TextBlock Text="Practice difficult words" />
+                </StackPanel>
+            </Button>
+        </Grid>
+        <Border Grid.Row="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="3">
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Queue" />
+                    <TextBlock x:Name="QueueCountText" FontSize="28" FontWeight="SemiBold" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="3">
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="High urgency" />
+                    <TextBlock x:Name="HighUrgencyText" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource PremiumDangerBrush}" />
+                </StackPanel>
+                <ComboBox x:Name="UrgencyFilter" Grid.Column="2" Header="Urgency" MinWidth="150" SelectionChanged="UrgencyFilter_SelectionChanged">
+                    <ComboBoxItem Content="All" />
+                    <ComboBoxItem Content="High" />
+                    <ComboBoxItem Content="Medium" />
+                    <ComboBoxItem Content="Low" />
+                </ComboBox>
+            </Grid>
+        </Border>
+        <Border Grid.Row="2" Style="{StaticResource PremiumPanelStyle}">
+            <ListView x:Name="MistakesView" Padding="8" HorizontalContentAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="MinHeight" Value="66" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnSpacing="14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="90" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="3">
+                                <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding Term}" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Meaning}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" Text="MISSES" />
+                                <TextBlock Text="{Binding Misses}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" Text="LAPSES" />
+                                <TextBlock Text="{Binding Lapses}" />
+                            </StackPanel>
+                            <Border Grid.Column="3" Padding="8,4" Background="{StaticResource PremiumWarningSoftBrush}" CornerRadius="6" VerticalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding Urgency}" />
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+    </Grid>
+</Page>

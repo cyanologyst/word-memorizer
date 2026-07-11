@@ -22,7 +22,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Border Width="72" Height="72" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="8">
-                        <FontIcon Glyph="&#xE8D2;" FontSize="34" Foreground="{StaticResource PremiumAccentBrush}" />
+                        <Image Width="64" Height="64" Source="/Assets/AppLogo.png" Stretch="Uniform" />
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">
                         <TextBlock Text="Word Review Reminder" FontSize="26" FontWeight="SemiBold" />
