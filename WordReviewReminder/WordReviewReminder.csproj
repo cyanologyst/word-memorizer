@@ -32,9 +32,9 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
     <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\AppIcon.ico" />
-    <Content Include="Assets\AppLogo.png" />
-    <Content Include="Assets\TrayIcon*.png" />
+    <Content Include="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\AppLogo.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\TrayIcon*.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Sounds\*.wav" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
     <Content Include="Assets\Achievements\*.png" CopyToOutputDirectory="PreserveNewest" />
