@@ -10,11 +10,13 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
-            <SolidColorBrush x:Key="PremiumPageBackgroundBrush" Color="#171014" />
-            <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="#292124" />
-            <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#31272A" />
-            <SolidColorBrush x:Key="PremiumLayerBrush" Color="#392F32" />
-            <SolidColorBrush x:Key="PremiumSubtleBrush" Color="#21191D" />
+            <SolidColorBrush x:Key="PremiumPageBackgroundBrush" Color="#A6171014" />
+            <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="#B3292124" />
+            <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#C431272A" />
+            <SolidColorBrush x:Key="PremiumLayerBrush" Color="#A6392F32" />
+            <SolidColorBrush x:Key="PremiumSubtleBrush" Color="#8F21191D" />
+            <SolidColorBrush x:Key="PremiumGlassBorderBrush" Color="#30FFFFFF" />
+            <SolidColorBrush x:Key="PremiumGlassBorderSubtleBrush" Color="#1FFFFFFF" />
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="#FF7A5F" />
             <SolidColorBrush x:Key="PremiumAccentSoftBrush" Color="#33FF7A5F" />
             <SolidColorBrush x:Key="PremiumSuccessBrush" Color="#62D187" />
@@ -26,15 +28,15 @@
 
             <Style x:Key="PremiumPanelStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource PremiumSurfaceBrush}" />
-                <Setter Property="BorderBrush" Value="Transparent" />
-                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="BorderBrush" Value="{StaticResource PremiumGlassBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="8" />
             </Style>
 
             <Style x:Key="PremiumLayerStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource PremiumLayerBrush}" />
-                <Setter Property="BorderBrush" Value="Transparent" />
-                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="BorderBrush" Value="{StaticResource PremiumGlassBorderSubtleBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="6" />
             </Style>
 

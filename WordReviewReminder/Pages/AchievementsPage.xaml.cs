@@ -279,8 +279,8 @@ public sealed class AchievementCardViewModel
     private static readonly SolidColorBrush LockedForeground = CreateBrush(0xFF, 0xB8, 0xAF, 0xB2);
     private static readonly SolidColorBrush LockedBackground = CreateBrush(0x24, 0xB8, 0xAF, 0xB2);
     private static readonly SolidColorBrush LockedBorder = CreateBrush(0x30, 0xFF, 0xFF, 0xFF);
-    private static readonly SolidColorBrush ActiveCardBackground = CreateBrush(0xFF, 0x2A, 0x22, 0x25);
-    private static readonly SolidColorBrush LockedCardBackground = CreateBrush(0xFF, 0x25, 0x1F, 0x22);
+    private static readonly SolidColorBrush ActiveCardBackground = CreateBrush(0xC7, 0x2A, 0x22, 0x25);
+    private static readonly SolidColorBrush LockedCardBackground = CreateBrush(0xB8, 0x25, 0x1F, 0x22);
 
     public AchievementCardViewModel(AchievementSnapshot snapshot)
     {

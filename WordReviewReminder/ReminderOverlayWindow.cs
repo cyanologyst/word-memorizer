@@ -96,7 +96,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Width = CardWidth,
             Height = CardHeight,
             Margin = new Thickness(8),
-            Background = Brush("#2A2225"),
+            Background = Brush("#E82A2225"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(14),
             SnapsToDevicePixels = true,
@@ -238,7 +238,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var panel = new Border
         {
-            Background = Brush("#34282C"),
+            Background = Brush("#D934282C"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(14, 10, 14, 10),

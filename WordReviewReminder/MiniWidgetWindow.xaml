@@ -5,10 +5,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Word widget">
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
 
-    <Border Padding="14" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="16">
+    <Border Padding="14" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{StaticResource PremiumGlassBorderBrush}" BorderThickness="1" CornerRadius="16">
         <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
