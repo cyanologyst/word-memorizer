@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Navigation;
 using WordReviewReminder.Core;
 using WordReviewReminder.Pages;
 using WordReviewReminder.Services;
@@ -32,6 +33,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        NavFrame.Navigated += NavFrame_Navigated;
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -113,6 +115,34 @@ public sealed partial class MainWindow : Window
                     throw new InvalidOperationException($"Unknown navigation item tag: {item.Tag}");
             }
         }
+    }
+
+    private void NavFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        if (NavFrame.Content is not FrameworkElement content)
+        {
+            return;
+        }
+
+        ElementCompositionPreview.SetIsTranslationEnabled(content, true);
+        var visual = ElementCompositionPreview.GetElementVisual(content);
+        if (!_animationsEnabled)
+        {
+            visual.Opacity = 1;
+            return;
+        }
+
+        visual.Opacity = 0;
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 1, easing);
+        opacity.Duration = TimeSpan.FromMilliseconds(180);
+        var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        translation.InsertKeyFrame(0, new Vector3(0, 8, 0));
+        translation.InsertKeyFrame(1, Vector3.Zero, easing);
+        translation.Duration = TimeSpan.FromMilliseconds(220);
+        visual.StartAnimation("Opacity", opacity);
+        visual.StartAnimation("Translation", translation);
     }
 
     public void NavigateTo(string tag)

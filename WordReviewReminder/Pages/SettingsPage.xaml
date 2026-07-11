@@ -9,9 +9,9 @@
     Loaded="Page_Loaded"
     SizeChanged="Page_SizeChanged">
 
-    <Grid Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Background="{StaticResource GlassBaseBrush}">
         <ScrollViewer>
-            <StackPanel Padding="24,18,24,80" Spacing="14">
+            <StackPanel MaxWidth="1280" Padding="24,18,24,80" Spacing="14" HorizontalAlignment="Stretch">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="10" />
@@ -19,7 +19,7 @@
                 </StackPanel.ChildrenTransitions>
 
                 <StackPanel Spacing="6">
-                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
+                    <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Settings" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Reminder timing, quiet hours, and notification behavior" />
                 </StackPanel>
 
@@ -84,9 +84,18 @@
 
                         <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                             <StackPanel Spacing="16">
-                                <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
-                                <ToggleSwitch x:Name="QuietHoursToggle" Header="Pause reminders during quiet hours" Toggled="PreviewControl_Changed" />
                                 <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                        <TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Pause reminders during a daily time window" />
+                                    </StackPanel>
+                                    <ToggleSwitch x:Name="QuietHoursToggle" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                </Grid>
+                                <Grid x:Name="QuietHoursFields" ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="220" />
                                         <ColumnDefinition Width="220" />
@@ -106,12 +115,28 @@
                         <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                             <StackPanel Spacing="16">
                                 <TextBlock Text="System" Style="{StaticResource SubtitleTextBlockStyle}" />
-                                <ToggleSwitch x:Name="StartWithWindowsToggle" Header="Start with Windows" Toggled="PreviewControl_Changed" />
-                                <ToggleSwitch x:Name="GlobalHotkeyToggle" Header="Global review shortcut" OffContent="Off" OnContent="Ctrl+Alt+R" Toggled="PreviewControl_Changed" />
-                                <ToggleSwitch x:Name="ClipboardQuickAddToggle" Header="Clipboard quick-add prompts" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
-                                <ToggleSwitch x:Name="CompactFullscreenToggle" Header="Compact reminders during fullscreen activity" Toggled="PreviewControl_Changed" />
-                                <ToggleSwitch x:Name="SoundToggle" Header="Sound cues" OffContent="Silent" OnContent="On" Toggled="PreviewControl_Changed" />
-                                <NumberBox x:Name="DefaultSessionSizeBox" Header="Default session size" Minimum="5" Maximum="100" SmallChange="5" ValueChanged="DefaultSessionSizeBox_ValueChanged" />
+                                <Grid ColumnSpacing="18" RowSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Spacing="2"><TextBlock Text="Start with Windows" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Launch quietly when you sign in" /></StackPanel>
+                                    <ToggleSwitch x:Name="StartWithWindowsToggle" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <StackPanel Grid.Row="1" Spacing="2"><TextBlock Text="Global review shortcut" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Open review from anywhere with Ctrl+Alt+R" /></StackPanel>
+                                    <ToggleSwitch x:Name="GlobalHotkeyToggle" Grid.Row="1" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <StackPanel Grid.Row="2" Spacing="2"><TextBlock Text="Clipboard quick-add prompts" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Offer to save copied vocabulary" /></StackPanel>
+                                    <ToggleSwitch x:Name="ClipboardQuickAddToggle" Grid.Row="2" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <StackPanel Grid.Row="3" Spacing="2"><TextBlock Text="Compact fullscreen reminders" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Use a smaller card over fullscreen apps" /></StackPanel>
+                                    <ToggleSwitch x:Name="CompactFullscreenToggle" Grid.Row="3" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <StackPanel Grid.Row="4" Spacing="2"><TextBlock Text="Sound cues" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Play restrained review feedback sounds" /></StackPanel>
+                                    <ToggleSwitch x:Name="SoundToggle" Grid.Row="4" Grid.Column="1" OffContent="Silent" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <StackPanel Grid.Row="5" Spacing="2"><TextBlock Text="Default session size" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Words in a new review session" /></StackPanel>
+                                    <NumberBox x:Name="DefaultSessionSizeBox" Grid.Row="5" Grid.Column="1" Width="130" Minimum="5" Maximum="100" SmallChange="5" SpinButtonPlacementMode="Inline" ValueChanged="DefaultSessionSizeBox_ValueChanged" />
+                                </Grid>
                             </StackPanel>
                         </Border>
 
@@ -157,17 +182,16 @@
                         </Border>
                     </StackPanel>
 
-                    <Border x:Name="PreviewPane" Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}" VerticalAlignment="Top">
+                    <Border x:Name="PreviewPane" Grid.Column="1" Padding="18" Style="{StaticResource PremiumRaisedPanelStyle}" VerticalAlignment="Top">
                         <StackPanel Spacing="16">
                             <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <Border Padding="16" Background="{StaticResource PremiumSurfaceStrongBrush}" CornerRadius="8">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="Review now" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="Refuge" FontSize="30" FontWeight="SemiBold" />
-                                    <TextBlock Text="shelter, asylum, haven" TextWrapping="WrapWholeWords" />
-                                    <ProgressBar x:Name="PreviewDurationBar" Height="6" Maximum="120" />
-                                </StackPanel>
-                            </Border>
+                            <StackPanel Spacing="10" Margin="0,4,0,2">
+                                <TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="REVIEW NOW" />
+                                <TextBlock Text="Refuge" FontSize="30" FontWeight="SemiBold" />
+                                <TextBlock Text="shelter, asylum, haven" TextWrapping="WrapWholeWords" />
+                                <ProgressBar x:Name="PreviewDurationBar" Height="6" Maximum="120" />
+                            </StackPanel>
+                            <Rectangle Height="1" Fill="{StaticResource PremiumGlassBorderSubtleBrush}" />
                             <TextBlock x:Name="PreviewSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Button Content="15 min" Click="Preset15Button_Click" />
@@ -180,7 +204,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border x:Name="SaveBar" VerticalAlignment="Bottom" Padding="24,12" Background="{StaticResource PremiumSurfaceBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
+        <Border x:Name="SaveBar" VerticalAlignment="Bottom" Padding="24,12" Background="{StaticResource GlassRaisedBrush}" BorderBrush="{StaticResource PremiumGlassBorderBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                 <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" Click="SaveButton_Click" />

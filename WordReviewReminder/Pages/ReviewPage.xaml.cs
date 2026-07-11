@@ -74,6 +74,31 @@ public sealed partial class ReviewPage : Page
         await StartSessionAsync(options);
     }
 
+    private void SessionGoalPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Microsoft.UI.Xaml.Controls.Primitives.ToggleButton { Tag: string value } &&
+            int.TryParse(value, out var goal))
+        {
+            SessionGoalBox.Value = goal;
+            UpdateGoalPresetChecks(goal);
+        }
+    }
+
+    private void SessionGoalBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (!double.IsNaN(args.NewValue))
+        {
+            UpdateGoalPresetChecks((int)Math.Round(args.NewValue));
+        }
+    }
+
+    private void UpdateGoalPresetChecks(int goal)
+    {
+        Goal10Button.IsChecked = goal == 10;
+        Goal20Button.IsChecked = goal == 20;
+        Goal30Button.IsChecked = goal == 30;
+    }
+
     private async Task StartSessionAsync(ReviewSessionOptions options)
     {
         _options = options;

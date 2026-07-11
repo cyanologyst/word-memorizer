@@ -31,7 +31,7 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid Padding="24,18,24,20" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="24,18,24,20" RowSpacing="14" Background="{StaticResource GlassBaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -44,7 +44,7 @@
                 <ColumnDefinition Width="220" />
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Review" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Review" />
                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Focus on one word, reveal its meaning, then rate your recall" />
             </StackPanel>
             <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
@@ -53,13 +53,13 @@
             </StackPanel>
         </Grid>
 
-        <Border x:Name="SessionSetupPanel" Grid.Row="1" MaxWidth="900" Padding="28" HorizontalAlignment="Stretch" Style="{StaticResource PremiumPanelStyle}">
-            <StackPanel Spacing="20">
+        <Border x:Name="SessionSetupPanel" Grid.Row="1" MaxWidth="860" Padding="24" HorizontalAlignment="Stretch" VerticalAlignment="Top" Style="{StaticResource PremiumRaisedPanelStyle}">
+            <StackPanel Spacing="16">
                 <StackPanel Spacing="5">
-                    <TextBlock FontSize="26" FontWeight="SemiBold" Text="Build a review session" />
+                    <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Build a review session" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Choose the shape of this session before you begin." />
                 </StackPanel>
-                <Grid ColumnSpacing="18" RowSpacing="16">
+                <Grid ColumnSpacing="22" RowSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -68,18 +68,26 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <NumberBox x:Name="SessionGoalBox" Header="Session length" Minimum="5" Maximum="100" SmallChange="5" Value="20" />
-                    <ComboBox x:Name="SessionWordListBox" Grid.Column="1" Header="Wordlist" DisplayMemberPath="Title" />
-                    <ComboBox x:Name="SessionModeBox" Grid.Row="1" Header="Word selection" SelectedIndex="0">
+                    <StackPanel Spacing="7">
+                        <TextBlock Text="Session length" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ToggleButton x:Name="Goal10Button" MinWidth="52" Content="10" Tag="10" Click="SessionGoalPreset_Click" />
+                            <ToggleButton x:Name="Goal20Button" MinWidth="52" Content="20" Tag="20" Click="SessionGoalPreset_Click" />
+                            <ToggleButton x:Name="Goal30Button" MinWidth="52" Content="30" Tag="30" Click="SessionGoalPreset_Click" />
+                            <NumberBox x:Name="SessionGoalBox" Width="112" Minimum="5" Maximum="100" SmallChange="5" Value="20" SpinButtonPlacementMode="Inline" ValueChanged="SessionGoalBox_ValueChanged" />
+                        </StackPanel>
+                    </StackPanel>
+                    <ComboBox x:Name="SessionWordListBox" Grid.Column="1" MinHeight="36" Header="Wordlist" DisplayMemberPath="Title" />
+                    <ComboBox x:Name="SessionModeBox" Grid.Row="1" MinHeight="36" Header="Word selection" SelectedIndex="0">
                         <ComboBoxItem Content="Due and new words" />
                         <ComboBoxItem Content="Difficult words only" />
                     </ComboBox>
-                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="10">
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8">
                         <ToggleSwitch x:Name="TimedSessionToggle" Header="Timed recall" />
                         <ToggleSwitch x:Name="FocusModeToggle" Header="Hide navigation during the session" IsOn="True" />
                     </StackPanel>
                 </Grid>
-                <Button HorizontalAlignment="Right" MinWidth="180" Style="{StaticResource PrimaryActionButtonStyle}" Click="StartConfiguredSessionButton_Click">
+                <Button HorizontalAlignment="Left" MinWidth="180" Style="{StaticResource PrimaryActionButtonStyle}" Click="StartConfiguredSessionButton_Click">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE768;" />
                         <TextBlock Text="Start session" />

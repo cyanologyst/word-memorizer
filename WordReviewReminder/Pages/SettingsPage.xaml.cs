@@ -1,5 +1,8 @@
+using System.Numerics;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using WordReviewReminder.Core;
 using WordReviewReminder.Services;
 using Windows.Media.SpeechSynthesis;
@@ -12,6 +15,7 @@ public sealed partial class SettingsPage : Page
 {
     private bool _loading = true;
     private readonly SpeechService _speech = new();
+    private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
 
     public SettingsPage()
     {
@@ -34,6 +38,7 @@ public sealed partial class SettingsPage : Page
         PopupDurationSlider.Value = settings.PopupDurationSeconds;
         SelectionModeBox.SelectedIndex = settings.SelectionMode == ReviewSelectionMode.Random ? 1 : 0;
         QuietHoursToggle.IsOn = settings.QuietHoursEnabled;
+        UpdateQuietHoursState(settings.QuietHoursEnabled);
         QuietStartPicker.Time = settings.QuietHoursStart.ToTimeSpan();
         QuietEndPicker.Time = settings.QuietHoursEnd.ToTimeSpan();
         StartWithWindowsToggle.IsOn = settings.StartWithWindows;
@@ -120,6 +125,11 @@ public sealed partial class SettingsPage : Page
     {
         if (!_loading)
         {
+            if (ReferenceEquals(sender, QuietHoursToggle))
+            {
+                UpdateQuietHoursState(QuietHoursToggle.IsOn);
+            }
+
             UpdatePreview();
         }
     }
@@ -154,6 +164,13 @@ public sealed partial class SettingsPage : Page
         UpdatePreview();
     }
 
+    private void UpdateQuietHoursState(bool enabled)
+    {
+        QuietStartPicker.IsEnabled = enabled;
+        QuietEndPicker.IsEnabled = enabled;
+        QuietHoursFields.Opacity = enabled ? 1 : 0.48;
+    }
+
     private void UpdatePreview(bool markDirty = true)
     {
         var interval = Math.Max(1, (int)Math.Round(IntervalBox.Value));
@@ -171,7 +188,7 @@ public sealed partial class SettingsPage : Page
         if (markDirty && !_loading)
         {
             StatusText.Text = "Unsaved changes";
-            SaveBar.Visibility = Visibility.Visible;
+            ShowSaveBar();
         }
     }
 
@@ -208,6 +225,53 @@ public sealed partial class SettingsPage : Page
         StartupService.SetStartWithWindows(settings.StartWithWindows);
         StatusText.Text = "Saved";
         UpdatePreview(markDirty: false);
+        await Task.Delay(850);
+        await HideSaveBarAsync();
+    }
+
+    private void ShowSaveBar()
+    {
+        if (SaveBar.Visibility == Visibility.Visible)
+        {
+            return;
+        }
+
+        SaveBar.Visibility = Visibility.Visible;
+        var visual = ElementCompositionPreview.GetElementVisual(SaveBar);
+        ElementCompositionPreview.SetIsTranslationEnabled(SaveBar, true);
+        if (!_animationsEnabled)
+        {
+            visual.Opacity = 1;
+            return;
+        }
+
+        visual.Opacity = 0;
+        var easing = visual.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.16f, 1), new Vector2(0.3f, 1));
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 1, easing);
+        opacity.Duration = TimeSpan.FromMilliseconds(170);
+        var translation = visual.Compositor.CreateVector3KeyFrameAnimation();
+        translation.InsertKeyFrame(0, new Vector3(0, 8, 0));
+        translation.InsertKeyFrame(1, Vector3.Zero, easing);
+        translation.Duration = TimeSpan.FromMilliseconds(210);
+        visual.StartAnimation("Opacity", opacity);
+        visual.StartAnimation("Translation", translation);
+    }
+
+    private async Task HideSaveBarAsync()
+    {
+        if (!_animationsEnabled)
+        {
+            SaveBar.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var visual = ElementCompositionPreview.GetElementVisual(SaveBar);
+        var opacity = visual.Compositor.CreateScalarKeyFrameAnimation();
+        opacity.InsertKeyFrame(1, 0);
+        opacity.Duration = TimeSpan.FromMilliseconds(150);
+        visual.StartAnimation("Opacity", opacity);
+        await Task.Delay(170);
         SaveBar.Visibility = Visibility.Collapsed;
     }
 

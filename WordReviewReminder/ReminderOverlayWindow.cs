@@ -116,8 +116,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Width = CardWidth,
             Height = CardHeight,
             Margin = new Thickness(0),
-            Background = Brush("#B82A2225"),
-            BorderThickness = new Thickness(0),
+            Background = ThemeBrush("PopupGlassBrush", "#B82A2225"),
+            BorderBrush = ThemeBrush("PremiumGlassBorderSubtleBrush", "#1FFFFFFF"),
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(14),
             SnapsToDevicePixels = true,
             Opacity = 0
@@ -258,7 +259,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var panel = new Border
         {
-            Background = Brush("#D934282C"),
+            Background = ThemeBrush("PopupGlassLayerBrush", "#D934282C"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(14, 10, 14, 10),
@@ -299,6 +300,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildActions()
     {
+        var control = ThemeColor("PopupGlassControlBrush", "#CC3A3033");
         var grid = new Grid { Height = 38 };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.1, GridUnitType.Star) });
@@ -308,8 +310,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         Grid.SetRow(grid, 3);
 
         grid.Children.Add(BuildAction("Know", "\uE73E", "#FF7A5F", "#FF7A5F", ReviewAction.Known, 0, true));
-        grid.Children.Add(BuildAction("Later", "\uE916", "#3A3033", "#4A3F43", ReviewAction.Later, 1));
-        grid.Children.Add(BuildAction("Skip", "\uE711", "#3A3033", "#4A3F43", ReviewAction.Skipped, 2));
+        grid.Children.Add(BuildAction("Later", "\uE916", control, "#4A3F43", ReviewAction.Later, 1));
+        grid.Children.Add(BuildAction("Skip", "\uE711", control, "#4A3F43", ReviewAction.Skipped, 2));
         grid.Children.Add(BuildSnoozeAction());
         grid.Children.Add(BuildDetailsAction());
 
@@ -327,7 +329,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private Border BuildDetailsAction()
     {
-        var button = BuildActionShell("#342C30", "#342C30", 4);
+        var control = ThemeColor("PopupGlassControlBrush", "#CC3A3033");
+        var button = BuildActionShell(control, control, 4);
         button.Child = BuildActionContent("Details", "\uE946");
         System.Windows.Automation.AutomationProperties.SetName(button, "Open word details");
         button.MouseLeftButtonUp += (_, _) =>
@@ -341,7 +344,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private Border BuildSnoozeAction()
     {
-        var button = BuildActionShell("#342C30", "#342C30", 3);
+        var control = ThemeColor("PopupGlassControlBrush", "#CC3A3033");
+        var button = BuildActionShell(control, control, 3);
         button.Child = BuildActionContent("Snooze", "\uE823");
         System.Windows.Automation.AutomationProperties.SetName(button, "Snooze for 15 minutes");
         button.MouseLeftButtonUp += async (_, _) => await SnoozeAndCloseAsync(TimeSpan.FromMinutes(15));
@@ -408,7 +412,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Width = 40,
             Height = 40,
             Margin = new Thickness(12, 0, 0, 0),
-            Background = Brush("#3A3033"),
+            Background = ThemeBrush("PopupGlassControlBrush", "#CC3A3033"),
             CornerRadius = new CornerRadius(6),
             Cursor = Cursors.Hand,
             ToolTip = accessibleName,
@@ -436,7 +440,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Width = CardWidth,
             Height = CardHeight,
             Margin = new Thickness(0),
-            Background = Brush("#CC2A2225"),
+            Background = ThemeBrush("PopupGlassBrush", "#E62A2225"),
             CornerRadius = new CornerRadius(14),
             Visibility = Visibility.Collapsed
         };
@@ -658,6 +662,44 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     private static SolidColorBrush Brush(string color)
     {
         return (SolidColorBrush)new BrushConverter().ConvertFromString(color)!;
+    }
+
+    private static SolidColorBrush ThemeBrush(string key, string fallback)
+    {
+        try
+        {
+            if (Microsoft.UI.Xaml.Application.Current?.Resources.TryGetValue(key, out var value) == true &&
+                value is Microsoft.UI.Xaml.Media.SolidColorBrush brush)
+            {
+                var color = brush.Color;
+                return new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B));
+            }
+        }
+        catch
+        {
+            // The fallback keeps standalone window tests and startup failure paths usable.
+        }
+
+        return Brush(fallback);
+    }
+
+    private static string ThemeColor(string key, string fallback)
+    {
+        try
+        {
+            if (Microsoft.UI.Xaml.Application.Current?.Resources.TryGetValue(key, out var value) == true &&
+                value is Microsoft.UI.Xaml.Media.SolidColorBrush brush)
+            {
+                var color = brush.Color;
+                return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+            }
+        }
+        catch
+        {
+            // See ThemeBrush: WPF can also create this window outside the WinUI host.
+        }
+
+        return fallback;
     }
 
     private static string BuildSourceText(WordEntry word)

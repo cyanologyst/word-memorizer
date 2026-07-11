@@ -46,6 +46,35 @@ public sealed partial class HomePage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await RefreshAsync();
+        ApplyDashboardLayout(ActualWidth);
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        ApplyDashboardLayout(e.NewSize.Width);
+    }
+
+    private void ApplyDashboardLayout(double width)
+    {
+        var wide = width >= 920;
+        Grid.SetRow(HeaderActions, wide ? 0 : 1);
+        Grid.SetColumn(HeaderActions, wide ? 1 : 0);
+        HeaderActions.HorizontalAlignment = wide ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+        HeaderActions.Margin = wide ? new Thickness(0) : new Thickness(0, 12, 0, 0);
+
+        MetricColumn3.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        MetricColumn4.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        Grid.SetRow(StreakCard, wide ? 0 : 1);
+        Grid.SetColumn(StreakCard, wide ? 2 : 0);
+        StreakCard.Margin = wide ? new Thickness(0) : new Thickness(0, 10, 0, 0);
+        Grid.SetRow(DueCard, wide ? 0 : 1);
+        Grid.SetColumn(DueCard, wide ? 3 : 1);
+        DueCard.Margin = wide ? new Thickness(0) : new Thickness(0, 10, 0, 0);
+
+        BottomColumn2.Width = wide ? new GridLength(0.85, GridUnitType.Star) : new GridLength(0);
+        Grid.SetRow(WordlistsPanel, wide ? 0 : 1);
+        Grid.SetColumn(WordlistsPanel, wide ? 1 : 0);
+        WordlistsPanel.Margin = wide ? new Thickness(0) : new Thickness(0, 14, 0, 0);
     }
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)

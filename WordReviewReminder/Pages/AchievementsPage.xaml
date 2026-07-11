@@ -70,7 +70,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="3">
-                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Achievement vault" />
+                    <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Achievement vault" />
                     <TextBlock
                         MaxWidth="680"
                         FontSize="13"
@@ -123,7 +123,7 @@
                         <TextBlock x:Name="FeaturedProgressText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                     </StackPanel>
 
-                    <Border x:Name="CollectionPanel" Grid.Column="2" Padding="14" Background="{StaticResource PremiumLayerBrush}" CornerRadius="8" VerticalAlignment="Center">
+                    <Border x:Name="CollectionPanel" Grid.Column="2" Padding="14" Style="{StaticResource PremiumLayerStyle}" VerticalAlignment="Center">
                         <StackPanel Spacing="6">
                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Text="Collection progress" />
                             <TextBlock x:Name="CollectionPercentText" FontSize="28" FontWeight="SemiBold" Text="0%" />
@@ -199,12 +199,12 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border HorizontalAlignment="Left" Padding="7,3" Background="{StaticResource PremiumLayerBrush}" CornerRadius="9">
-                                            <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Category}" />
+                                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Category}" />
                                         </Border>
                                         <Border Grid.Column="1" Padding="7,3" Background="{Binding StateBackgroundBrush}" CornerRadius="9">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <FontIcon FontSize="10" Foreground="{Binding StateForegroundBrush}" Glyph="{Binding StateGlyph}" />
-                                                <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{Binding StateForegroundBrush}" Text="{Binding StatusLabel}" />
+                                                <FontIcon FontSize="12" Foreground="{Binding StateForegroundBrush}" Glyph="{Binding StateGlyph}" />
+                                                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{Binding StateForegroundBrush}" Text="{Binding StatusLabel}" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -230,7 +230,7 @@
                                             MaxLines="2" />
                                         <TextBlock
                                             Foreground="{StaticResource PremiumWarningBrush}"
-                                            FontSize="11"
+                                            FontSize="12"
                                             FontWeight="SemiBold"
                                             Text="{Binding TierLabel}"
                                             Visibility="{Binding TierVisibility}" />
@@ -243,8 +243,8 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" MaxLines="1" Text="{Binding ProgressLabel}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="1" Foreground="{Binding StateForegroundBrush}" FontSize="11" FontWeight="SemiBold" Text="{Binding ProgressPercentText}" />
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" MaxLines="1" Text="{Binding ProgressLabel}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Foreground="{Binding StateForegroundBrush}" FontSize="12" FontWeight="SemiBold" Text="{Binding ProgressPercentText}" />
                                         </Grid>
                                     </StackPanel>
                                 </Grid>

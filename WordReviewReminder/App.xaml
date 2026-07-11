@@ -15,6 +15,12 @@
             <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#C431272A" />
             <SolidColorBrush x:Key="PremiumLayerBrush" Color="#A6392F32" />
             <SolidColorBrush x:Key="PremiumSubtleBrush" Color="#8F21191D" />
+            <SolidColorBrush x:Key="GlassBaseBrush" Color="#A6171014" />
+            <SolidColorBrush x:Key="GlassPanelBrush" Color="#B3292124" />
+            <SolidColorBrush x:Key="GlassRaisedBrush" Color="#D431272A" />
+            <SolidColorBrush x:Key="PopupGlassBrush" Color="#B82A2225" />
+            <SolidColorBrush x:Key="PopupGlassLayerBrush" Color="#D934282C" />
+            <SolidColorBrush x:Key="PopupGlassControlBrush" Color="#CC3A3033" />
             <SolidColorBrush x:Key="PremiumGlassBorderBrush" Color="#30FFFFFF" />
             <SolidColorBrush x:Key="PremiumGlassBorderSubtleBrush" Color="#1FFFFFFF" />
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="#FF7A5F" />
@@ -27,7 +33,14 @@
             <SolidColorBrush x:Key="PremiumDangerSoftBrush" Color="#28FF8B8B" />
 
             <Style x:Key="PremiumPanelStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource PremiumSurfaceBrush}" />
+                <Setter Property="Background" Value="{StaticResource GlassPanelBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource PremiumGlassBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+            </Style>
+
+            <Style x:Key="PremiumRaisedPanelStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource GlassRaisedBrush}" />
                 <Setter Property="BorderBrush" Value="{StaticResource PremiumGlassBorderBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="8" />
@@ -48,8 +61,25 @@
             </Style>
 
             <Style x:Key="PageSectionTitleStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontSize" Value="20" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+
+            <Style x:Key="PremiumPageTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="28" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="TextWrapping" Value="WrapWholeWords" />
+            </Style>
+
+            <Style x:Key="PremiumBodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="TextWrapping" Value="WrapWholeWords" />
+            </Style>
+
+            <Style x:Key="PremiumCaptionTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="WrapWholeWords" />
             </Style>
 
             <Style x:Key="MetricValueTextStyle" TargetType="TextBlock">

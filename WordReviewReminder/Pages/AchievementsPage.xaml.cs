@@ -16,6 +16,8 @@ namespace WordReviewReminder.Pages;
 
 public sealed partial class AchievementsPage : Page
 {
+    private static readonly SolidColorBrush CardHoverBrush = new(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF));
+    private static readonly SolidColorBrush CardPressedBrush = new(Color.FromArgb(0x09, 0xFF, 0xFF, 0xFF));
     private readonly List<AchievementCardViewModel> _allAchievements = [];
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
     private string _filter = "All";
@@ -214,6 +216,11 @@ public sealed partial class AchievementsPage : Page
 
     private void BadgeCard_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (sender is Button button)
+        {
+            button.Background = CardHoverBrush;
+        }
+
         if (_animationsEnabled)
         {
             AnimateCardScale(sender as FrameworkElement, 1.018f, 180);
@@ -222,6 +229,11 @@ public sealed partial class AchievementsPage : Page
 
     private void BadgeCard_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (sender is Button button)
+        {
+            button.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+        }
+
         if (_animationsEnabled)
         {
             AnimateCardScale(sender as FrameworkElement, 1, 220);
@@ -230,6 +242,11 @@ public sealed partial class AchievementsPage : Page
 
     private void BadgeCard_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (sender is Button button)
+        {
+            button.Background = CardPressedBrush;
+        }
+
         if (_animationsEnabled)
         {
             AnimateCardScale(sender as FrameworkElement, 0.988f, 90);
@@ -238,6 +255,11 @@ public sealed partial class AchievementsPage : Page
 
     private void BadgeCard_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (sender is Button button)
+        {
+            button.Background = CardHoverBrush;
+        }
+
         if (_animationsEnabled)
         {
             AnimateCardScale(sender as FrameworkElement, 1.018f, 140);
@@ -246,6 +268,11 @@ public sealed partial class AchievementsPage : Page
 
     private void BadgeCard_PointerCanceled(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (sender is Button button)
+        {
+            button.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+        }
+
         if (_animationsEnabled)
         {
             AnimateCardScale(sender as FrameworkElement, 1, 160);
@@ -272,15 +299,15 @@ public sealed class AchievementCardViewModel
 {
     private static readonly SolidColorBrush UnlockedForeground = CreateBrush(0xFF, 0x62, 0xD1, 0x87);
     private static readonly SolidColorBrush UnlockedBackground = CreateBrush(0x2E, 0x62, 0xD1, 0x87);
-    private static readonly SolidColorBrush UnlockedBorder = CreateBrush(0x66, 0x62, 0xD1, 0x87);
+    private static readonly SolidColorBrush UnlockedBorder = CreateBrush(0x3D, 0x62, 0xD1, 0x87);
     private static readonly SolidColorBrush ProgressForeground = CreateBrush(0xFF, 0xF2, 0xC3, 0x6B);
     private static readonly SolidColorBrush ProgressBackground = CreateBrush(0x2E, 0xF2, 0xC3, 0x6B);
-    private static readonly SolidColorBrush ProgressBorder = CreateBrush(0x66, 0xF2, 0xC3, 0x6B);
+    private static readonly SolidColorBrush ProgressBorder = CreateBrush(0x3D, 0xF2, 0xC3, 0x6B);
     private static readonly SolidColorBrush LockedForeground = CreateBrush(0xFF, 0xB8, 0xAF, 0xB2);
     private static readonly SolidColorBrush LockedBackground = CreateBrush(0x24, 0xB8, 0xAF, 0xB2);
-    private static readonly SolidColorBrush LockedBorder = CreateBrush(0x30, 0xFF, 0xFF, 0xFF);
-    private static readonly SolidColorBrush ActiveCardBackground = CreateBrush(0xC7, 0x2A, 0x22, 0x25);
-    private static readonly SolidColorBrush LockedCardBackground = CreateBrush(0xB8, 0x25, 0x1F, 0x22);
+    private static readonly SolidColorBrush LockedBorder = CreateBrush(0x22, 0xFF, 0xFF, 0xFF);
+    private static readonly SolidColorBrush ActiveCardBackground = CreateBrush(0xB3, 0x29, 0x21, 0x24);
+    private static readonly SolidColorBrush LockedCardBackground = CreateBrush(0xA6, 0x21, 0x19, 0x1D);
 
     public AchievementCardViewModel(AchievementSnapshot snapshot)
     {
