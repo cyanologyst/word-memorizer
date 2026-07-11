@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using WordReviewReminder.Core;
 using WordReviewReminder.Services;
@@ -101,30 +100,11 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(14),
             SnapsToDevicePixels = true,
-            Opacity = 0,
-            Effect = new DropShadowEffect
-            {
-                BlurRadius = 24,
-                ShadowDepth = 6,
-                Direction = 270,
-                Opacity = 0.34,
-                Color = Colors.Black
-            }
+            Opacity = 0
         };
         _cardTranslate = new TranslateTransform(0, 10);
         _card.RenderTransform = _cardTranslate;
         root.Children.Add(_card);
-
-        var layout = new Grid();
-        layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
-        layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        _card.Child = layout;
-
-        layout.Children.Add(new Border
-        {
-            Background = Brush("#FF7A5F"),
-            CornerRadius = new CornerRadius(14, 0, 0, 14)
-        });
 
         var body = new Grid
         {
@@ -134,8 +114,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        Grid.SetColumn(body, 1);
-        layout.Children.Add(body);
+        _card.Child = body;
 
         body.Children.Add(BuildTopStrip());
         body.Children.Add(BuildHeader());
