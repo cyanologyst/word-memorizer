@@ -1,6 +1,6 @@
 # Releasing Word Review Reminder
 
-Word Review Reminder is distributed as a signed x64 MSIX through a Windows App Installer file. App Installer checks for updates at launch every six hours and also registers a background update check.
+Word Review Reminder is distributed as both a signed x64 MSIX and a signed x64 MSI. App Installer checks MSIX releases for updates at launch every six hours and also registers a background update check. The MSI provides a traditional per-machine install and supports major upgrades when users run a newer MSI.
 
 ## One-time setup
 
@@ -27,6 +27,7 @@ The generated PFX and CER are ignored by Git. Never commit the PFX or its passwo
 The command creates these files under `artifacts/release`:
 
 - `WordReviewReminder-x64.msix`
+- `WordReviewReminder-x64.msi`
 - `WordReviewReminder.appinstaller`
 - `WordReviewReminder.cer`
 - `SHA256SUMS.txt`
@@ -42,7 +43,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow tests the app, signs the MSIX with the configured certificate, generates the App Installer feed, and uploads all release assets. Keep the same package identity, publisher, and signing certificate across releases.
+The release workflow tests the app, builds and signs both installers with the configured certificate, generates the App Installer feed, and uploads all release assets. Keep the same package identity, publisher, MSI upgrade code, and signing certificate across releases.
 
 The App Installer URL remains stable:
 
@@ -50,4 +51,4 @@ The App Installer URL remains stable:
 https://github.com/cyanologyst/word-memorizer/releases/latest/download/WordReviewReminder.appinstaller
 ```
 
-Increment the tag for every release. Windows only installs an update when its four-part package version is higher than the installed version.
+Increment the tag for every release. Windows only installs an MSIX update when its four-part package version is higher than the installed version. MSI upgrades compare the first three version fields and are installed by running the newer signed MSI.

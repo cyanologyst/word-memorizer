@@ -42,7 +42,7 @@ dotnet test .\WordReviewReminder.Tests\WordReviewReminder.Tests.csproj -p:Platfo
 
 ## Install And Update
 
-Production releases use signed MSIX packages and Windows App Installer. Install through `WordReviewReminder.appinstaller`; Windows then checks the stable release feed at launch and in the background. The About page also provides a manual update check.
+Production releases provide two signed x64 installers. Use `WordReviewReminder.appinstaller` for automatic Windows update checks at launch and in the background, or use `WordReviewReminder-x64.msi` for a traditional per-machine installation. The About page also provides a manual update check for App Installer releases.
 
 Release signing, local packaging, GitHub Actions secrets, and version-tag instructions are documented in [docs/releasing.md](docs/releasing.md).
 

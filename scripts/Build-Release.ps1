@@ -77,10 +77,19 @@ $appInstaller = (Get-Content -Raw -LiteralPath $template).Replace("__VERSION__",
 $appInstallerPath = Join-Path $output "WordReviewReminder.appinstaller"
 [System.IO.File]::WriteAllText($appInstallerPath, $appInstaller, [System.Text.UTF8Encoding]::new($false))
 
+& (Join-Path $PSScriptRoot "Build-Msi.ps1") `
+    -Version $Version `
+    -CertificateThumbprint $signingCertificate.Thumbprint `
+    -OutputDirectory $output
+if ($LASTEXITCODE -ne 0) {
+    throw "MSI build failed with exit code $LASTEXITCODE."
+}
+$msiPath = Join-Path $output "WordReviewReminder-x64.msi"
+
 $cerPath = Join-Path $output "WordReviewReminder.cer"
 Export-Certificate -Cert $signingCertificate -FilePath $cerPath -Force | Out-Null
 
-$checksums = Get-FileHash -Algorithm SHA256 -LiteralPath $msixPath, $appInstallerPath, $cerPath
+$checksums = Get-FileHash -Algorithm SHA256 -LiteralPath $msixPath, $msiPath, $appInstallerPath, $cerPath
 $checksumPath = Join-Path $output "SHA256SUMS.txt"
 $checksumLines = $checksums | ForEach-Object { "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)" }
 [System.IO.File]::WriteAllLines($checksumPath, $checksumLines, [System.Text.UTF8Encoding]::new($false))

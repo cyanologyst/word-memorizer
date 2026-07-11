@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="Word Review Reminder"
+      Manufacturer="cyanologyst"
+      Version="$(var.ProductVersion)"
+      UpgradeCode="B6AA0555-D3BF-4680-8EF8-9DE45896EC0B"
+      Language="1033"
+      Codepage="1252"
+      InstallerVersion="500"
+      Compressed="yes"
+      Scope="perMachine">
+
+    <SummaryInformation Description="Word Review Reminder installer" />
+    <MajorUpgrade
+        DowngradeErrorMessage="A newer version of Word Review Reminder is already installed."
+        Schedule="afterInstallInitialize" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="ProductIcon" SourceFile="$(var.PublishDir)\Assets\AppIcon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/cyanologyst/word-memorizer" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="CompanyFolder" Name="cyanologyst">
+        <Directory Id="INSTALLFOLDER" Name="Word Review Reminder" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Word Review Reminder" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Word Review Reminder" Level="1">
+      <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentRef Id="ApplicationShortcut" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="ApplicationFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <Component Id="ApplicationShortcut" Directory="ApplicationProgramsFolder" Guid="88E8F89E-B8EA-4D73-BD3B-3800FA6F4896">
+      <Shortcut
+          Id="StartMenuShortcut"
+          Name="Word Review Reminder"
+          Description="Review vocabulary at useful intervals"
+          Target="[INSTALLFOLDER]WordReviewReminder.exe"
+          WorkingDirectory="INSTALLFOLDER"
+          Icon="ProductIcon" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue
+          Root="HKLM"
+          Key="Software\cyanologyst\WordReviewReminder"
+          Name="Installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+    </Component>
+  </Fragment>
+</Wix>
