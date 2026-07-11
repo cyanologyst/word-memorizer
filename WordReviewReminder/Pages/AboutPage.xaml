@@ -22,7 +22,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Border Width="72" Height="72" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="8">
-                        <Image Width="64" Height="64" Source="/Assets/AppLogo.png" Stretch="Uniform" />
+                        <Image Width="64" Height="64" Source="ms-appx:///Assets/AppLogo.png" Stretch="Uniform" />
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">
                         <TextBlock Text="Word Review Reminder" FontSize="26" FontWeight="SemiBold" />
@@ -71,6 +71,34 @@
                     </StackPanel>
                 </Border>
             </Grid>
+
+            <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="7">
+                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Updates" />
+                        <TextBlock x:Name="UpdateStatusText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Windows checks for signed updates automatically." TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <ProgressRing x:Name="UpdateProgressRing" Width="18" Height="18" IsActive="False" Visibility="Collapsed" />
+                        <Button x:Name="InstallUpdateButton" Visibility="Collapsed" AutomationProperties.Name="Open Windows App Installer to update" Click="InstallUpdateButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE896;" />
+                                <TextBlock Text="Install update" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="CheckUpdateButton" AutomationProperties.Name="Check for application updates" Click="CheckUpdateButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE895;" />
+                                <TextBlock Text="Check now" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

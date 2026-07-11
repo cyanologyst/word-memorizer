@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller
+    xmlns="http://schemas.microsoft.com/appx/appinstaller/2021"
+    Version="__VERSION__"
+    Uri="https://github.com/cyanologyst/word-memorizer/releases/latest/download/WordReviewReminder.appinstaller">
+  <MainPackage
+      Name="cyanologyst.WordReviewReminder"
+      Publisher="CN=cyanologyst"
+      Version="__VERSION__"
+      ProcessorArchitecture="x64"
+      Uri="https://github.com/cyanologyst/word-memorizer/releases/latest/download/WordReviewReminder-x64.msix" />
+  <UpdateSettings>
+    <OnLaunch
+        HoursBetweenUpdateChecks="6"
+        ShowPrompt="true"
+        UpdateBlocksActivation="false" />
+    <AutomaticBackgroundTask />
+  </UpdateSettings>
+</AppInstaller>

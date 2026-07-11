@@ -40,6 +40,12 @@ Run the test suite with:
 dotnet test .\WordReviewReminder.Tests\WordReviewReminder.Tests.csproj -p:Platform=x64
 ```
 
+## Install And Update
+
+Production releases use signed MSIX packages and Windows App Installer. Install through `WordReviewReminder.appinstaller`; Windows then checks the stable release feed at launch and in the background. The About page also provides a manual update check.
+
+Release signing, local packaging, GitHub Actions secrets, and version-tag instructions are documented in [docs/releasing.md](docs/releasing.md).
+
 ## Add Wordlists
 
 Import `*.wordlist.json` files from the Wordlists page. The required schema, optional fields, naming rules, and complete example are documented in [docs/wordlist-json-format.md](docs/wordlist-json-format.md).

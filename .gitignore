@@ -7,3 +7,8 @@ obj/
 TestResults/
 *.log
 tmp-*.png
+qa-*.png
+artifacts/
+installer/certs/
+*.pfx
+*.cer

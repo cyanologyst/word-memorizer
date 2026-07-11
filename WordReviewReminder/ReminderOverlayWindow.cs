@@ -12,10 +12,10 @@ namespace WordReviewReminder;
 
 public sealed class ReminderOverlayWindow : System.Windows.Window
 {
-    private const double WindowWidth = 560;
-    private const double CardWidth = 540;
-    private double CardHeight => _compact ? 260 : 306;
-    private double WindowHeight => CardHeight + 20;
+    private const double WindowWidth = 510;
+    private const double CardWidth = 494;
+    private double CardHeight => _compact ? 238 : 278;
+    private double WindowHeight => CardHeight + 16;
 
     private readonly Func<ReviewAction, Task> _recordActionAsync;
     private readonly SpeechService _speech = new();
@@ -96,7 +96,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Width = CardWidth,
             Height = CardHeight,
-            Margin = new Thickness(10),
+            Margin = new Thickness(8),
             Background = Brush("#2A2225"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(14),
@@ -128,7 +128,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
         var body = new Grid
         {
-            Margin = new Thickness(22, 16, 18, 16)
+            Margin = new Thickness(18, 13, 14, 13)
         };
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -167,7 +167,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildTopStrip()
     {
-        var grid = new Grid { Height = 16 };
+        var grid = new Grid { Height = 12 };
         var track = new Border
         {
             Height = 3,
@@ -211,14 +211,14 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildHeader()
     {
-        var grid = new Grid { Margin = new Thickness(0, _compact ? 4 : 8, 0, _compact ? 5 : 10), Cursor = Cursors.SizeAll };
+        var grid = new Grid { Margin = new Thickness(0, _compact ? 3 : 6, 0, _compact ? 4 : 7), Cursor = Cursors.SizeAll };
         grid.MouseLeftButtonDown += Header_MouseLeftButtonDown;
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetRow(grid, 1);
 
         var copy = new StackPanel { Orientation = Orientation.Vertical };
-        var chips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+        var chips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 6) };
         chips.Children.Add(BuildChip("TOEFL Review", "#5B3333"));
         chips.Children.Add(BuildChip(BuildSourceText(_word), "#3A3033", new Thickness(8, 0, 0, 0)));
 
@@ -228,9 +228,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Text = _word.Term,
             Foreground = Brushes.White,
             FontFamily = new FontFamily("Segoe UI Variable Display, Segoe UI"),
-            FontSize = _compact ? 28 : 34,
+            FontSize = _compact ? 26 : 31,
             FontWeight = FontWeights.SemiBold,
-            LineHeight = 38,
+            LineHeight = 35,
             TextTrimming = TextTrimming.CharacterEllipsis
         });
         copy.Children.Add(new TextBlock
@@ -238,7 +238,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Text = $"{_word.PartOfSpeech}  {_word.Pronunciation}".Trim(),
             Foreground = Brush("#D8CBCF"),
             FontSize = 13,
-            Margin = new Thickness(0, 6, 0, 0),
+            Margin = new Thickness(0, 4, 0, 0),
             TextTrimming = TextTrimming.CharacterEllipsis
         });
         grid.Children.Add(copy);
@@ -262,8 +262,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Background = Brush("#34282C"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(8),
-            Padding = new Thickness(16, 12, 16, 12),
-            Margin = new Thickness(0, 0, 0, 12)
+            Padding = new Thickness(14, 10, 14, 10),
+            Margin = new Thickness(0, 0, 0, 9)
         };
         Grid.SetRow(panel, 2);
 
@@ -273,10 +273,10 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Text = _word.ShortMeaning ?? "",
             Foreground = Brushes.White,
             FontSize = 15,
-            LineHeight = 22,
+            LineHeight = 20,
             TextWrapping = TextWrapping.Wrap,
             VerticalAlignment = VerticalAlignment.Top,
-            MaxHeight = _compact ? 48 : 66,
+            MaxHeight = _compact ? 42 : 58,
             TextTrimming = TextTrimming.CharacterEllipsis
         });
         if (!_compact && _word.ExampleSentences.FirstOrDefault() is { } example)
@@ -286,9 +286,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
                 Text = $"Example: {example}",
                 Foreground = Brush("#C7B9BD"),
                 FontSize = 12,
-                Margin = new Thickness(0, 7, 0, 0),
+                Margin = new Thickness(0, 5, 0, 0),
                 TextWrapping = TextWrapping.Wrap,
-                MaxHeight = 38,
+                MaxHeight = 32,
                 TextTrimming = TextTrimming.CharacterEllipsis
             });
         }
@@ -300,7 +300,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildActions()
     {
-        var grid = new Grid { Height = 42 };
+        var grid = new Grid { Height = 38 };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -361,8 +361,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var button = new Border
         {
-            Height = 38,
-            Margin = new Thickness(column == 0 ? 0 : 8, 0, 0, 0),
+            Height = 34,
+            Margin = new Thickness(column == 0 ? 0 : 6, 0, 0, 0),
             Background = Brush(background),
             BorderBrush = Brush(stroke),
             BorderThickness = new Thickness(1),
@@ -387,16 +387,16 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Text = icon,
             FontFamily = new FontFamily("Segoe Fluent Icons"),
-            FontSize = 14,
+            FontSize = 13,
             Foreground = foreground,
-            Margin = new Thickness(0, 0, 7, 0),
+            Margin = new Thickness(0, 0, 5, 0),
             VerticalAlignment = VerticalAlignment.Center
         });
         stack.Children.Add(new TextBlock
         {
             Text = label,
             Foreground = foreground,
-            FontSize = 14,
+            FontSize = 13,
             VerticalAlignment = VerticalAlignment.Center
         });
         return stack;
@@ -406,9 +406,9 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
     {
         var button = new Border
         {
-            Width = 44,
-            Height = 44,
-            Margin = new Thickness(14, 0, 0, 0),
+            Width = 40,
+            Height = 40,
+            Margin = new Thickness(12, 0, 0, 0),
             Background = Brush("#3A3033"),
             CornerRadius = new CornerRadius(6),
             Cursor = Cursors.Hand,
@@ -436,7 +436,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Width = CardWidth,
             Height = CardHeight,
-            Margin = new Thickness(10),
+            Margin = new Thickness(8),
             Background = Brush("#CC2A2225"),
             CornerRadius = new CornerRadius(14),
             Visibility = Visibility.Collapsed
@@ -489,7 +489,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Background = Brush(background),
             CornerRadius = new CornerRadius(12),
             Margin = margin ?? new Thickness(0),
-            Padding = new Thickness(10, 5, 10, 5),
+            Padding = new Thickness(9, 4, 9, 4),
             Child = new TextBlock
             {
                 Text = text,
