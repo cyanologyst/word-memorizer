@@ -6,16 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded"
-    SizeChanged="Page_SizeChanged">
+    Loaded="Page_Loaded">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <Grid x:Name="DashboardLayout" Padding="24,18,24,24" ColumnSpacing="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition x:Name="DetailsColumn" Width="310" />
-            </Grid.ColumnDefinitions>
-
+        <Grid Padding="24,18,24,24">
             <StackPanel Spacing="14">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
@@ -54,7 +48,6 @@
                                 </StackPanel>
                             </Button>
                             <CommandBar Background="Transparent" DefaultLabelPosition="Collapsed" IsDynamicOverflowEnabled="False" HorizontalAlignment="Right">
-                                <AppBarButton Icon="Volume" Label="Listen" AutomationProperties.Name="Listen to current word" Click="SpeakButton_Click" />
                                 <AppBarButton Icon="Pin" Label="Mini widget" AutomationProperties.Name="Open floating mini widget" Click="MiniButton_Click" />
                                 <AppBarButton Icon="Pause" Label="Pause" AutomationProperties.Name="Pause reminders for 30 minutes" Click="PauseQuickButton_Click" />
                                 <AppBarButton Icon="Refresh" Label="Refresh" AutomationProperties.Name="Refresh dashboard" Click="RefreshButton_Click" />
@@ -100,55 +93,6 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-
-                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
-                    <Grid ColumnSpacing="22">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="220" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Current review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="WordText" FontSize="44" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                            <TextBlock x:Name="WordMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="MeaningText" FontSize="17" TextWrapping="WrapWholeWords" MaxLines="3" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Padding="9,5" Background="{StaticResource PremiumLayerBrush}" CornerRadius="12">
-                                    <TextBlock x:Name="SourceChipText" FontSize="12" />
-                                </Border>
-                                <Border Padding="9,5" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="12">
-                                    <TextBlock x:Name="AttentionChipText" FontSize="12" Text="Due for review" />
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Spacing="9" VerticalAlignment="Center">
-                            <Button x:Name="KnowButton" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" Click="KnowButton_Click">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE73E;" />
-                                    <TextBlock Text="Know" />
-                                </StackPanel>
-                            </Button>
-                            <Button x:Name="LaterButton" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" Click="LaterButton_Click">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE916;" />
-                                    <TextBlock Text="Review Later" />
-                                </StackPanel>
-                            </Button>
-                            <Button x:Name="SkipButton" Style="{StaticResource DangerActionButtonStyle}" HorizontalAlignment="Stretch" Click="SkipButton_Click">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE711;" />
-                                    <TextBlock Text="Skip" />
-                                </StackPanel>
-                            </Button>
-                            <Button x:Name="DetailsButton" HorizontalAlignment="Stretch" AutomationProperties.Name="Toggle word details panel" Click="DetailsButton_Click">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE946;" />
-                                    <TextBlock x:Name="DetailsButtonText" Text="Hide Details" />
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
 
                 <Grid ColumnSpacing="18">
                     <Grid.ColumnDefinitions>
@@ -202,58 +146,6 @@
                 </Grid>
             </StackPanel>
 
-            <Border x:Name="DetailsPane" Grid.Column="1" Padding="18" Style="{StaticResource PremiumPanelStyle}">
-                <StackPanel Spacing="14">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Word details" Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <Button Grid.Column="1" ToolTipService.ToolTip="Listen to pronunciation" Click="SpeakButton_Click">
-                            <FontIcon Glyph="&#xE767;" />
-                        </Button>
-                    </Grid>
-                    <TextBlock x:Name="DetailWordText" FontSize="36" FontWeight="SemiBold" TextWrapping="WrapWholeWords" />
-                    <TextBlock x:Name="DetailMetaText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
-                    <TextBlock x:Name="DetailMeaningText" TextWrapping="WrapWholeWords" />
-                    <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
-                    <TextBlock Text="Source" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock x:Name="DetailSourceText" TextWrapping="WrapWholeWords" />
-                    <TextBlock Text="Review stats" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <Grid ColumnSpacing="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Border Padding="10" Style="{StaticResource PremiumLayerStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="DetailKnownText" FontSize="22" FontWeight="SemiBold" />
-                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Known" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="1" Padding="10" Style="{StaticResource PremiumLayerStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="DetailLaterText" FontSize="22" FontWeight="SemiBold" />
-                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Later" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="2" Padding="10" Style="{StaticResource PremiumLayerStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="DetailSeenText" FontSize="22" FontWeight="SemiBold" />
-                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Seen" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                    <Button HorizontalAlignment="Stretch" Click="ShowFullDetailsButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE946;" />
-                            <TextBlock Text="Open rich details" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Border>
         </Grid>
     </ScrollViewer>
 </Page>

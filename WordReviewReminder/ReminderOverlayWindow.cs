@@ -1,8 +1,11 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shell;
 using System.Windows.Threading;
 using WordReviewReminder.Core;
 using WordReviewReminder.Services;
@@ -11,10 +14,18 @@ namespace WordReviewReminder;
 
 public sealed class ReminderOverlayWindow : System.Windows.Window
 {
-    private const double WindowWidth = 510;
+    private const double WindowWidth = 494;
     private const double CardWidth = 494;
     private double CardHeight => _compact ? 238 : 278;
-    private double WindowHeight => CardHeight + 16;
+    private double WindowHeight => CardHeight;
+
+    private const int DwmUseImmersiveDarkMode = 20;
+    private const int DwmWindowCornerPreference = 33;
+    private const int DwmBorderColor = 34;
+    private const int DwmSystemBackdropType = 38;
+    private const int DwmWindowCornerRound = 2;
+    private const int DwmSystemBackdropTransientWindow = 3;
+    private const int DwmColorNone = unchecked((int)0xFFFFFFFE);
 
     private readonly Func<ReviewAction, Task> _recordActionAsync;
     private readonly SpeechService _speech = new();
@@ -42,7 +53,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         _snoozeAsync = snoozeAsync;
         _compact = compact;
 
-        AllowsTransparency = true;
+        AllowsTransparency = false;
         Background = Brushes.Transparent;
         ResizeMode = ResizeMode.NoResize;
         ShowInTaskbar = false;
@@ -52,8 +63,17 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         WindowStyle = WindowStyle.None;
         Width = WindowWidth;
         Height = WindowHeight;
+        WindowChrome.SetWindowChrome(this, new WindowChrome
+        {
+            CaptionHeight = 0,
+            CornerRadius = new CornerRadius(0),
+            GlassFrameThickness = new Thickness(-1),
+            ResizeBorderThickness = new Thickness(0),
+            UseAeroCaptionButtons = false
+        });
         Content = BuildCard();
         KeyDown += Window_KeyDown;
+        SourceInitialized += (_, _) => EnableAcrylicBackdrop();
 
         Loaded += (_, _) =>
         {
@@ -95,8 +115,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Width = CardWidth,
             Height = CardHeight,
-            Margin = new Thickness(8),
-            Background = Brush("#E82A2225"),
+            Margin = new Thickness(0),
+            Background = Brush("#B82A2225"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(14),
             SnapsToDevicePixels = true,
@@ -415,7 +435,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Width = CardWidth,
             Height = CardHeight,
-            Margin = new Thickness(8),
+            Margin = new Thickness(0),
             Background = Brush("#CC2A2225"),
             CornerRadius = new CornerRadius(14),
             Visibility = Visibility.Collapsed
@@ -598,6 +618,42 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             ? Math.Clamp(preferredTop.Value, workArea.Top, Math.Max(workArea.Top, workArea.Bottom - Height))
             : workArea.Bottom - Height - 22;
     }
+
+    private void EnableAcrylicBackdrop()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        if (HwndSource.FromHwnd(handle) is HwndSource source)
+        {
+            source.CompositionTarget.BackgroundColor = Colors.Transparent;
+        }
+
+        var margins = new DwmMargins { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+        _ = DwmExtendFrameIntoClientArea(handle, ref margins);
+        SetDwmAttribute(handle, DwmUseImmersiveDarkMode, 1);
+        SetDwmAttribute(handle, DwmWindowCornerPreference, DwmWindowCornerRound);
+        SetDwmAttribute(handle, DwmBorderColor, DwmColorNone);
+        SetDwmAttribute(handle, DwmSystemBackdropType, DwmSystemBackdropTransientWindow);
+    }
+
+    private static void SetDwmAttribute(nint handle, int attribute, int value)
+    {
+        _ = DwmSetWindowAttribute(handle, attribute, ref value, sizeof(int));
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DwmMargins
+    {
+        public int Left;
+        public int Right;
+        public int Top;
+        public int Bottom;
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmExtendFrameIntoClientArea(nint windowHandle, ref DwmMargins margins);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(nint windowHandle, int attribute, ref int value, int valueSize);
 
     private static SolidColorBrush Brush(string color)
     {
