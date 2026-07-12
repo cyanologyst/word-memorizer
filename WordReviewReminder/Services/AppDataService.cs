@@ -5,6 +5,10 @@ namespace WordReviewReminder.Services;
 public sealed class AppDataService
 {
     private readonly ReviewScheduler _scheduler = new();
+    private readonly SemaphoreSlim _eventCacheGate = new(1, 1);
+    private List<ReviewEvent>? _allEventsCache;
+    private long _cachedLogLength = -1;
+    private DateTime _cachedLogWriteUtc = DateTime.MinValue;
     private const int DailyGoal = 20;
 
     public AppDataService()
@@ -126,6 +130,9 @@ public sealed class AppDataService
 
     public async Task InitializeAsync()
     {
+        _allEventsCache = null;
+        _cachedLogLength = -1;
+        _cachedLogWriteUtc = DateTime.MinValue;
         Store.EnsureCreated();
         var seedDirectory = Path.Combine(AppContext.BaseDirectory, "Data", "Wordlists");
         await Store.SeedWordListsAsync(seedDirectory);
@@ -211,7 +218,7 @@ public sealed class AppDataService
         await Store.SaveProgressAsync(Progress);
 
         var list = FindListForWord(word);
-        await LogService.AppendAsync(new ReviewEvent
+        var reviewEvent = new ReviewEvent
         {
             Timestamp = now,
             WordListId = list?.Id ?? "",
@@ -219,9 +226,15 @@ public sealed class AppDataService
             Term = word.Term,
             Action = action,
             ResponseSeconds = Math.Max(0, responseSeconds)
-        });
+        };
+        await LogService.AppendAsync(reviewEvent);
+        await UpdateEventCacheAfterAppendAsync(reviewEvent);
 
-        await RefreshAsync();
+        RecentEvents = new[] { reviewEvent }
+            .Concat(RecentEvents)
+            .OrderByDescending(review => review.Timestamp)
+            .Take(2000)
+            .ToList();
         await EvaluateAchievementsAsync(raiseEvents: true);
     }
 
@@ -267,7 +280,7 @@ public sealed class AppDataService
 
     private async Task EvaluateAchievementsAsync(bool raiseEvents)
     {
-        var allEvents = await LogService.ReadAllAsync();
+        var allEvents = await GetAllEventsCachedAsync();
         var evaluation = AchievementEvaluator.Evaluate(
             AchievementState,
             allEvents,
@@ -399,8 +412,49 @@ public sealed class AppDataService
 
     public async Task<LearningAnalyticsSnapshot> GetLearningAnalyticsAsync(int rangeDays)
     {
-        var events = await LogService.ReadAllAsync();
+        var events = await GetAllEventsCachedAsync();
         return LearningAnalytics.Build(events, WordLists.Where(list => list.IsEnabled).ToList(), rangeDays, DateTimeOffset.Now);
+    }
+
+    private async Task<IReadOnlyList<ReviewEvent>> GetAllEventsCachedAsync()
+    {
+        await _eventCacheGate.WaitAsync();
+        try
+        {
+            var info = new FileInfo(Store.LogsPath);
+            var length = info.Exists ? info.Length : 0;
+            var writeUtc = info.Exists ? info.LastWriteTimeUtc : DateTime.MinValue;
+            if (_allEventsCache is not null && length == _cachedLogLength && writeUtc == _cachedLogWriteUtc)
+            {
+                return _allEventsCache;
+            }
+
+            _allEventsCache = [.. await LogService.ReadAllAsync()];
+            info.Refresh();
+            _cachedLogLength = info.Exists ? info.Length : 0;
+            _cachedLogWriteUtc = info.Exists ? info.LastWriteTimeUtc : DateTime.MinValue;
+            return _allEventsCache;
+        }
+        finally
+        {
+            _eventCacheGate.Release();
+        }
+    }
+
+    private async Task UpdateEventCacheAfterAppendAsync(ReviewEvent reviewEvent)
+    {
+        await _eventCacheGate.WaitAsync();
+        try
+        {
+            _allEventsCache?.Add(reviewEvent);
+            var info = new FileInfo(Store.LogsPath);
+            _cachedLogLength = info.Exists ? info.Length : 0;
+            _cachedLogWriteUtc = info.Exists ? info.LastWriteTimeUtc : DateTime.MinValue;
+        }
+        finally
+        {
+            _eventCacheGate.Release();
+        }
     }
 
     public async Task<WordEntry> AddPersonalWordAsync(string term, WordEnrichment? enrichment = null)

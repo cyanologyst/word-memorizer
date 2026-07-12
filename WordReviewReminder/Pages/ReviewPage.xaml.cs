@@ -224,7 +224,6 @@ public sealed partial class ReviewPage : Page
 
     private async Task LoadNextAsync()
     {
-        await App.Data.RefreshAsync();
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now, _options, _reviewedWordIds);
         if (_currentWord is null)
         {
