@@ -210,7 +210,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Logs page, `ReviewLogService`, tests.
 - **Risk:** Medium; pagination must preserve chronological correctness.
 - **Acceptance criteria:** Combined filters and no-results states work; large logs remain responsive; export names the destination and scope.
-- **Status:** Not started
+- **Status:** In progress
 
 #### P2.5 Organize Settings And Support
 
@@ -255,11 +255,12 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **2026-07-13 Mistake Lab pass:** Moved difficulty qualification and human-readable reasons into tested domain logic. Added combined search, urgency filtering, sorting by urgency/misses/lapses/last review/alphabetical order, reason text, and double-click details. Debug x64 build succeeds with zero warnings and all 17 tests pass.
 - **2026-07-13 Wordlists workspace pass:** Added result counts, part-of-speech filtering, four sort modes, extended multi-selection, compact selected-word actions, contextual details/edit/delete commands, review metadata, list export, reversible list and bulk-word deletion, busy feedback, and an import preview with explicit duplicate handling. Duplicate list IDs can no longer silently overwrite local data. A cold start restored directly to Wordlists remains open and responsive after fixing an initialization-order crash. Debug x64 build succeeds with zero warnings and all 19 tests pass; final responsive visual QA remains pending.
 - **2026-07-13 analytics and activity pass:** Added a tested, time-zone-aware analytics domain model for 7/30/90-day ranges, review volume, recall, first versus repeat work, difficult responses, consistency, best day, per-list comparison, and event-derived mastery movement. Statistics now explains those measures and exposes honest no-data states. Activity now provides 4/8/13-week ranges, month and weekday axes, review counts plus recall details, keyboard-focusable days, compact summaries, and horizontal overflow instead of clipping. Both pages survive direct cold starts with no fatal logs. Debug x64 build succeeds with zero warnings and all 22 tests pass; visual width and keyboard QA remain pending.
+- **2026-07-13 review-history pass:** Replaced page-level full-file loading with a tested streaming, bounded-memory query API and a paged 2,000-event recent cache. Logs now supports debounced search, result/list/date filters, newest/oldest/alphabetical sorting, date grouping, 100-row pages, response-time context, word details, filtered JSONL export, precise result feedback, and responsive filter wrapping. Malformed JSONL lines are skipped instead of crashing history. The page survives a direct cold start with no fatal logs. Debug x64 build succeeds with zero warnings and all 24 tests pass; final visual and keyboard QA remain pending.
 
 ## Current Implementation Focus
 
 1. Resume visual QA when Windows inspection is available and exercise Wordlists at normal/minimum widths plus the reveal/scoring guard and empty/no-results states.
 2. Finish P0 operation failure handling and the accessibility/high-contrast audit.
-3. Finish visual QA for Wordlists, Statistics, and Activity, then build searchable, paged review history.
+3. Finish visual QA for Wordlists, Statistics, Activity, and Logs, then organize Settings and support diagnostics.
 4. Continue replacing page-local values with shared design tokens and reusable styles.
 5. Stabilize shell page caching and reduced-motion transitions.

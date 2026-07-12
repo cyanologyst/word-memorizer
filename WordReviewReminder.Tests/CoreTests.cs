@@ -366,6 +366,70 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public async Task ReviewLogQueriesCombinedFiltersAndPagesNewestFirst()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var service = new ReviewLogService(Path.Combine(root, "review-log.jsonl"));
+            var start = new DateTimeOffset(2026, 7, 1, 12, 0, 0, TimeSpan.Zero);
+            for (var index = 0; index < 12; index++)
+            {
+                await service.AppendAsync(NewReview(
+                    index % 2 == 0 ? $"alpha-{index}" : $"beta-{index}",
+                    index % 3 == 0 ? ReviewAction.Later : ReviewAction.Known,
+                    start.AddDays(index),
+                    index < 8 ? "core" : "extra"));
+            }
+
+            var page = await service.QueryAsync(new ReviewLogQuery
+            {
+                Search = "alpha",
+                WordListId = "core",
+                From = start.AddDays(2),
+                To = start.AddDays(7).AddHours(1),
+                PageSize = 2
+            });
+
+            Assert.Equal(3, page.TotalCount);
+            Assert.Equal(2, page.Items.Count);
+            Assert.True(page.HasNext);
+            Assert.True(page.Items[0].Timestamp > page.Items[1].Timestamp);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ReviewLogExportHonorsTheActiveQuery()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var service = new ReviewLogService(Path.Combine(root, "review-log.jsonl"));
+            await service.AppendAsync(NewReview("one", ReviewAction.Known, DateTimeOffset.UtcNow));
+            await service.AppendAsync(NewReview("two", ReviewAction.Skipped, DateTimeOffset.UtcNow));
+            var destination = Path.Combine(root, "filtered.jsonl");
+
+            var count = await service.ExportAsync(
+                new ReviewLogQuery { Action = ReviewAction.Known },
+                destination);
+
+            Assert.Equal(1, count);
+            Assert.Single(await File.ReadAllLinesAsync(destination));
+            Assert.Contains("one", await File.ReadAllTextAsync(destination));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task SettingsRoundTripLastVisitedPage()
     {
         var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));

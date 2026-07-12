@@ -139,10 +139,7 @@ public sealed class AppDataService
     public async Task RefreshAsync()
     {
         WordLists = [.. await Store.LoadWordListsAsync()];
-        RecentEvents = (await LogService.ReadAllAsync())
-            .OrderByDescending(review => review.Timestamp)
-            .Take(2000)
-            .ToList();
+        RecentEvents = (await LogService.QueryAsync(new ReviewLogQuery { PageSize = 2000 })).Items;
     }
 
     public WordEntry? PickNextWord(DateTimeOffset now)
