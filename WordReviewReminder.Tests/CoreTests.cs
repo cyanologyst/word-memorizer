@@ -1,4 +1,5 @@
 using WordReviewReminder.Core;
+using System.IO.Compression;
 
 namespace WordReviewReminder.Tests;
 
@@ -299,6 +300,60 @@ public sealed class CoreTests
             {
                 Directory.Delete(root, recursive: true);
             }
+        }
+    }
+
+    [Fact]
+    public async Task BackupRoundTripRestoresSettingsAndWordlists()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        var sourceRoot = Path.Combine(root, "source");
+        var targetRoot = Path.Combine(root, "target");
+        var archivePath = Path.Combine(root, "backup.zip");
+        try
+        {
+            var sourceStore = new LocalDataStore(sourceRoot);
+            await sourceStore.SaveSettingsAsync(new UserSettings { DailyReviewGoal = 42 });
+            await sourceStore.SaveWordListAsync(NewList(new WordEntry("one", "One", null, null, null, null, 1, null)));
+            await new BackupService(sourceStore).CreateAsync(archivePath);
+
+            var targetStore = new LocalDataStore(targetRoot);
+            await new BackupService(targetStore).RestoreAsync(archivePath);
+
+            Assert.Equal(42, (await targetStore.LoadSettingsAsync()).DailyReviewGoal);
+            Assert.Equal("One", (await targetStore.LoadWordListsAsync()).Single().Words.Single().Term);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task BackupRestoreRejectsPathTraversal()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var archivePath = Path.Combine(root, "unsafe.zip");
+        try
+        {
+            using (var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+            {
+                var entry = archive.CreateEntry("../escape.txt");
+                await using var writer = new StreamWriter(entry.Open());
+                await writer.WriteAsync("unsafe");
+            }
+
+            var store = new LocalDataStore(Path.Combine(root, "target"));
+            await Assert.ThrowsAsync<InvalidDataException>(() => new BackupService(store).RestoreAsync(archivePath));
+            Assert.False(File.Exists(Path.Combine(root, "escape.txt")));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
         }
     }
 

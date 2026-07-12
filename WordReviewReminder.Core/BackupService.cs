@@ -1,7 +1,6 @@
 using System.IO.Compression;
-using WordReviewReminder.Core;
 
-namespace WordReviewReminder.Services;
+namespace WordReviewReminder.Core;
 
 public sealed class BackupService
 {
@@ -35,7 +34,8 @@ public sealed class BackupService
                 foreach (var entry in archive.Entries)
                 {
                     var destination = Path.GetFullPath(Path.Combine(staging, entry.FullName));
-                    if (!destination.StartsWith(Path.GetFullPath(staging), StringComparison.OrdinalIgnoreCase))
+                    var stagingRoot = Path.GetFullPath(staging) + Path.DirectorySeparatorChar;
+                    if (!destination.StartsWith(stagingRoot, StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidDataException("The backup contains an unsafe path.");
                     }
