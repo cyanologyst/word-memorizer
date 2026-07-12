@@ -69,6 +69,7 @@ public sealed record UserSettings
     public string? VoiceName { get; set; }
     public double SpeechRate { get; set; } = 1.0;
     public int DefaultSessionSize { get; set; } = 20;
+    public int DailyReviewGoal { get; set; } = 20;
     public int LastSessionGoal { get; set; } = 20;
     public string? LastSessionWordListId { get; set; }
     public bool LastSessionDifficultOnly { get; set; }

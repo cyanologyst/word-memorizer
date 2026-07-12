@@ -55,6 +55,7 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
                                     <StackPanel>
@@ -89,6 +90,12 @@
                                         <ComboBoxItem Content="Due first" />
                                         <ComboBoxItem Content="Random" />
                                     </ComboBox>
+
+                                    <StackPanel Grid.Row="4">
+                                        <TextBlock Text="Daily goal" />
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Reviews to complete each day" />
+                                    </StackPanel>
+                                    <NumberBox x:Name="DailyGoalBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Width="150" HorizontalAlignment="Left" Minimum="1" Maximum="500" SmallChange="5" SpinButtonPlacementMode="Inline" ValueChanged="DefaultSessionSizeBox_ValueChanged" />
                                 </Grid>
                             </StackPanel>
                         </Border>

@@ -61,6 +61,7 @@ public sealed partial class SettingsPage : Page
         SoundToggle.IsOn = settings.SoundEnabled;
         DictionaryLookupToggle.IsOn = settings.DictionaryLookupEnabled;
         DefaultSessionSizeBox.Value = settings.DefaultSessionSize;
+        DailyGoalBox.Value = settings.DailyReviewGoal;
         VoiceBox.ItemsSource = SpeechSynthesizer.AllVoices.Select(voice => voice.DisplayName).ToList();
         VoiceBox.SelectedItem = settings.VoiceName ?? SpeechSynthesizer.DefaultVoice?.DisplayName;
         SpeechRateSlider.Value = settings.SpeechRate;
@@ -237,6 +238,7 @@ public sealed partial class SettingsPage : Page
             VoiceName = VoiceBox.SelectedItem?.ToString(),
             SpeechRate = SpeechRateSlider.Value,
             DefaultSessionSize = Math.Max(5, (int)DefaultSessionSizeBox.Value),
+            DailyReviewGoal = Math.Clamp((int)DailyGoalBox.Value, 1, 500),
             LastSessionGoal = sessionPreferences.LastSessionGoal,
             LastSessionWordListId = sessionPreferences.LastSessionWordListId,
             LastSessionDifficultOnly = sessionPreferences.LastSessionDifficultOnly,
@@ -271,7 +273,7 @@ public sealed partial class SettingsPage : Page
     {
         var query = sender.Text.Trim();
         var visibleCount = 0;
-        visibleCount += SetSectionVisibility(ReviewSection, query, "review reminder interval notification mode popup duration selection session size");
+        visibleCount += SetSectionVisibility(ReviewSection, query, "review reminder interval notification mode popup duration selection session size daily goal target");
         visibleCount += SetSectionVisibility(NotificationsSection, query, "notification quiet hours schedule pause start end");
         visibleCount += SetSectionVisibility(SystemSection, query, "windows startup shortcut hotkey clipboard fullscreen sound default session");
         visibleCount += SetSectionVisibility(AudioSection, query, "audio pronunciation voice speech speaking rate test");

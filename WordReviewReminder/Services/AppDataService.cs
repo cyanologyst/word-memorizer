@@ -9,7 +9,6 @@ public sealed class AppDataService
     private List<ReviewEvent>? _allEventsCache;
     private long _cachedLogLength = -1;
     private DateTime _cachedLogWriteUtc = DateTime.MinValue;
-    private const int DailyGoal = 20;
 
     public AppDataService()
     {
@@ -50,9 +49,9 @@ public sealed class AppDataService
         }
     }
 
-    public int DailyGoalCount => DailyGoal;
+    public int DailyGoalCount => Math.Clamp(Settings.DailyReviewGoal, 1, 500);
 
-    public double DailyGoalProgress => Math.Min(100, ReviewedToday * 100.0 / DailyGoal);
+    public double DailyGoalProgress => Math.Min(100, ReviewedToday * 100.0 / DailyGoalCount);
 
     public int ReviewStreakDays
     {
@@ -81,7 +80,7 @@ public sealed class AppDataService
             .Select(date =>
             {
                 var count = RecentEvents.Count(review => review.Timestamp.ToLocalTime().Date == date);
-                return new ActivityDay(date.ToString("ddd"), count, Math.Min(100, count * 100.0 / DailyGoal));
+                return new ActivityDay(date.ToString("ddd"), count, Math.Min(100, count * 100.0 / DailyGoalCount));
             })
             .ToList();
     }

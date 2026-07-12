@@ -468,7 +468,8 @@ public sealed class CoreTests
                 LastSessionWordListId = "core",
                 LastSessionDifficultOnly = true,
                 LastSessionTimed = true,
-                LastSessionFocusMode = false
+                LastSessionFocusMode = false,
+                DailyReviewGoal = 35
             };
 
             await store.SaveSettingsAsync(settings);
@@ -483,6 +484,7 @@ public sealed class CoreTests
             Assert.True(loaded.LastSessionDifficultOnly);
             Assert.True(loaded.LastSessionTimed);
             Assert.False(loaded.LastSessionFocusMode);
+            Assert.Equal(35, loaded.DailyReviewGoal);
         }
         finally
         {
