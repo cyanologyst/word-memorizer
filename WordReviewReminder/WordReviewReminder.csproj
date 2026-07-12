@@ -39,6 +39,7 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
     <Content Include="Assets\Achievements\*.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Data\Wordlists\*.wordlist.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\docs\third-party-notices.md" Link="Docs\third-party-notices.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

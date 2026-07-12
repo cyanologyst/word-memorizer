@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
         <StackPanel Padding="{StaticResource StandardPagePadding}" Spacing="14">
@@ -32,11 +33,15 @@
                 </Grid>
             </Border>
 
-            <Grid ColumnSpacing="14">
+            <Grid x:Name="InfoGrid" ColumnSpacing="14" RowSpacing="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="InfoColumn2" Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Wordlists and documentation" />
@@ -57,7 +62,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                <Border x:Name="LocalDataCard" Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Local data" />
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Settings, progress, wordlists, achievements, and review history remain on this PC." TextWrapping="WrapWholeWords" />
@@ -68,6 +73,50 @@
                                 <TextBlock Text="Open folder" />
                             </StackPanel>
                         </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="SupportGrid" ColumnSpacing="14" RowSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="SupportColumn2" Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Privacy" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" Text="No account or cloud sync is required. Wordlists, settings, progress, achievements, and review history stay in your local data folder." />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" Text="When online dictionary enrichment is enabled, only the word being looked up is sent to the configured public dictionary service." />
+                    </StackPanel>
+                </Border>
+                <Border x:Name="DiagnosticsCard" Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Support and diagnostics" />
+                        <TextBlock x:Name="DiagnosticsSummaryText" Style="{StaticResource PremiumCaptionTextStyle}" TextWrapping="WrapWholeWords" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button AutomationProperties.Name="Copy application diagnostics" Click="CopyDiagnosticsButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8C8;" />
+                                    <TextBlock Text="Copy diagnostics" />
+                                </StackPanel>
+                            </Button>
+                            <Button AutomationProperties.Name="Open support issues on GitHub" Click="SupportButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE897;" />
+                                    <TextBlock Text="Support" />
+                                </StackPanel>
+                            </Button>
+                            <Button AutomationProperties.Name="Open third-party license notices" Click="LicensesButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8A5;" />
+                                    <TextBlock Text="Licenses" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>

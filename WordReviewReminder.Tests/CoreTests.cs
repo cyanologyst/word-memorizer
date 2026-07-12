@@ -436,12 +436,21 @@ public sealed class CoreTests
         try
         {
             var store = new LocalDataStore(root);
-            var settings = new UserSettings { LastPageTag = "statistics" };
+            var settings = new UserSettings
+            {
+                LastPageTag = "statistics",
+                DictionaryLookupEnabled = false,
+                ReminderIntervalMinutes = 45,
+                SoundEnabled = true
+            };
 
             await store.SaveSettingsAsync(settings);
             var loaded = await store.LoadSettingsAsync();
 
             Assert.Equal("statistics", loaded.LastPageTag);
+            Assert.False(loaded.DictionaryLookupEnabled);
+            Assert.Equal(45, loaded.ReminderIntervalMinutes);
+            Assert.True(loaded.SoundEnabled);
         }
         finally
         {

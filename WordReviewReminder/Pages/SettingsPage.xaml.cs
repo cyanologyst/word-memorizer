@@ -24,8 +24,12 @@ public sealed partial class SettingsPage : Page
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        PopulateControls(App.Data.Settings);
+    }
+
+    private void PopulateControls(UserSettings settings)
+    {
         _loading = true;
-        var settings = App.Data.Settings;
         IntervalBox.Value = settings.ReminderIntervalMinutes;
         IntervalSlider.Value = settings.ReminderIntervalMinutes;
         NotificationModeBox.SelectedIndex = settings.NotificationMode switch
@@ -46,10 +50,13 @@ public sealed partial class SettingsPage : Page
         ClipboardQuickAddToggle.IsOn = settings.ClipboardQuickAddEnabled;
         CompactFullscreenToggle.IsOn = settings.CompactNotificationsWhenFullscreen;
         SoundToggle.IsOn = settings.SoundEnabled;
+        DictionaryLookupToggle.IsOn = settings.DictionaryLookupEnabled;
         DefaultSessionSizeBox.Value = settings.DefaultSessionSize;
         VoiceBox.ItemsSource = SpeechSynthesizer.AllVoices.Select(voice => voice.DisplayName).ToList();
         VoiceBox.SelectedItem = settings.VoiceName ?? SpeechSynthesizer.DefaultVoice?.DisplayName;
         SpeechRateSlider.Value = settings.SpeechRate;
+        var accessibility = new Windows.UI.ViewManagement.AccessibilitySettings();
+        AccessibilityStatusText.Text = $"Animations follow Windows and are {(_animationsEnabled ? "enabled" : "reduced")}. High contrast is {(accessibility.HighContrast ? "on" : "off")}.";
         _loading = false;
         UpdatePreview(markDirty: false);
     }
@@ -211,7 +218,7 @@ public sealed partial class SettingsPage : Page
             SelectionMode = SelectionModeBox.SelectedIndex == 1 ? ReviewSelectionMode.Random : ReviewSelectionMode.DueFirst,
             GlobalHotkeyEnabled = GlobalHotkeyToggle.IsOn,
             ClipboardQuickAddEnabled = ClipboardQuickAddToggle.IsOn,
-            DictionaryLookupEnabled = true,
+            DictionaryLookupEnabled = DictionaryLookupToggle.IsOn,
             SoundEnabled = SoundToggle.IsOn,
             CompactNotificationsWhenFullscreen = CompactFullscreenToggle.IsOn,
             VoiceName = VoiceBox.SelectedItem?.ToString(),
@@ -229,6 +236,54 @@ public sealed partial class SettingsPage : Page
         UpdatePreview(markDirty: false);
         await Task.Delay(850);
         await HideSaveBarAsync();
+    }
+
+    private void SettingsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        var query = sender.Text.Trim();
+        var visibleCount = 0;
+        visibleCount += SetSectionVisibility(ReviewSection, query, "review reminder interval notification mode popup duration selection session size");
+        visibleCount += SetSectionVisibility(NotificationsSection, query, "notification quiet hours schedule pause start end");
+        visibleCount += SetSectionVisibility(SystemSection, query, "windows startup shortcut hotkey clipboard fullscreen sound default session");
+        visibleCount += SetSectionVisibility(AudioSection, query, "audio pronunciation voice speech speaking rate test");
+        visibleCount += SetSectionVisibility(WordDetailsSection, query, "dictionary enrichment definition example accessibility animation high contrast");
+        visibleCount += SetSectionVisibility(DataSection, query, "data backup restore archive reset defaults privacy local");
+        NoSettingsResults.Visibility = visibleCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static int SetSectionVisibility(FrameworkElement section, string query, string keywords)
+    {
+        var visible = string.IsNullOrWhiteSpace(query) || keywords.Contains(query, StringComparison.OrdinalIgnoreCase);
+        section.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        return visible ? 1 : 0;
+    }
+
+    private async void ResetDefaultsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Reset settings to defaults?",
+            Content = "This prepares the original reminder, review, audio, and Windows integration preferences. Your wordlists, review history, achievements, and progress are not changed.",
+            PrimaryButtonText = "Reset settings",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        var defaults = new UserSettings
+        {
+            LastPageTag = App.Data.Settings.LastPageTag,
+            PopupLeft = App.Data.Settings.PopupLeft,
+            PopupTop = App.Data.Settings.PopupTop
+        };
+        PopulateControls(defaults);
+        StatusText.Text = "Defaults ready to save";
+        ShowSaveBar();
+        App.Feedback.Show("Defaults restored", "Review the settings, then choose Save settings to apply them.");
     }
 
     private void ShowSaveBar()
