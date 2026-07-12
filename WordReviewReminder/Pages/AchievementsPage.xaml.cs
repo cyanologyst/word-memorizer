@@ -379,6 +379,7 @@ public sealed class AchievementCardViewModel
     public string ProgressLabel => Snapshot.ProgressLabel;
     public bool IsInProgress => !Snapshot.IsUnlocked && Snapshot.ProgressPercent > 0;
     public string StatusLabel => Snapshot.IsUnlocked ? "Unlocked" : IsInProgress ? "In progress" : "Locked";
+    public string AutomationLabel => $"{Title}, {StatusLabel}, {ProgressLabel}";
     public string StateGlyph => Snapshot.IsUnlocked ? "\uE73E" : IsInProgress ? "\uE916" : "\uE72E";
     public string TierLabel => Snapshot.TierLabel;
     public bool IsUnlocked => Snapshot.IsUnlocked;

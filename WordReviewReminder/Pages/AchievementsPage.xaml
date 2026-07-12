@@ -159,7 +159,7 @@
                             Margin="0"
                             MinWidth="0"
                             Tag="{Binding}"
-                            AutomationProperties.Name="{Binding Title}"
+                            AutomationProperties.Name="{Binding AutomationLabel}"
                             AutomationProperties.HelpText="{Binding Description}"
                             Style="{StaticResource CardButtonStyle}"
                             Click="AchievementCard_Click"

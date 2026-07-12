@@ -104,7 +104,7 @@
                                         <TextBlock Text="Quiet hours" Style="{StaticResource SubtitleTextBlockStyle}" />
                                         <TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Pause reminders during a daily time window" />
                                     </StackPanel>
-                                    <ToggleSwitch x:Name="QuietHoursToggle" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="QuietHoursToggle" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Quiet hours" Toggled="PreviewControl_Changed" />
                                 </Grid>
                                 <Grid x:Name="QuietHoursFields" ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -136,15 +136,15 @@
                                         <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Spacing="2"><TextBlock Text="Start with Windows" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Launch quietly when you sign in" /></StackPanel>
-                                    <ToggleSwitch x:Name="StartWithWindowsToggle" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="StartWithWindowsToggle" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Start with Windows" Toggled="PreviewControl_Changed" />
                                     <StackPanel Grid.Row="1" Spacing="2"><TextBlock Text="Global review shortcut" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Open review from anywhere with Ctrl+Alt+R" /></StackPanel>
-                                    <ToggleSwitch x:Name="GlobalHotkeyToggle" Grid.Row="1" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="GlobalHotkeyToggle" Grid.Row="1" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Global review shortcut Ctrl Alt R" Toggled="PreviewControl_Changed" />
                                     <StackPanel Grid.Row="2" Spacing="2"><TextBlock Text="Clipboard quick-add prompts" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Offer to save copied vocabulary" /></StackPanel>
-                                    <ToggleSwitch x:Name="ClipboardQuickAddToggle" Grid.Row="2" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="ClipboardQuickAddToggle" Grid.Row="2" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Clipboard quick-add prompts" Toggled="PreviewControl_Changed" />
                                     <StackPanel Grid.Row="3" Spacing="2"><TextBlock Text="Compact fullscreen reminders" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Use a smaller card over fullscreen apps" /></StackPanel>
-                                    <ToggleSwitch x:Name="CompactFullscreenToggle" Grid.Row="3" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="CompactFullscreenToggle" Grid.Row="3" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Compact fullscreen reminders" Toggled="PreviewControl_Changed" />
                                     <StackPanel Grid.Row="4" Spacing="2"><TextBlock Text="Sound cues" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Play restrained review feedback sounds" /></StackPanel>
-                                    <ToggleSwitch x:Name="SoundToggle" Grid.Row="4" Grid.Column="1" OffContent="Silent" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="SoundToggle" Grid.Row="4" Grid.Column="1" OffContent="Silent" OnContent="On" AutomationProperties.Name="Sound cues" Toggled="PreviewControl_Changed" />
                                     <StackPanel Grid.Row="5" Spacing="2"><TextBlock Text="Default session size" /><TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Words in a new review session" /></StackPanel>
                                     <NumberBox x:Name="DefaultSessionSizeBox" Grid.Row="5" Grid.Column="1" Width="130" Minimum="5" Maximum="100" SmallChange="5" SpinButtonPlacementMode="Inline" ValueChanged="DefaultSessionSizeBox_ValueChanged" />
                                 </Grid>
@@ -183,7 +183,7 @@
                                         <TextBlock Text="Online dictionary enrichment" />
                                         <TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Look up definitions and examples when local details are incomplete" TextWrapping="WrapWholeWords" />
                                     </StackPanel>
-                                    <ToggleSwitch x:Name="DictionaryLookupToggle" Grid.Column="1" OffContent="Off" OnContent="On" Toggled="PreviewControl_Changed" />
+                                    <ToggleSwitch x:Name="DictionaryLookupToggle" Grid.Column="1" OffContent="Off" OnContent="On" AutomationProperties.Name="Online dictionary enrichment" Toggled="PreviewControl_Changed" />
                                 </Grid>
                                 <Grid ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>

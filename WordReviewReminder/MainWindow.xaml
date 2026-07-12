@@ -45,47 +45,48 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     Content="Dashboard"
-                    Tag="home">
+                    Tag="home"
+                    ToolTipService.ToolTip="Dashboard">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Review" Tag="review">
+                <NavigationViewItem Content="Review" Tag="review" ToolTipService.ToolTip="Review">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE768;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Mistake Lab" Tag="mistakes">
+                <NavigationViewItem Content="Mistake Lab" Tag="mistakes" ToolTipService.ToolTip="Mistake Lab">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7BA;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Wordlists" Tag="wordlists">
+                <NavigationViewItem Content="Wordlists" Tag="wordlists" ToolTipService.ToolTip="Wordlists">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Statistics" Tag="statistics">
+                <NavigationViewItem Content="Statistics" Tag="statistics" ToolTipService.ToolTip="Statistics">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE9D2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Activity" Tag="calendar">
+                <NavigationViewItem Content="Activity" Tag="calendar" ToolTipService.ToolTip="Activity">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE787;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AchievementsNavItem" Content="Achievements" Tag="achievements">
+                <NavigationViewItem x:Name="AchievementsNavItem" Content="Achievements" Tag="achievements" ToolTipService.ToolTip="Achievements">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7E7;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Logs" Tag="logs">
+                <NavigationViewItem Content="Logs" Tag="logs" ToolTipService.ToolTip="Logs">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE823;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="About" Tag="about">
+                <NavigationViewItem Content="About" Tag="about" ToolTipService.ToolTip="About">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xEA3A;" />
                     </NavigationViewItem.Icon>

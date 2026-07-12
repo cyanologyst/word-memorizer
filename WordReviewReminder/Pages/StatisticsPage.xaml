@@ -91,7 +91,7 @@
                     <FontIcon Glyph="&#xE9D9;" FontSize="26" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <TextBlock Style="{StaticResource EmptyStateTitleStyle}" Text="Not enough activity yet" />
                     <TextBlock MaxWidth="430" Text="Complete a review session to unlock recall trends and learning insights for this period." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" TextWrapping="WrapWholeWords" />
-                    <Button Style="{StaticResource PrimaryActionButtonStyle}" Click="StartReviewButton_Click">
+                    <Button Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Start a review session" Click="StartReviewButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE768;" />
                             <TextBlock Text="Start review" />
@@ -155,7 +155,7 @@
                             </ItemsRepeater.ItemTemplate>
                         </ItemsRepeater>
                         <TextBlock x:Name="NoMissesText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="No difficult responses in this period." Visibility="Collapsed" />
-                        <Button x:Name="PracticeDifficultButton" HorizontalAlignment="Stretch" Click="PracticeDifficultButton_Click">
+                        <Button x:Name="PracticeDifficultButton" HorizontalAlignment="Stretch" AutomationProperties.Name="Practice difficult words" Click="PracticeDifficultButton_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xE7C1;" />
                                 <TextBlock Text="Practice difficult words" />
