@@ -26,11 +26,20 @@ public sealed partial class LogsPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
+        _loaded = false;
+        var selectedListId = (WordListFilterBox.SelectedItem as WordListFilterItem)?.Id;
         await App.Data.RefreshAsync();
-        WordListFilterBox.ItemsSource = new[] { new WordListFilterItem(null, "All wordlists") }
+        var options = new[] { new WordListFilterItem(null, "All wordlists") }
             .Concat(App.Data.WordLists.Select(list => new WordListFilterItem(list.Id, list.Title)))
             .ToList();
-        WordListFilterBox.SelectedIndex = 0;
+        WordListFilterBox.ItemsSource = options;
+        WordListFilterBox.SelectedItem = options.FirstOrDefault(item =>
+            string.Equals(item.Id, selectedListId, StringComparison.OrdinalIgnoreCase));
+        if (WordListFilterBox.SelectedIndex < 0)
+        {
+            WordListFilterBox.SelectedIndex = 0;
+        }
+
         _loaded = true;
         await RefreshAsync();
     }

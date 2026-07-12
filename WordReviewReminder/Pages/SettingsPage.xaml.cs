@@ -15,6 +15,7 @@ public sealed partial class SettingsPage : Page
 {
     private bool _loading = true;
     private bool _resetSessionPreferences;
+    private bool _initialized;
     private readonly SpeechService _speech = new();
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
 
@@ -25,6 +26,12 @@ public sealed partial class SettingsPage : Page
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        if (_initialized)
+        {
+            return;
+        }
+
+        _initialized = true;
         _resetSessionPreferences = false;
         PopulateControls(App.Data.Settings);
     }
@@ -406,7 +413,8 @@ public sealed partial class SettingsPage : Page
         {
             await App.Data.BackupService.RestoreAsync(file.Path);
             await App.Data.InitializeAsync();
-            Page_Loaded(this, new RoutedEventArgs());
+            _resetSessionPreferences = false;
+            PopulateControls(App.Data.Settings);
             StatusText.Text = "Backup restored";
             App.Feedback.Success("Backup restored", "Local wordlists, progress, and settings were reloaded.");
         }
