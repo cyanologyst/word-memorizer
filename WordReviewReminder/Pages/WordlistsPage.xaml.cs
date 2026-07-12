@@ -248,7 +248,9 @@ public sealed partial class WordlistsPage : Page
         await RefreshAsync();
     }
 
-    private async void ImportButton_Click(object sender, RoutedEventArgs e)
+    private async void ImportButton_Click(object sender, RoutedEventArgs e) => await ImportWordListAsync();
+
+    public async Task ImportWordListAsync()
     {
         var picker = new FileOpenPicker();
         picker.FileTypeFilter.Add(".json");
@@ -349,7 +351,9 @@ public sealed partial class WordlistsPage : Page
         return plan.PreparedList;
     }
 
-    private async void AddWordButton_Click(object sender, RoutedEventArgs e)
+    private async void AddWordButton_Click(object sender, RoutedEventArgs e) => await AddWordAsync();
+
+    public async Task AddWordAsync()
     {
         var word = await ShowWordDialogAsync(null);
         if (word is null)

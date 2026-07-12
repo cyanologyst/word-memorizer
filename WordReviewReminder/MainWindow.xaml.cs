@@ -191,6 +191,12 @@ public sealed partial class MainWindow : Window
 
     public void NavigateTo(string tag)
     {
+        if (string.Equals(tag, "settings", StringComparison.OrdinalIgnoreCase))
+        {
+            NavView.SelectedItem = NavView.SettingsItem;
+            return;
+        }
+
         var item = FindNavigationItem(tag);
         if (item is not null)
         {
@@ -258,7 +264,11 @@ public sealed partial class MainWindow : Window
             new("Activity", "Page", async () => { NavigateTo("calendar"); await Task.CompletedTask; }),
             new("Achievements", "Page", async () => { NavigateTo("achievements"); await Task.CompletedTask; }),
             new("Logs", "Page", async () => { NavigateTo("logs"); await Task.CompletedTask; }),
+            new("Settings", "Page", async () => { NavigateTo("settings"); await Task.CompletedTask; }),
             new("Start focused review", "Command", async () => { ReviewNow(); await Task.CompletedTask; }),
+            new("Add a word", "Command", async () => await RunWordlistsCommandAsync(page => page.AddWordAsync())),
+            new("Import a wordlist", "Command", async () => await RunWordlistsCommandAsync(page => page.ImportWordListAsync())),
+            new("Keyboard shortcuts", "Help", ShowKeyboardShortcutsAsync),
             new("Pause reminders for 30 minutes", "Command", async () => { App.Data.PauseFor(TimeSpan.FromMinutes(30)); await Task.CompletedTask; })
         };
         entries.AddRange(App.Data.AllEnabledWords.Take(1000).Select(word => new PaletteEntry(
@@ -273,7 +283,7 @@ public sealed partial class MainWindow : Window
             })));
 
         var search = new AutoSuggestBox { PlaceholderText = "Search words, pages, and commands", QueryIcon = new SymbolIcon(Symbol.Find) };
-        var results = new ListView { Height = 360, SelectionMode = ListViewSelectionMode.Single, DisplayMemberPath = "Label" };
+        var results = new ListView { Height = 360, SelectionMode = ListViewSelectionMode.Single, DisplayMemberPath = "DisplayText" };
         void Filter()
         {
             var query = search.Text.Trim();
@@ -301,6 +311,50 @@ public sealed partial class MainWindow : Window
         {
             await selected.Action();
         }
+    }
+
+    private async Task RunWordlistsCommandAsync(Func<WordlistsPage, Task> action)
+    {
+        NavigateTo("wordlists");
+        await Task.Yield();
+        if (NavFrame.Content is WordlistsPage page)
+        {
+            await action(page);
+        }
+    }
+
+    private async Task ShowKeyboardShortcutsAsync()
+    {
+        var shortcuts = new[]
+        {
+            ("Ctrl+K", "Open the command palette"),
+            ("Ctrl+Alt+R", "Start review from anywhere"),
+            ("Space", "Reveal the current meaning"),
+            ("1", "Mark the revealed word Known"),
+            ("2", "Review the revealed word Later"),
+            ("3", "Skip the current word"),
+            ("Esc", "Pause or resume an active session")
+        };
+        var content = new StackPanel { Spacing = 8, MinWidth = 420 };
+        foreach (var (keys, description) in shortcuts)
+        {
+            var row = new Grid { ColumnSpacing = 14 };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(112) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.Children.Add(new TextBlock { Text = keys, FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Mono"), FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            var text = new TextBlock { Text = description, TextWrapping = TextWrapping.WrapWholeWords };
+            Grid.SetColumn(text, 1);
+            row.Children.Add(text);
+            content.Children.Add(row);
+        }
+
+        await new ContentDialog
+        {
+            XamlRoot = NavFrame.XamlRoot,
+            Title = "Keyboard shortcuts",
+            Content = content,
+            CloseButtonText = "Close"
+        }.ShowAsync();
     }
 
     private void OpenMiniWidget()
@@ -428,7 +482,10 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private sealed record PaletteEntry(string Label, string Context, Func<Task> Action);
+    private sealed record PaletteEntry(string Label, string Context, Func<Task> Action)
+    {
+        public string DisplayText => $"{Label}  ·  {Context}";
+    }
 
     private void Data_AchievementUnlocked(object? sender, AchievementUnlockedEventArgs e)
     {
