@@ -14,6 +14,7 @@ namespace WordReviewReminder.Pages;
 public sealed partial class SettingsPage : Page
 {
     private bool _loading = true;
+    private bool _resetSessionPreferences;
     private readonly SpeechService _speech = new();
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
 
@@ -24,6 +25,7 @@ public sealed partial class SettingsPage : Page
 
     private void Page_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        _resetSessionPreferences = false;
         PopulateControls(App.Data.Settings);
     }
 
@@ -201,6 +203,7 @@ public sealed partial class SettingsPage : Page
 
     private async void SaveButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        var sessionPreferences = _resetSessionPreferences ? new UserSettings() : App.Data.Settings;
         var settings = new UserSettings
         {
             ReminderIntervalMinutes = Math.Max(1, (int)IntervalBox.Value),
@@ -224,12 +227,18 @@ public sealed partial class SettingsPage : Page
             VoiceName = VoiceBox.SelectedItem?.ToString(),
             SpeechRate = SpeechRateSlider.Value,
             DefaultSessionSize = Math.Max(5, (int)DefaultSessionSizeBox.Value),
+            LastSessionGoal = sessionPreferences.LastSessionGoal,
+            LastSessionWordListId = sessionPreferences.LastSessionWordListId,
+            LastSessionDifficultOnly = sessionPreferences.LastSessionDifficultOnly,
+            LastSessionTimed = sessionPreferences.LastSessionTimed,
+            LastSessionFocusMode = sessionPreferences.LastSessionFocusMode,
             LastPageTag = App.Data.Settings.LastPageTag,
             PopupLeft = App.Data.Settings.PopupLeft,
             PopupTop = App.Data.Settings.PopupTop
         };
 
         await App.Data.SaveSettingsAsync(settings);
+        _resetSessionPreferences = false;
         StartupService.SetStartWithWindows(settings.StartWithWindows);
         StatusText.Text = "Saved";
         App.Feedback.Success("Settings saved", "Reminder and review preferences are up to date.");
@@ -280,6 +289,7 @@ public sealed partial class SettingsPage : Page
             PopupLeft = App.Data.Settings.PopupLeft,
             PopupTop = App.Data.Settings.PopupTop
         };
+        _resetSessionPreferences = true;
         PopulateControls(defaults);
         StatusText.Text = "Defaults ready to save";
         ShowSaveBar();

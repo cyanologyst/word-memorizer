@@ -69,6 +69,11 @@ public sealed record UserSettings
     public string? VoiceName { get; set; }
     public double SpeechRate { get; set; } = 1.0;
     public int DefaultSessionSize { get; set; } = 20;
+    public int LastSessionGoal { get; set; } = 20;
+    public string? LastSessionWordListId { get; set; }
+    public bool LastSessionDifficultOnly { get; set; }
+    public bool LastSessionTimed { get; set; }
+    public bool LastSessionFocusMode { get; set; } = true;
     public string LastPageTag { get; set; } = "home";
     public double? PopupLeft { get; set; }
     public double? PopupTop { get; set; }
@@ -113,6 +118,7 @@ public sealed record ReviewSessionOptions
     public bool DifficultOnly { get; init; }
     public bool Timed { get; init; }
     public bool FocusMode { get; init; } = true;
+    public List<string>? IncludedWordIds { get; init; }
 }
 
 public sealed record SessionSummary(

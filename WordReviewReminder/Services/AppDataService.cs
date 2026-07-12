@@ -159,19 +159,7 @@ public sealed class AppDataService
             return null;
         }
 
-        var filtered = WordLists
-            .Where(list => string.IsNullOrWhiteSpace(options.WordListId) || list.Id == options.WordListId)
-            .Select(list => list with
-            {
-                Words = list.Words
-                    .Where(word => excludedWordIds is null || !excludedWordIds.Contains(word.Id))
-                    .Where(word => !options.DifficultOnly ||
-                        Progress.Entries.TryGetValue(word.Id, out var progress) &&
-                        (progress.Lapses > 0 || progress.TimesLater + progress.TimesSkipped >= 2 || progress.MemoryDifficulty >= 6))
-                    .ToList()
-            })
-            .Where(list => list.Words.Count > 0)
-            .ToList();
+        var filtered = ReviewSessionFilter.Apply(WordLists, Progress, options, excludedWordIds);
 
         return _scheduler.PickNextWord(filtered, Progress, Settings, now);
     }
@@ -311,6 +299,16 @@ public sealed class AppDataService
     public async Task SaveLastPageAsync(string pageTag)
     {
         Settings.LastPageTag = pageTag;
+        await Store.SaveSettingsAsync(Settings);
+    }
+
+    public async Task SaveReviewSessionPreferencesAsync(ReviewSessionOptions options)
+    {
+        Settings.LastSessionGoal = Math.Clamp(options.Goal, 1, 100);
+        Settings.LastSessionWordListId = options.WordListId;
+        Settings.LastSessionDifficultOnly = options.DifficultOnly;
+        Settings.LastSessionTimed = options.Timed;
+        Settings.LastSessionFocusMode = options.FocusMode;
         await Store.SaveSettingsAsync(Settings);
     }
 

@@ -196,6 +196,28 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void SessionFilterRestrictsRetryToIncludedUnreviewedWords()
+    {
+        var words = new[]
+        {
+            new WordEntry("one", "One", null, null, null, null, 1, null),
+            new WordEntry("two", "Two", null, null, null, null, 2, null),
+            new WordEntry("three", "Three", null, null, null, null, 3, null)
+        };
+        var options = new ReviewSessionOptions { IncludedWordIds = ["one", "three"] };
+
+        var filtered = ReviewSessionFilter.Apply(
+            [NewList(words)],
+            new ReviewProgress(),
+            options,
+            new HashSet<string>(["one"], StringComparer.OrdinalIgnoreCase));
+
+        var remaining = Assert.Single(filtered).Words;
+        Assert.Single(remaining);
+        Assert.Equal("three", remaining[0].Id);
+    }
+
+    [Fact]
     public void MistakeQualifierExplainsUrgencyAndQualification()
     {
         var difficult = MistakeQualifier.Evaluate(new ReviewProgressEntry
@@ -441,7 +463,12 @@ public sealed class CoreTests
                 LastPageTag = "statistics",
                 DictionaryLookupEnabled = false,
                 ReminderIntervalMinutes = 45,
-                SoundEnabled = true
+                SoundEnabled = true,
+                LastSessionGoal = 12,
+                LastSessionWordListId = "core",
+                LastSessionDifficultOnly = true,
+                LastSessionTimed = true,
+                LastSessionFocusMode = false
             };
 
             await store.SaveSettingsAsync(settings);
@@ -451,6 +478,11 @@ public sealed class CoreTests
             Assert.False(loaded.DictionaryLookupEnabled);
             Assert.Equal(45, loaded.ReminderIntervalMinutes);
             Assert.True(loaded.SoundEnabled);
+            Assert.Equal(12, loaded.LastSessionGoal);
+            Assert.Equal("core", loaded.LastSessionWordListId);
+            Assert.True(loaded.LastSessionDifficultOnly);
+            Assert.True(loaded.LastSessionTimed);
+            Assert.False(loaded.LastSessionFocusMode);
         }
         finally
         {

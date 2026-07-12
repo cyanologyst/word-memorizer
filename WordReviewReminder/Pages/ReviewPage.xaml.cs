@@ -14,6 +14,7 @@ public sealed partial class ReviewPage : Page
     private readonly DispatcherTimer _recallTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
     private readonly List<ReviewAction> _sessionActions = [];
+    private readonly List<SessionReviewResult> _sessionResults = [];
     private readonly HashSet<string> _reviewedWordIds = new(StringComparer.OrdinalIgnoreCase);
     private WordEntry? _currentWord;
     private ReviewSessionOptions _options = new();
@@ -24,7 +25,16 @@ public sealed partial class ReviewPage : Page
     private bool _revealed;
     private DateTimeOffset _sessionStartedAt;
     private DateTimeOffset _wordShownAt;
+    private DateTimeOffset? _pauseStartedAt;
+    private TimeSpan _wordPausedDuration;
+    private TimeSpan _sessionPausedDuration;
     private ReviewSessionPlan? _recommendedPlan;
+    private MasterySummary _startingMastery = new(0, 0, 0, 0);
+    private bool _recording;
+    private bool _paused;
+    private bool _sessionEnded;
+    private bool _sessionRecorded;
+    private bool _sessionEndedEarly;
 
     public ReviewPage()
     {
@@ -44,8 +54,13 @@ public sealed partial class ReviewPage : Page
         SessionWordListBox.ItemsSource = new[] { new WordListOption(null, "All enabled wordlists") }
             .Concat(App.Data.WordLists.Where(list => list.IsEnabled).Select(list => new WordListOption(list.Id, list.Title)))
             .ToList();
-        SessionWordListBox.SelectedIndex = 0;
-        SessionGoalBox.Value = App.Data.Settings.DefaultSessionSize;
+        SessionWordListBox.SelectedItem = (SessionWordListBox.ItemsSource as IEnumerable<WordListOption>)?
+            .FirstOrDefault(item => string.Equals(item.Id, App.Data.Settings.LastSessionWordListId, StringComparison.OrdinalIgnoreCase));
+        SessionWordListBox.SelectedIndex = SessionWordListBox.SelectedIndex < 0 ? 0 : SessionWordListBox.SelectedIndex;
+        SessionGoalBox.Value = Math.Clamp(App.Data.Settings.LastSessionGoal, 1, 100);
+        SessionModeBox.SelectedIndex = App.Data.Settings.LastSessionDifficultOnly ? 1 : 0;
+        TimedSessionToggle.IsOn = App.Data.Settings.LastSessionTimed;
+        FocusModeToggle.IsOn = App.Data.Settings.LastSessionFocusMode;
         UpdateSessionPlans();
 
         if (_pendingOptions is not null)
@@ -56,9 +71,20 @@ public sealed partial class ReviewPage : Page
         }
     }
 
-    private void Page_Unloaded(object sender, RoutedEventArgs e)
+    private async void Page_Unloaded(object sender, RoutedEventArgs e)
     {
         _recallTimer.Stop();
+        for (var attempt = 0; _recording && attempt < 50; attempt++)
+        {
+            await Task.Delay(20);
+        }
+
+        if (!_sessionRecorded && _sessionActions.Count > 0)
+        {
+            _sessionRecorded = true;
+            await App.Data.RecordReviewSessionAsync(_sessionStartedAt, DateTimeOffset.UtcNow, _sessionActions);
+        }
+
         (App.MainWindow as MainWindow)?.SetFocusMode(false);
         (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
     }
@@ -81,6 +107,7 @@ public sealed partial class ReviewPage : Page
             Timed = TimedSessionToggle.IsOn,
             FocusMode = FocusModeToggle.IsOn
         };
+        await App.Data.SaveReviewSessionPreferencesAsync(options);
         await StartSessionAsync(options);
     }
 
@@ -165,11 +192,23 @@ public sealed partial class ReviewPage : Page
         _sessionGoal = Math.Clamp(options.Goal, 1, 100);
         _sessionCount = 0;
         _sessionActions.Clear();
+        _sessionResults.Clear();
         _reviewedWordIds.Clear();
         _sessionStartedAt = DateTimeOffset.UtcNow;
+        _pauseStartedAt = null;
+        _wordPausedDuration = TimeSpan.Zero;
+        _sessionPausedDuration = TimeSpan.Zero;
+        _recording = false;
+        _paused = false;
+        _sessionEnded = false;
+        _sessionRecorded = false;
+        _sessionEndedEarly = false;
+        _startingMastery = App.Data.GetMasterySummary();
         SessionSetupPanel.Visibility = Visibility.Collapsed;
         CompletionPanel.Visibility = Visibility.Collapsed;
+        PausedPanel.Visibility = Visibility.Collapsed;
         FocusCard.Visibility = Visibility.Visible;
+        SessionControlPanel.Visibility = Visibility.Visible;
         (App.MainWindow as MainWindow)?.SetFocusMode(options.FocusMode);
         await LoadNextAsync();
         Focus(FocusState.Programmatic);
@@ -179,14 +218,15 @@ public sealed partial class ReviewPage : Page
     {
         await App.Data.RefreshAsync();
         _currentWord = App.Data.PickNextWord(DateTimeOffset.Now, _options, _reviewedWordIds);
-        if (_currentWord is null && _reviewedWordIds.Count > 0)
+        if (_currentWord is null)
         {
-            _reviewedWordIds.Clear();
-            _currentWord = App.Data.PickNextWord(DateTimeOffset.Now, _options, _reviewedWordIds);
+            await CompleteSessionAsync(endedEarly: _sessionCount < _sessionGoal);
+            return;
         }
 
         _revealed = false;
         _wordShownAt = DateTimeOffset.UtcNow;
+        _wordPausedDuration = TimeSpan.Zero;
         Render();
         StartRecallTimer();
         if (_animationsEnabled)
@@ -203,13 +243,15 @@ public sealed partial class ReviewPage : Page
     private void Render()
     {
         var hasWord = _currentWord is not null;
-        var sessionComplete = _sessionCount >= _sessionGoal;
+        var sessionComplete = _sessionEnded;
         CompletionPanel.Visibility = sessionComplete ? Visibility.Visible : Visibility.Collapsed;
-        FocusCard.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
-        KnowButton.IsEnabled = hasWord && _revealed;
-        LaterButton.IsEnabled = hasWord && _revealed;
-        SkipButton.IsEnabled = hasWord;
-        RevealButton.IsEnabled = hasWord;
+        FocusCard.Visibility = sessionComplete || _paused ? Visibility.Collapsed : Visibility.Visible;
+        PausedPanel.Visibility = _paused && !sessionComplete ? Visibility.Visible : Visibility.Collapsed;
+        SessionControlPanel.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
+        KnowButton.IsEnabled = hasWord && _revealed && !_recording && !_paused;
+        LaterButton.IsEnabled = hasWord && _revealed && !_recording && !_paused;
+        SkipButton.IsEnabled = hasWord && !_recording && !_paused;
+        RevealButton.IsEnabled = hasWord && !_recording && !_paused;
         ProgressText.Text = $"{_sessionCount} / {_sessionGoal}";
         SessionProgressBar.Maximum = _sessionGoal;
         SessionProgressBar.Value = _sessionCount;
@@ -238,6 +280,8 @@ public sealed partial class ReviewPage : Page
         MeaningText.Opacity = _revealed ? 1 : 0;
         MeaningText.Text = _currentWord.ShortMeaning ?? "";
         RevealButtonText.Text = _revealed ? "Revealed" : "Reveal";
+        AdditionalDetailsExpander.IsExpanded = false;
+        PopulateAdditionalDetails(_currentWord, _revealed);
         StatusText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "";
     }
 
@@ -245,19 +289,52 @@ public sealed partial class ReviewPage : Page
     {
         _recallTimer.Stop();
         (App.MainWindow as MainWindow)?.SetFocusMode(false);
-        (App.MainWindow as MainWindow)?.SetTaskbarProgress(_sessionGoal, _sessionGoal);
+        (App.MainWindow as MainWindow)?.SetTaskbarProgress(_sessionCount, Math.Max(1, _sessionCount));
         var known = _sessionActions.Count(action => action == ReviewAction.Known);
         var later = _sessionActions.Count(action => action == ReviewAction.Later);
         var skipped = _sessionActions.Count(action => action == ReviewAction.Skipped);
-        var duration = DateTimeOffset.UtcNow - _sessionStartedAt;
+        var duration = DateTimeOffset.UtcNow - _sessionStartedAt - _sessionPausedDuration;
         var summary = new SessionSummary(_sessionActions.Count, known, later, skipped, duration);
-        SessionSummaryText.Text = $"{summary.Accuracy:N0}% recall accuracy in {duration:mm\\:ss}.";
-        SessionBreakdownText.Text = $"{known} known   {later} later   {skipped} skipped";
-        StatusText.Text = "Session complete";
+        CompletionTitleText.Text = _sessionEndedEarly ? "Session ended" : "Session complete";
+        SessionSummaryText.Text = $"Reviewed {summary.Total:N0} word{(summary.Total == 1 ? "" : "s")} in {duration:mm\\:ss}.";
+        KnownSummaryText.Text = known.ToString("N0");
+        LaterSummaryText.Text = later.ToString("N0");
+        SkippedSummaryText.Text = skipped.ToString("N0");
+        AccuracySummaryText.Text = summary.Total == 0 ? "-" : $"{summary.Accuracy:N0}%";
+        var mastery = App.Data.GetMasterySummary();
+        MasteryMovementText.Text = summary.Total == 0
+            ? "No responses were recorded."
+            : $"Mastery movement: {FormatChange(mastery.Mastered - _startingMastery.Mastered)} mastered · {FormatChange(mastery.Familiar - _startingMastery.Familiar)} familiar";
+        var retryCount = _sessionResults.Count(item => item.Action != ReviewAction.Known);
+        ReviewMissedButton.IsEnabled = retryCount > 0;
+        ReviewMissedButton.Visibility = retryCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        StatusText.Text = _sessionEndedEarly ? "Session ended safely" : "Session complete";
         SoundService.Play("session-complete");
     }
 
-    private void StartRecallTimer()
+    private async Task CompleteSessionAsync(bool endedEarly)
+    {
+        if (_sessionEnded)
+        {
+            return;
+        }
+
+        FinishPauseIfNeeded();
+        _recallTimer.Stop();
+        _sessionEnded = true;
+        _sessionEndedEarly = endedEarly;
+        _currentWord = null;
+        if (!_sessionRecorded && _sessionActions.Count > 0)
+        {
+            _sessionRecorded = true;
+            await App.Data.RecordReviewSessionAsync(_sessionStartedAt, DateTimeOffset.UtcNow, _sessionActions);
+        }
+
+        await App.Data.RefreshAsync();
+        Render();
+    }
+
+    private void StartRecallTimer(bool reset = true)
     {
         _recallTimer.Stop();
         if (!_options.Timed || _currentWord is null)
@@ -265,8 +342,12 @@ public sealed partial class ReviewPage : Page
             return;
         }
 
-        _secondsRemaining = 15;
-        StatusText.Text = $"15 seconds to decide";
+        if (reset)
+        {
+            _secondsRemaining = 15;
+        }
+
+        StatusText.Text = $"{_secondsRemaining} seconds to decide";
         _recallTimer.Start();
     }
 
@@ -298,7 +379,7 @@ public sealed partial class ReviewPage : Page
 
     private async Task RecordAsync(ReviewAction action)
     {
-        if (_currentWord is null || _sessionCount >= _sessionGoal)
+        if (_recording || _paused || _sessionEnded || _currentWord is null || _sessionCount >= _sessionGoal)
         {
             return;
         }
@@ -309,24 +390,139 @@ public sealed partial class ReviewPage : Page
             return;
         }
 
-        _recallTimer.Stop();
-        var responseSeconds = Math.Max(0, (DateTimeOffset.UtcNow - _wordShownAt).TotalSeconds);
-        var reviewedWord = _currentWord;
-        await App.Data.RecordReviewAsync(reviewedWord, action, responseSeconds);
-        _reviewedWordIds.Add(reviewedWord.Id);
-        _sessionActions.Add(action);
-        _sessionCount = Math.Min(_sessionGoal, _sessionCount + 1);
-        SoundService.Play(action == ReviewAction.Known ? "review-known" : "review-later");
-
-        if (_sessionCount == _sessionGoal)
+        _recording = true;
+        UpdateActionAvailability();
+        try
         {
-            await App.Data.RecordReviewSessionAsync(_sessionStartedAt, DateTimeOffset.UtcNow, _sessionActions);
-            _currentWord = null;
-            Render();
+            _recallTimer.Stop();
+            var responseSeconds = Math.Max(0, (DateTimeOffset.UtcNow - _wordShownAt - _wordPausedDuration).TotalSeconds);
+            var reviewedWord = _currentWord;
+            await App.Data.RecordReviewAsync(reviewedWord, action, responseSeconds);
+            _reviewedWordIds.Add(reviewedWord.Id);
+            _sessionActions.Add(action);
+            _sessionResults.Add(new SessionReviewResult(reviewedWord.Id, action));
+            _sessionCount = Math.Min(_sessionGoal, _sessionCount + 1);
+            SoundService.Play(action == ReviewAction.Known ? "review-known" : "review-later");
+
+            if (_sessionCount == _sessionGoal)
+            {
+                await CompleteSessionAsync(endedEarly: false);
+                return;
+            }
+
+            await LoadNextAsync();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Review was not recorded", exception.Message);
+            StatusText.Text = "Try that response again";
+        }
+        finally
+        {
+            _recording = false;
+            UpdateActionAvailability();
+        }
+    }
+
+    private void PauseSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_sessionEnded || _paused || _currentWord is null || _recording)
+        {
             return;
         }
 
-        await LoadNextAsync();
+        _paused = true;
+        _pauseStartedAt = DateTimeOffset.UtcNow;
+        _recallTimer.Stop();
+        PausedSummaryText.Text = $"{_sessionCount:N0} of {_sessionGoal:N0} words completed. The current word and timer are preserved.";
+        StatusText.Text = "Session paused";
+        Render();
+    }
+
+    private void ResumeSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_paused || _sessionEnded)
+        {
+            return;
+        }
+
+        FinishPauseIfNeeded();
+        StatusText.Text = "Session resumed";
+        Render();
+        StartRecallTimer(reset: false);
+        Focus(FocusState.Programmatic);
+    }
+
+    private async void EndSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_sessionEnded || _recording)
+        {
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "End this review session?",
+            Content = $"{_sessionCount:N0} of {_sessionGoal:N0} words are complete. Recorded responses are saved; the current word will not be scored.",
+            PrimaryButtonText = "End session",
+            CloseButtonText = "Keep reviewing",
+            DefaultButton = ContentDialogButton.Close
+        };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await CompleteSessionAsync(endedEarly: true);
+        }
+    }
+
+    private void FinishPauseIfNeeded()
+    {
+        if (_pauseStartedAt is not DateTimeOffset pauseStarted)
+        {
+            _paused = false;
+            return;
+        }
+
+        var duration = DateTimeOffset.UtcNow - pauseStarted;
+        _wordPausedDuration += duration;
+        _sessionPausedDuration += duration;
+        _pauseStartedAt = null;
+        _paused = false;
+    }
+
+    private void UpdateActionAvailability()
+    {
+        var hasWord = _currentWord is not null && !_sessionEnded && !_paused && !_recording;
+        RevealButton.IsEnabled = hasWord;
+        KnowButton.IsEnabled = hasWord && _revealed;
+        LaterButton.IsEnabled = hasWord && _revealed;
+        SkipButton.IsEnabled = hasWord;
+    }
+
+    private async void ReviewMissedButton_Click(object sender, RoutedEventArgs e)
+    {
+        var retryIds = _sessionResults
+            .Where(item => item.Action != ReviewAction.Known)
+            .Select(item => item.WordId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (retryIds.Count == 0)
+        {
+            return;
+        }
+
+        await StartSessionAsync(_options with
+        {
+            Goal = retryIds.Count,
+            DifficultOnly = false,
+            IncludedWordIds = retryIds
+        });
+    }
+
+    private void DoneButton_Click(object sender, RoutedEventArgs e)
+    {
+        (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
+        (App.MainWindow as MainWindow)?.NavigateTo("home");
     }
 
     private void RestartSessionButton_Click(object sender, RoutedEventArgs e)
@@ -336,12 +532,14 @@ public sealed partial class ReviewPage : Page
         (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
         CompletionPanel.Visibility = Visibility.Collapsed;
         FocusCard.Visibility = Visibility.Collapsed;
+        PausedPanel.Visibility = Visibility.Collapsed;
+        SessionControlPanel.Visibility = Visibility.Collapsed;
         SessionSetupPanel.Visibility = Visibility.Visible;
     }
 
     private void RevealMeaning()
     {
-        if (_currentWord is null || _revealed)
+        if (_currentWord is null || _revealed || _paused || _sessionEnded)
         {
             return;
         }
@@ -353,6 +551,8 @@ public sealed partial class ReviewPage : Page
         MeaningText.Opacity = 0;
         MeaningTransform.TranslateY = 8;
         RevealButtonText.Text = "Revealed";
+        PopulateAdditionalDetails(_currentWord, revealed: true);
+        StatusText.Text = "Meaning revealed · Rate your recall";
         if (_animationsEnabled)
         {
             RevealStoryboard.Begin();
@@ -366,10 +566,47 @@ public sealed partial class ReviewPage : Page
         }
     }
 
+    private void PopulateAdditionalDetails(WordEntry word, bool revealed)
+    {
+        var examples = word.ExampleSentences.Where(value => !string.IsNullOrWhiteSpace(value)).Take(2).ToList();
+        var related = word.Synonyms.Concat(word.Antonyms).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Take(8).ToList();
+        var tags = word.Tags?.Where(value => !string.IsNullOrWhiteSpace(value)).Take(6).ToList() ?? [];
+        var hasDetails = examples.Count > 0 || related.Count > 0 || tags.Count > 0 || !string.IsNullOrWhiteSpace(word.Notes);
+        AdditionalDetailsExpander.Visibility = revealed && hasDetails ? Visibility.Visible : Visibility.Collapsed;
+        ExamplesText.Text = examples.Count == 0 ? "" : $"Example: {string.Join("  ", examples)}";
+        ExamplesText.Visibility = examples.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        RelatedWordsText.Text = related.Count == 0 ? "" : $"Related: {string.Join(", ", related)}";
+        RelatedWordsText.Visibility = related.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        var noteParts = new[]
+        {
+            tags.Count == 0 ? null : $"Tags: {string.Join(", ", tags)}",
+            string.IsNullOrWhiteSpace(word.Notes) ? null : word.Notes
+        }.Where(value => value is not null);
+        NotesText.Text = string.Join(" · ", noteParts!);
+        NotesText.Visibility = string.IsNullOrWhiteSpace(NotesText.Text) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private static string FormatChange(int value) => value > 0 ? $"+{value:N0}" : value.ToString("N0");
+
     private async void Page_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         switch (e.Key)
         {
+            case VirtualKey.Escape:
+                if (!_sessionEnded && _currentWord is not null)
+                {
+                    if (_paused)
+                    {
+                        ResumeSessionButton_Click(this, new RoutedEventArgs());
+                    }
+                    else
+                    {
+                        PauseSessionButton_Click(this, new RoutedEventArgs());
+                    }
+
+                    e.Handled = true;
+                }
+                break;
             case VirtualKey.Space:
                 RevealMeaning();
                 e.Handled = true;
@@ -405,4 +642,5 @@ public sealed partial class ReviewPage : Page
     }
 
     private sealed record WordListOption(string? Id, string Title);
+    private sealed record SessionReviewResult(string WordId, ReviewAction Action);
 }
