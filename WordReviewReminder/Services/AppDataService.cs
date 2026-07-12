@@ -335,17 +335,22 @@ public sealed class AppDataService
     {
         var words = AllEnabledWords.ToDictionary(word => word.Id, StringComparer.OrdinalIgnoreCase);
         return Progress.Entries.Values
-            .Where(entry => entry.Lapses > 0 || entry.TimesLater + entry.TimesSkipped > 0)
             .Select(entry =>
             {
                 words.TryGetValue(entry.WordId, out var word);
+                var qualification = MistakeQualifier.Evaluate(entry);
                 return new MistakeWordItem(
                     word ?? new WordEntry(entry.WordId, entry.WordId, null, null, null, null, null, null),
-                    entry.TimesLater + entry.TimesSkipped,
-                    entry.Lapses,
+                    qualification.Misses,
+                    qualification.Lapses,
                     entry.MemoryDifficulty,
-                    entry.DueAt);
+                    entry.DueAt,
+                    entry.LastReviewedAt,
+                    qualification.Urgency,
+                    qualification.Reason,
+                    qualification.Qualifies);
             })
+            .Where(item => item.Qualifies)
             .OrderByDescending(item => item.Lapses)
             .ThenByDescending(item => item.Misses)
             .ThenByDescending(item => item.MemoryDifficulty)
@@ -464,11 +469,22 @@ public sealed class AppDataService
 public sealed record ActivityDay(string DayLabel, int Count, double Progress);
 public sealed record MasterySummary(int New, int Learning, int Familiar, int Mastered);
 public sealed record MissedWord(string Term, int Misses);
-public sealed record MistakeWordItem(WordEntry Word, int Misses, int Lapses, double MemoryDifficulty, DateTimeOffset DueAt)
+public sealed record MistakeWordItem(
+    WordEntry Word,
+    int Misses,
+    int Lapses,
+    double MemoryDifficulty,
+    DateTimeOffset DueAt,
+    DateTimeOffset? LastReviewedAt,
+    string Urgency,
+    string Reason,
+    bool Qualifies)
 {
     public string Term => Word.Term;
     public string Meaning => Word.ShortMeaning ?? "";
-    public string Urgency => Lapses >= 3 || MemoryDifficulty >= 8 ? "High" : Misses >= 2 ? "Medium" : "Low";
+    public string LastReviewedLabel => LastReviewedAt is null
+        ? "Not reviewed"
+        : $"Reviewed {LastReviewedAt.Value.ToLocalTime():MMM d}";
 }
 public sealed record CalendarDayItem(DateTime Date, int Count, int Level)
 {

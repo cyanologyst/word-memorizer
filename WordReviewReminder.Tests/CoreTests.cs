@@ -164,6 +164,25 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void MistakeQualifierExplainsUrgencyAndQualification()
+    {
+        var difficult = MistakeQualifier.Evaluate(new ReviewProgressEntry
+        {
+            WordId = "word-1",
+            TimesSkipped = 2,
+            Lapses = 1,
+            MemoryDifficulty = 8.2
+        });
+        var clean = MistakeQualifier.Evaluate(new ReviewProgressEntry { WordId = "word-2" });
+
+        Assert.True(difficult.Qualifies);
+        Assert.Equal("High", difficult.Urgency);
+        Assert.Equal("High memory difficulty", difficult.Reason);
+        Assert.False(clean.Qualifies);
+        Assert.Equal("No difficulty signal", clean.Reason);
+    }
+
+    [Fact]
     public async Task EnrichedWordFieldsRoundTripThroughJsonStorage()
     {
         var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));

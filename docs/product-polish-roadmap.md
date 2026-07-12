@@ -190,7 +190,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Mistake Lab, domain qualification/aggregation, tests.
 - **Risk:** Medium; qualification definitions must be documented and stable.
 - **Acceptance criteria:** Every row explains inclusion; sorting/filtering/search work together; empty/completed states offer a useful next step; qualification logic is tested.
-- **Status:** Not started
+- **Status:** In progress
 
 #### P2.3 Learning-Focused Statistics And Activity
 
@@ -252,6 +252,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **2026-07-13 accessibility/empty-state pass:** Added more accessible names, polite live regions, reduced-motion handling in Review, reveal-before-rating protection, and shared empty/no-results surfaces for Dashboard wordlists, Mistake Lab, Logs, and Wordlists. Debug x64 build succeeds with zero warnings and all 13 tests pass. Final visual exercise of this sub-pass remains pending because Windows inspection returned `GetCursorPos: Access is denied` on two retries.
 - **2026-07-13 shell and session-planning pass:** Centralized common page padding/title/subtitle resources, made destructive Wordlist actions semantically distinct, centralized the navigation map, and persisted the last safe page without attempting to resume an interrupted Review. Added a domain `ReviewSessionPlanner`, due/new/difficult estimates, tiny-list goal capping, a recommended-session action, and live custom-session summaries. Debug x64 build succeeds with zero warnings and all 16 tests pass.
 - **2026-07-13 daily-briefing pass:** Dashboard now explains the recommended workload and reason, distinguishes due/new/difficult words, moves streak into a compact status chip, and starts the recommended session in one action. Custom session setup remains available from the overflow menu.
+- **2026-07-13 Mistake Lab pass:** Moved difficulty qualification and human-readable reasons into tested domain logic. Added combined search, urgency filtering, sorting by urgency/misses/lapses/last review/alphabetical order, reason text, and double-click details. Debug x64 build succeeds with zero warnings and all 17 tests pass.
 
 ## Current Implementation Focus
 

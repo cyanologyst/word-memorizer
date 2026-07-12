@@ -23,12 +23,17 @@
             </Button>
         </Grid>
         <Border Grid.Row="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
-            <Grid ColumnSpacing="24">
+            <Grid ColumnSpacing="14" RowSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="150" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <StackPanel Spacing="3">
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Queue" />
                     <TextBlock x:Name="QueueCountText" FontSize="28" FontWeight="SemiBold" />
@@ -37,7 +42,15 @@
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="High urgency" />
                     <TextBlock x:Name="HighUrgencyText" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource PremiumDangerBrush}" />
                 </StackPanel>
-                <ComboBox x:Name="UrgencyFilter" Grid.Column="2" Header="Urgency" MinWidth="150" SelectionChanged="UrgencyFilter_SelectionChanged">
+                <AutoSuggestBox x:Name="SearchBox" Grid.Row="1" Grid.ColumnSpan="2" PlaceholderText="Search difficult words or meanings" QueryIcon="Find" TextChanged="SearchBox_TextChanged" />
+                <ComboBox x:Name="SortBox" Grid.Row="1" Grid.Column="2" Header="Sort by" SelectionChanged="SortBox_SelectionChanged">
+                    <ComboBoxItem Content="Urgency" />
+                    <ComboBoxItem Content="Most misses" />
+                    <ComboBoxItem Content="Most lapses" />
+                    <ComboBoxItem Content="Last reviewed" />
+                    <ComboBoxItem Content="Alphabetical" />
+                </ComboBox>
+                <ComboBox x:Name="UrgencyFilter" Grid.Row="1" Grid.Column="3" Header="Urgency" MinWidth="150" SelectionChanged="UrgencyFilter_SelectionChanged">
                     <ComboBoxItem Content="All" />
                     <ComboBoxItem Content="High" />
                     <ComboBoxItem Content="Medium" />
@@ -47,11 +60,11 @@
         </Border>
         <Border Grid.Row="2" Style="{StaticResource PremiumPanelStyle}">
             <Grid>
-            <ListView x:Name="MistakesView" Padding="8" HorizontalContentAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible">
+            <ListView x:Name="MistakesView" Padding="8" HorizontalContentAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible" DoubleTapped="MistakesView_DoubleTapped">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="MinHeight" Value="66" />
+                        <Setter Property="MinHeight" Value="78" />
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
@@ -63,8 +76,9 @@
                                 <ColumnDefinition Width="90" />
                                 <ColumnDefinition Width="90" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Spacing="3">
+                            <StackPanel Spacing="2">
                                 <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding Term}" />
+                                <TextBlock FontSize="12" Foreground="{StaticResource PremiumWarningBrush}" Text="{Binding Reason}" TextTrimming="CharacterEllipsis" />
                                 <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Meaning}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Meaning}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
