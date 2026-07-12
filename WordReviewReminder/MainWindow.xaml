@@ -121,7 +121,7 @@
                 MinHeight="132"
                 Padding="16"
                 Background="{StaticResource PremiumSurfaceStrongBrush}"
-                BorderBrush="#66F2C36B"
+                BorderBrush="{StaticResource AchievementUnlockBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="8"
                 Visibility="Collapsed">
@@ -132,7 +132,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid Width="92" Height="92" VerticalAlignment="Center">
-                    <Ellipse Fill="#181F3655" />
+                    <Ellipse Fill="{StaticResource AchievementBadgeHaloBrush}" />
                     <Image x:Name="UnlockBadgeImage" Width="88" Height="88" Stretch="Uniform" />
                 </Grid>
                 <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">

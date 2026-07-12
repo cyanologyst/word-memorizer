@@ -172,7 +172,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         {
             Height = 3,
             VerticalAlignment = VerticalAlignment.Center,
-            Background = Brush("#48393E"),
+            Background = ThemeBrush("PopupProgressTrackBrush", "#48393E"),
             CornerRadius = new CornerRadius(2)
         };
         var fill = new Border
@@ -180,7 +180,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Height = 3,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
-            Background = Brush("#FF7A5F"),
+            Background = ThemeBrush("PremiumAccentBrush", "#FF7A5F"),
             CornerRadius = new CornerRadius(2),
             RenderTransformOrigin = new Point(0, 0.5)
         };
@@ -219,8 +219,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
         var copy = new StackPanel { Orientation = Orientation.Vertical };
         var chips = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 6) };
-        chips.Children.Add(BuildChip("TOEFL Review", "#5B3333"));
-        chips.Children.Add(BuildChip(BuildSourceText(_word), "#3A3033", new Thickness(8, 0, 0, 0)));
+        chips.Children.Add(BuildChip("TOEFL Review", ThemeColor("PopupChipAccentBrush", "#5B3333")));
+        chips.Children.Add(BuildChip(BuildSourceText(_word), ThemeColor("PopupChipNeutralBrush", "#3A3033"), new Thickness(8, 0, 0, 0)));
 
         copy.Children.Add(chips);
         copy.Children.Add(new TextBlock
@@ -236,7 +236,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         copy.Children.Add(new TextBlock
         {
             Text = $"{_word.PartOfSpeech}  {_word.Pronunciation}".Trim(),
-            Foreground = Brush("#D8CBCF"),
+            Foreground = ThemeBrush("PopupSecondaryTextBrush", "#D8CBCF"),
             FontSize = 13,
             Margin = new Thickness(0, 4, 0, 0),
             TextTrimming = TextTrimming.CharacterEllipsis
@@ -284,7 +284,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             content.Children.Add(new TextBlock
             {
                 Text = $"Example: {example}",
-                Foreground = Brush("#C7B9BD"),
+                Foreground = ThemeBrush("PopupTertiaryTextBrush", "#C7B9BD"),
                 FontSize = 12,
                 Margin = new Thickness(0, 5, 0, 0),
                 TextWrapping = TextWrapping.Wrap,
@@ -309,9 +309,11 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) });
         Grid.SetRow(grid, 3);
 
-        grid.Children.Add(BuildAction("Know", "\uE73E", "#FF7A5F", "#FF7A5F", ReviewAction.Known, 0, true));
-        grid.Children.Add(BuildAction("Later", "\uE916", control, "#4A3F43", ReviewAction.Later, 1));
-        grid.Children.Add(BuildAction("Skip", "\uE711", control, "#4A3F43", ReviewAction.Skipped, 2));
+        var accent = ThemeColor("PremiumAccentBrush", "#FF7A5F");
+        var secondaryBorder = ThemeColor("PopupSecondaryBorderBrush", "#4A3F43");
+        grid.Children.Add(BuildAction("Know", "\uE73E", accent, accent, ReviewAction.Known, 0, true));
+        grid.Children.Add(BuildAction("Later", "\uE916", control, secondaryBorder, ReviewAction.Later, 1));
+        grid.Children.Add(BuildAction("Skip", "\uE711", control, secondaryBorder, ReviewAction.Skipped, 2));
         grid.Children.Add(BuildSnoozeAction());
         grid.Children.Add(BuildDetailsAction());
 
@@ -379,7 +381,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
 
     private UIElement BuildActionContent(string label, string icon, bool isPrimary = false)
     {
-        var foreground = isPrimary ? Brushes.White : Brush("#F4EEF0");
+        var foreground = isPrimary ? Brushes.White : ThemeBrush("PopupPrimaryTextBrush", "#F4EEF0");
         var stack = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -440,7 +442,7 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             Width = CardWidth,
             Height = CardHeight,
             Margin = new Thickness(0),
-            Background = ThemeBrush("PopupGlassBrush", "#E62A2225"),
+            Background = ThemeBrush("PopupDetailsOverlayBrush", "#E62A2225"),
             CornerRadius = new CornerRadius(14),
             Visibility = Visibility.Collapsed
         };
@@ -450,8 +452,8 @@ public sealed class ReminderOverlayWindow : System.Windows.Window
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             Padding = new Thickness(20, 12, 20, 12),
-            Background = Brush("#263D30"),
-            BorderBrush = Brush("#62D187"),
+            Background = ThemeBrush("PopupSuccessSurfaceBrush", "#263D30"),
+            BorderBrush = ThemeBrush("PremiumSuccessBrush", "#62D187"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(16)
         };

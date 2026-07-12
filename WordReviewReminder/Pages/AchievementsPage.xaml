@@ -7,7 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     NavigationCacheMode="Required"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
     <VisualStateManager.VisualStateGroups>
         <VisualStateGroup x:Name="WindowWidthStates">
@@ -35,27 +36,6 @@
             </VisualState>
         </VisualStateGroup>
     </VisualStateManager.VisualStateGroups>
-
-    <Page.Resources>
-        <Style x:Key="AchievementFilterStyle" TargetType="ToggleButton">
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="12,0" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="FontSize" Value="13" />
-        </Style>
-        <Style x:Key="AchievementCardButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="UseSystemFocusVisuals" Value="True" />
-            <Setter Property="FocusVisualMargin" Value="-2" />
-        </Style>
-    </Page.Resources>
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
         <StackPanel Padding="{StaticResource AchievementPagePadding}" Spacing="16">
@@ -99,8 +79,8 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Width="100" Height="100" VerticalAlignment="Center">
-                        <Ellipse Fill="#181F3655" />
-                        <Ellipse Margin="13" Stroke="#44F4C768" StrokeThickness="1" />
+                        <Ellipse Fill="{StaticResource AchievementBadgeHaloBrush}" />
+                        <Ellipse Margin="13" Stroke="{StaticResource AchievementBadgeRingBrush}" StrokeThickness="1" />
                         <Image
                             x:Name="FeaturedBadgeImage"
                             Width="94"
@@ -135,20 +115,30 @@
                 </Grid>
             </Border>
 
-            <Grid ColumnSpacing="14" MinHeight="36" VerticalAlignment="Center">
+            <Grid x:Name="AchievementToolbar" ColumnSpacing="14" RowSpacing="8" MinHeight="36" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <StackPanel Spacing="1" VerticalAlignment="Center">
                     <TextBlock FontSize="18" FontWeight="SemiBold" Text="All achievements" />
                     <TextBlock x:Name="ResultsSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Text="25 badges" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <ToggleButton x:Name="AllFilter" Content="All" IsChecked="True" Style="{StaticResource AchievementFilterStyle}" Click="FilterButton_Click" Tag="All" />
-                    <ToggleButton x:Name="UnlockedFilter" Content="Unlocked" Style="{StaticResource AchievementFilterStyle}" Click="FilterButton_Click" Tag="Unlocked" />
-                    <ToggleButton x:Name="ProgressFilter" Content="In progress" Style="{StaticResource AchievementFilterStyle}" Click="FilterButton_Click" Tag="InProgress" />
-                    <ToggleButton x:Name="LockedFilter" Content="Locked" Style="{StaticResource AchievementFilterStyle}" Click="FilterButton_Click" Tag="Locked" />
+                <StackPanel x:Name="AchievementControls" Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <ToggleButton x:Name="AllFilter" Content="All" IsChecked="True" Style="{StaticResource FilterToggleButtonStyle}" Click="FilterButton_Click" Tag="All" />
+                    <ToggleButton x:Name="UnlockedFilter" Content="Unlocked" Style="{StaticResource FilterToggleButtonStyle}" Click="FilterButton_Click" Tag="Unlocked" />
+                    <ToggleButton x:Name="ProgressFilter" Content="In progress" Style="{StaticResource FilterToggleButtonStyle}" Click="FilterButton_Click" Tag="InProgress" />
+                    <ToggleButton x:Name="LockedFilter" Content="Locked" Style="{StaticResource FilterToggleButtonStyle}" Click="FilterButton_Click" Tag="Locked" />
+                    <ComboBox x:Name="SortBox" Width="148" SelectedIndex="0" SelectionChanged="SortBox_SelectionChanged" AutomationProperties.Name="Sort achievements">
+                        <x:String>Recommended</x:String>
+                        <x:String>Closest first</x:String>
+                        <x:String>Recently unlocked</x:String>
+                        <x:String>Title A-Z</x:String>
+                    </ComboBox>
                 </StackPanel>
             </Grid>
 
@@ -171,7 +161,7 @@
                             Tag="{Binding}"
                             AutomationProperties.Name="{Binding Title}"
                             AutomationProperties.HelpText="{Binding Description}"
-                            Style="{StaticResource AchievementCardButtonStyle}"
+                            Style="{StaticResource CardButtonStyle}"
                             Click="AchievementCard_Click"
                             Loaded="BadgeCard_Loaded"
                             PointerEntered="BadgeCard_PointerEntered"
@@ -211,7 +201,7 @@
                                     </Grid>
 
                                     <Grid Grid.Row="1">
-                                        <Ellipse Width="86" Height="86" Fill="#121C2B44" />
+                                        <Ellipse Width="86" Height="86" Fill="{StaticResource AchievementBadgeBackdropBrush}" />
                                         <Image
                                             Width="98"
                                             Height="98"
@@ -254,6 +244,13 @@
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
+            <Border x:Name="EmptyAchievementsPanel" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE7E7;" FontSize="24" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Style="{StaticResource EmptyStateTitleStyle}" Text="No achievements in this view" />
+                    <TextBlock Text="Choose another status filter to see more milestones." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

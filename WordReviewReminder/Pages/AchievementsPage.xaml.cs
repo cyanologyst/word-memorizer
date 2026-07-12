@@ -16,8 +16,8 @@ namespace WordReviewReminder.Pages;
 
 public sealed partial class AchievementsPage : Page
 {
-    private static readonly SolidColorBrush CardHoverBrush = new(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF));
-    private static readonly SolidColorBrush CardPressedBrush = new(Color.FromArgb(0x09, 0xFF, 0xFF, 0xFF));
+    private static Brush CardHoverBrush => ResourceBrush("InteractiveHoverBrush");
+    private static Brush CardPressedBrush => ResourceBrush("InteractivePressedBrush");
     private readonly List<AchievementCardViewModel> _allAchievements = [];
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
     private string _filter = "All";
@@ -116,14 +116,31 @@ public sealed partial class AchievementsPage : Page
         {
             "Unlocked" => _allAchievements.Where(item => item.IsUnlocked),
             "InProgress" => _allAchievements.Where(item => !item.IsUnlocked && item.ProgressPercent > 0),
-            "Locked" => _allAchievements.Where(item => !item.IsUnlocked),
+            "Locked" => _allAchievements.Where(item => !item.IsUnlocked && item.ProgressPercent <= 0),
             _ => _allAchievements
         };
 
+        filtered = SortBox.SelectedIndex switch
+        {
+            1 => filtered.OrderByDescending(item => item.ProgressPercent).ThenBy(item => item.Title),
+            2 => filtered.OrderByDescending(item => item.UnlockedAt ?? DateTimeOffset.MinValue).ThenByDescending(item => item.ProgressPercent),
+            3 => filtered.OrderBy(item => item.Title, StringComparer.CurrentCultureIgnoreCase),
+            _ => filtered.OrderByDescending(item => item.IsUnlocked).ThenByDescending(item => item.ProgressPercent).ThenBy(item => item.Title)
+        };
         var visible = filtered.ToList();
         _entranceIndex = 0;
         AchievementRepeater.ItemsSource = visible;
         ResultsSummaryText.Text = visible.Count == 1 ? "1 badge" : $"{visible.Count:N0} badges";
+        AchievementRepeater.Visibility = visible.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyAchievementsPanel.Visibility = visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SortBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            ApplyFilter();
+        }
     }
 
     private async void AchievementCard_Click(object sender, RoutedEventArgs e)
@@ -164,11 +181,25 @@ public sealed partial class AchievementsPage : Page
             XamlRoot = XamlRoot,
             Title = item.Title,
             Content = content,
-            PrimaryButtonText = item.IsUnlocked ? "Export milestone card" : null,
+            PrimaryButtonText = item.IsUnlocked ? "Export milestone card" : "Start review",
+            SecondaryButtonText = "Open statistics",
             CloseButtonText = "Close",
             DefaultButton = ContentDialogButton.Close
         };
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Secondary)
+        {
+            (App.MainWindow as MainWindow)?.NavigateTo("statistics");
+            return;
+        }
+
+        if (result == ContentDialogResult.Primary && !item.IsUnlocked)
+        {
+            (App.MainWindow as MainWindow)?.NavigateTo("review");
+            return;
+        }
+
+        if (result == ContentDialogResult.Primary)
         {
             var picker = new FileSavePicker { SuggestedFileName = $"{item.Title.ToLowerInvariant().Replace(' ', '-')}" };
             picker.FileTypeChoices.Add("PNG image", [".png"]);
@@ -177,8 +208,17 @@ public sealed partial class AchievementsPage : Page
             if (file is not null)
             {
                 await MilestoneCardService.ExportAsync(item.Snapshot, file.Path);
+                App.Feedback.Success("Milestone card exported", $"{item.Title} was saved to {file.Name}.");
             }
         }
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var compact = e.NewSize.Width < UiLayout.MediumPageWidth;
+        Grid.SetRow(AchievementControls, compact ? 1 : 0);
+        Grid.SetColumn(AchievementControls, compact ? 0 : 1);
+        AchievementControls.HorizontalAlignment = compact ? HorizontalAlignment.Left : HorizontalAlignment.Right;
     }
 
     private void BadgeCard_Loaded(object sender, RoutedEventArgs e)
@@ -293,21 +333,23 @@ public sealed partial class AchievementsPage : Page
         animation.Duration = TimeSpan.FromMilliseconds(durationMs);
         visual.StartAnimation("Scale", animation);
     }
+
+    private static Brush ResourceBrush(string key) => (Brush)Application.Current.Resources[key];
 }
 
 public sealed class AchievementCardViewModel
 {
-    private static readonly SolidColorBrush UnlockedForeground = CreateBrush(0xFF, 0x62, 0xD1, 0x87);
-    private static readonly SolidColorBrush UnlockedBackground = CreateBrush(0x2E, 0x62, 0xD1, 0x87);
-    private static readonly SolidColorBrush UnlockedBorder = CreateBrush(0x3D, 0x62, 0xD1, 0x87);
-    private static readonly SolidColorBrush ProgressForeground = CreateBrush(0xFF, 0xF2, 0xC3, 0x6B);
-    private static readonly SolidColorBrush ProgressBackground = CreateBrush(0x2E, 0xF2, 0xC3, 0x6B);
-    private static readonly SolidColorBrush ProgressBorder = CreateBrush(0x3D, 0xF2, 0xC3, 0x6B);
-    private static readonly SolidColorBrush LockedForeground = CreateBrush(0xFF, 0xB8, 0xAF, 0xB2);
-    private static readonly SolidColorBrush LockedBackground = CreateBrush(0x24, 0xB8, 0xAF, 0xB2);
-    private static readonly SolidColorBrush LockedBorder = CreateBrush(0x22, 0xFF, 0xFF, 0xFF);
-    private static readonly SolidColorBrush ActiveCardBackground = CreateBrush(0xB3, 0x29, 0x21, 0x24);
-    private static readonly SolidColorBrush LockedCardBackground = CreateBrush(0xA6, 0x21, 0x19, 0x1D);
+    private static Brush UnlockedForeground => ResourceBrush("PremiumSuccessBrush");
+    private static Brush UnlockedBackground => ResourceBrush("AchievementUnlockedBackgroundBrush");
+    private static Brush UnlockedBorder => ResourceBrush("AchievementUnlockedBorderBrush");
+    private static Brush ProgressForeground => ResourceBrush("PremiumWarningBrush");
+    private static Brush ProgressBackground => ResourceBrush("AchievementProgressBackgroundBrush");
+    private static Brush ProgressBorder => ResourceBrush("AchievementProgressBorderBrush");
+    private static Brush LockedForeground => ResourceBrush("AchievementLockedForegroundBrush");
+    private static Brush LockedBackground => ResourceBrush("AchievementLockedBackgroundBrush");
+    private static Brush LockedBorder => ResourceBrush("AchievementLockedBorderBrush");
+    private static Brush ActiveCardBackground => ResourceBrush("AchievementActiveCardBrush");
+    private static Brush LockedCardBackground => ResourceBrush("AchievementLockedCardBrush");
 
     public AchievementCardViewModel(AchievementSnapshot snapshot)
     {
@@ -337,8 +379,5 @@ public sealed class AchievementCardViewModel
     public Visibility LockVisibility => Snapshot.IsUnlocked ? Visibility.Collapsed : Visibility.Visible;
     public Visibility TierVisibility => string.IsNullOrWhiteSpace(TierLabel) ? Visibility.Collapsed : Visibility.Visible;
 
-    private static SolidColorBrush CreateBrush(byte alpha, byte red, byte green, byte blue)
-    {
-        return new SolidColorBrush(Color.FromArgb(alpha, red, green, blue));
-    }
+    private static Brush ResourceBrush(string key) => (Brush)Application.Current.Resources[key];
 }

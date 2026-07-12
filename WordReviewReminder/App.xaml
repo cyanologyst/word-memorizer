@@ -10,6 +10,56 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="PremiumPageBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumLayerBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumSubtleBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="GlassBaseBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="GlassPanelBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="GlassRaisedBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumGlassBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PremiumGlassBorderSubtleBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PremiumAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="PremiumAccentSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumSuccessBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PremiumSuccessSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumWarningBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PremiumWarningSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PremiumDangerBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PremiumDangerSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="InteractiveHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="InteractivePressedBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+                    <SolidColorBrush x:Key="AchievementBadgeHaloBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementBadgeRingBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="AchievementBadgeBackdropBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementUnlockedBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementUnlockedBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="AchievementProgressBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementProgressBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="AchievementLockedForegroundBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="AchievementLockedBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementLockedBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="AchievementActiveCardBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementLockedCardBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="AchievementUnlockBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupGlassBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupGlassLayerBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupGlassControlBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupProgressTrackBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupChipAccentBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupChipNeutralBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupSecondaryTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupTertiaryTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupSecondaryBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupPrimaryTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="PopupSuccessSurfaceBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="PopupDetailsOverlayBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
             <SolidColorBrush x:Key="PremiumPageBackgroundBrush" Color="#A6171014" />
             <SolidColorBrush x:Key="PremiumSurfaceBrush" Color="#B3292124" />
             <SolidColorBrush x:Key="PremiumSurfaceStrongBrush" Color="#C431272A" />
@@ -21,6 +71,15 @@
             <SolidColorBrush x:Key="PopupGlassBrush" Color="#B82A2225" />
             <SolidColorBrush x:Key="PopupGlassLayerBrush" Color="#D934282C" />
             <SolidColorBrush x:Key="PopupGlassControlBrush" Color="#CC3A3033" />
+            <SolidColorBrush x:Key="PopupProgressTrackBrush" Color="#48393E" />
+            <SolidColorBrush x:Key="PopupChipAccentBrush" Color="#5B3333" />
+            <SolidColorBrush x:Key="PopupChipNeutralBrush" Color="#3A3033" />
+            <SolidColorBrush x:Key="PopupSecondaryTextBrush" Color="#D8CBCF" />
+            <SolidColorBrush x:Key="PopupTertiaryTextBrush" Color="#C7B9BD" />
+            <SolidColorBrush x:Key="PopupSecondaryBorderBrush" Color="#4A3F43" />
+            <SolidColorBrush x:Key="PopupPrimaryTextBrush" Color="#F4EEF0" />
+            <SolidColorBrush x:Key="PopupSuccessSurfaceBrush" Color="#263D30" />
+            <SolidColorBrush x:Key="PopupDetailsOverlayBrush" Color="#E62A2225" />
             <SolidColorBrush x:Key="PremiumGlassBorderBrush" Color="#30FFFFFF" />
             <SolidColorBrush x:Key="PremiumGlassBorderSubtleBrush" Color="#1FFFFFFF" />
             <SolidColorBrush x:Key="PremiumAccentBrush" Color="#FF7A5F" />
@@ -31,7 +90,35 @@
             <SolidColorBrush x:Key="PremiumWarningSoftBrush" Color="#28F2C36B" />
             <SolidColorBrush x:Key="PremiumDangerBrush" Color="#FF8B8B" />
             <SolidColorBrush x:Key="PremiumDangerSoftBrush" Color="#28FF8B8B" />
+            <SolidColorBrush x:Key="InteractiveHoverBrush" Color="#12FFFFFF" />
+            <SolidColorBrush x:Key="InteractivePressedBrush" Color="#09FFFFFF" />
+            <SolidColorBrush x:Key="AchievementBadgeHaloBrush" Color="#181F3655" />
+            <SolidColorBrush x:Key="AchievementBadgeRingBrush" Color="#44F4C768" />
+            <SolidColorBrush x:Key="AchievementBadgeBackdropBrush" Color="#121C2B44" />
+            <SolidColorBrush x:Key="AchievementUnlockedBackgroundBrush" Color="#2E62D187" />
+            <SolidColorBrush x:Key="AchievementUnlockedBorderBrush" Color="#3D62D187" />
+            <SolidColorBrush x:Key="AchievementProgressBackgroundBrush" Color="#2EF2C36B" />
+            <SolidColorBrush x:Key="AchievementProgressBorderBrush" Color="#3DF2C36B" />
+            <SolidColorBrush x:Key="AchievementLockedForegroundBrush" Color="#B8AFB2" />
+            <SolidColorBrush x:Key="AchievementLockedBackgroundBrush" Color="#24B8AFB2" />
+            <SolidColorBrush x:Key="AchievementLockedBorderBrush" Color="#22FFFFFF" />
+            <SolidColorBrush x:Key="AchievementActiveCardBrush" Color="#B3292124" />
+            <SolidColorBrush x:Key="AchievementLockedCardBrush" Color="#A621191D" />
+            <SolidColorBrush x:Key="AchievementUnlockBorderBrush" Color="#66F2C36B" />
 
+            <x:Double x:Key="Space4">4</x:Double>
+            <x:Double x:Key="Space8">8</x:Double>
+            <x:Double x:Key="Space12">12</x:Double>
+            <x:Double x:Key="Space16">16</x:Double>
+            <x:Double x:Key="Space24">24</x:Double>
+            <x:Double x:Key="Space32">32</x:Double>
+            <x:Double x:Key="RadiusSmall">4</x:Double>
+            <x:Double x:Key="RadiusMedium">6</x:Double>
+            <x:Double x:Key="RadiusLarge">8</x:Double>
+            <x:Double x:Key="IconSizeSmall">14</x:Double>
+            <x:Double x:Key="IconSizeStandard">16</x:Double>
+            <x:Double x:Key="IconSizeLarge">20</x:Double>
+            <x:Double x:Key="CompactControlHeight">32</x:Double>
             <x:Double x:Key="PageHorizontalSpacing">24</x:Double>
             <x:Double x:Key="PageVerticalSpacing">18</x:Double>
             <x:Double x:Key="SectionSpacing">14</x:Double>
@@ -157,6 +244,26 @@
                 <Setter Property="MinHeight" Value="40" />
                 <Setter Property="Padding" Value="14,0" />
                 <Setter Property="CornerRadius" Value="4" />
+            </Style>
+
+            <Style x:Key="FilterToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Setter Property="MinHeight" Value="32" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="13" />
+            </Style>
+
+            <Style x:Key="CardButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                <Setter Property="FocusVisualMargin" Value="-2" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>
