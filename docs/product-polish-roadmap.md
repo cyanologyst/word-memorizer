@@ -180,7 +180,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Wordlists page, validator/import services, storage schema, docs, tests.
 - **Risk:** High; imports and identifiers affect persistent progress.
 - **Acceptance criteria:** Valid/invalid/duplicate imports are previewed and summarized; large lists remain responsive; deletion is safe; selected state and actions remain clear at supported sizes.
-- **Status:** Not started
+- **Status:** In progress
 
 #### P2.2 Make Mistake Lab Actionable
 
@@ -253,11 +253,12 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **2026-07-13 shell and session-planning pass:** Centralized common page padding/title/subtitle resources, made destructive Wordlist actions semantically distinct, centralized the navigation map, and persisted the last safe page without attempting to resume an interrupted Review. Added a domain `ReviewSessionPlanner`, due/new/difficult estimates, tiny-list goal capping, a recommended-session action, and live custom-session summaries. Debug x64 build succeeds with zero warnings and all 16 tests pass.
 - **2026-07-13 daily-briefing pass:** Dashboard now explains the recommended workload and reason, distinguishes due/new/difficult words, moves streak into a compact status chip, and starts the recommended session in one action. Custom session setup remains available from the overflow menu.
 - **2026-07-13 Mistake Lab pass:** Moved difficulty qualification and human-readable reasons into tested domain logic. Added combined search, urgency filtering, sorting by urgency/misses/lapses/last review/alphabetical order, reason text, and double-click details. Debug x64 build succeeds with zero warnings and all 17 tests pass.
+- **2026-07-13 Wordlists workspace pass:** Added result counts, part-of-speech filtering, four sort modes, extended multi-selection, compact selected-word actions, contextual details/edit/delete commands, review metadata, list export, reversible list and bulk-word deletion, busy feedback, and an import preview with explicit duplicate handling. Duplicate list IDs can no longer silently overwrite local data. A cold start restored directly to Wordlists remains open and responsive after fixing an initialization-order crash. Debug x64 build succeeds with zero warnings and all 19 tests pass; final responsive visual QA remains pending.
 
 ## Current Implementation Focus
 
-1. Resume visual QA when Windows inspection is available and exercise the reveal/scoring guard plus all empty/no-results states.
+1. Resume visual QA when Windows inspection is available and exercise Wordlists at normal/minimum widths plus the reveal/scoring guard and empty/no-results states.
 2. Finish P0 operation failure handling and the accessibility/high-contrast audit.
-3. Continue replacing page-local values with shared design tokens and reusable styles.
-4. Stabilize shell navigation, page persistence, and caching.
-5. Begin the recommended-session planner and compact review setup with domain tests.
+3. Complete the Wordlists import/export/bulk workflow and then begin tested learning analytics for Statistics and Activity.
+4. Continue replacing page-local values with shared design tokens and reusable styles.
+5. Stabilize shell page caching and reduced-motion transitions.

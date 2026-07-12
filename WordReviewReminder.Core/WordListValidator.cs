@@ -65,6 +65,12 @@ public static class WordListValidator
 
         if (existingLists is not null)
         {
+            if (existingLists.Any(existing =>
+                    string.Equals(existing.Id, list.Id, StringComparison.OrdinalIgnoreCase)))
+            {
+                errors.Add($"A wordlist with id '{list.Id}' already exists. Change the imported id before trying again.");
+            }
+
             var existingTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var existingWord in existingLists.SelectMany(existing => existing.Words))
             {

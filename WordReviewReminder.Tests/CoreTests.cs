@@ -48,6 +48,38 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void ValidatorRejectsAnImportedListIdThatAlreadyExists()
+    {
+        var existing = NewList(new WordEntry("old-one", "Halt", null, null, null, null, 1, null));
+        var imported = NewList(new WordEntry("new-one", "Begin", null, null, null, null, 1, null));
+
+        var result = WordListValidator.Validate(imported, [existing]);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.Contains("already exists"));
+    }
+
+    [Fact]
+    public void ImportPlannerCanSkipDuplicatesAcrossAndWithinLists()
+    {
+        var existing = NewList(new WordEntry("old-one", "Halt", null, null, null, null, 1, null));
+        var imported = new WordList(1, "new-list", "New List", "en", null,
+        [
+            new WordEntry("one", "Halt", null, null, null, null, 1, null),
+            new WordEntry("two", "Begin", null, null, null, null, 2, null),
+            new WordEntry("three", " begin ", null, null, null, null, 3, null)
+        ]);
+
+        var plan = WordListImportPlanner.Create(imported, [existing], DuplicateImportPolicy.Skip);
+
+        Assert.True(plan.CanImport);
+        Assert.Equal(3, plan.OriginalWordCount);
+        Assert.Equal(1, plan.ImportWordCount);
+        Assert.Equal(2, plan.SkippedDuplicateCount);
+        Assert.Equal("Begin", plan.PreparedList!.Words.Single().Term);
+    }
+
+    [Fact]
     public void SchedulerSkipsQuietHoursAcrossMidnight()
     {
         var scheduler = new ReviewScheduler(seed: 1);
@@ -208,6 +240,36 @@ public sealed class CoreTests
             Assert.Equal(word.Notes, loaded.Notes);
             Assert.Equal(word.Difficulty, loaded.Difficulty);
             Assert.Equal(word.EnrichmentSource, loaded.EnrichmentSource);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task LocalStoreDeletesOnlyTheRequestedWordlistFile()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new LocalDataStore(root);
+            var first = NewList(new WordEntry("word-1", "First", null, null, null, null, 1, null));
+            var second = new WordList(1, "second-list", "Second", "en", null,
+            [
+                new WordEntry("word-2", "Second", null, null, null, null, 1, null)
+            ]);
+
+            await store.SaveWordListAsync(first);
+            await store.SaveWordListAsync(second);
+            await store.DeleteWordListAsync(first.Id);
+
+            var remaining = await store.LoadWordListsAsync();
+            Assert.Single(remaining);
+            Assert.Equal(second.Id, remaining[0].Id);
         }
         finally
         {

@@ -324,11 +324,43 @@ public sealed class AppDataService
         await EvaluateAchievementsAsync(raiseEvents: false);
     }
 
+    public async Task ImportWordListAsync(WordList list)
+    {
+        var validation = WordListValidator.Validate(list, WordLists);
+        if (!validation.IsValid)
+        {
+            throw new InvalidDataException(string.Join(Environment.NewLine, validation.Errors));
+        }
+
+        await Store.SaveWordListAsync(list);
+        await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: false);
+    }
+
     public async Task SaveWordListAsync(WordList list)
     {
         await Store.SaveWordListAsync(list);
         await RefreshAsync();
         await EvaluateAchievementsAsync(raiseEvents: false);
+    }
+
+    public async Task DeleteWordListAsync(string id)
+    {
+        if (IsBuiltInWordList(id))
+        {
+            throw new InvalidOperationException("Built-in wordlists can be disabled, but they cannot be deleted.");
+        }
+
+        await Store.DeleteWordListAsync(id);
+        await RefreshAsync();
+        await EvaluateAchievementsAsync(raiseEvents: false);
+    }
+
+    public bool IsBuiltInWordList(string id)
+    {
+        var seedDirectory = Path.Combine(AppContext.BaseDirectory, "Data", "Wordlists");
+        var seedPath = Path.Combine(seedDirectory, $"{LocalDataStore.SanitizeFileName(id)}.wordlist.json");
+        return File.Exists(seedPath);
     }
 
     public IReadOnlyList<MistakeWordItem> GetMistakeCandidates(int count = 100)

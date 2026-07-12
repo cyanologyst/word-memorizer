@@ -71,6 +71,18 @@ public sealed class LocalDataStore
         await JsonSerializer.SerializeAsync(stream, list, JsonOptions.Default, cancellationToken);
     }
 
+    public Task DeleteWordListAsync(string id)
+    {
+        EnsureCreated();
+        var path = Path.Combine(WordListsPath, $"{SanitizeFileName(id)}.wordlist.json");
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public async Task<UserSettings> LoadSettingsAsync(CancellationToken cancellationToken = default)
     {
         EnsureCreated();
