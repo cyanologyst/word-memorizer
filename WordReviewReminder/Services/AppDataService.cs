@@ -402,6 +402,12 @@ public sealed class AppDataService
             .ToList();
     }
 
+    public async Task<LearningAnalyticsSnapshot> GetLearningAnalyticsAsync(int rangeDays)
+    {
+        var events = await LogService.ReadAllAsync();
+        return LearningAnalytics.Build(events, WordLists.Where(list => list.IsEnabled).ToList(), rangeDays, DateTimeOffset.Now);
+    }
+
     public async Task<WordEntry> AddPersonalWordAsync(string term, WordEnrichment? enrichment = null)
     {
         var list = WordLists.FirstOrDefault(candidate => candidate.Id == "personal-words")

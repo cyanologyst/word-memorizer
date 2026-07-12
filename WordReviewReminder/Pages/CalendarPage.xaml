@@ -3,42 +3,114 @@
     x:Class="WordReviewReminder.Pages.CalendarPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
         <StackPanel Padding="{StaticResource StandardPagePadding}" Spacing="14">
-            <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Activity" />
-                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Thirteen weeks of review consistency" />
-            </StackPanel>
+            <Grid x:Name="HeaderGrid" ColumnSpacing="16" RowSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="HeaderActionColumn" Width="180" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Activity" />
+                    <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="See when you practiced and how consistently you recalled words" />
+                </StackPanel>
+                <ComboBox x:Name="RangeBox" Grid.Column="1" Header="Calendar range" SelectedIndex="2" SelectionChanged="RangeBox_SelectionChanged" AutomationProperties.Name="Activity calendar range">
+                    <x:String>4 weeks</x:String>
+                    <x:String>8 weeks</x:String>
+                    <x:String>13 weeks</x:String>
+                </ComboBox>
+            </Grid>
+
+            <Grid x:Name="SummaryGrid" ColumnSpacing="14" RowSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="SummaryColumn3" Width="*" />
+                    <ColumnDefinition x:Name="SummaryColumn4" Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="7">
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Total reviews" />
+                        <TextBlock x:Name="TotalReviewsText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock x:Name="UniqueWordsText" Style="{StaticResource PremiumCaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="7">
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Active days" />
+                        <TextBlock x:Name="ActiveDaysText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock x:Name="ConsistencyText" Style="{StaticResource PremiumCaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border x:Name="BestDayCard" Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="7">
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Best day" />
+                        <TextBlock x:Name="BestDayText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock x:Name="BestDayCaptionText" Style="{StaticResource PremiumCaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border x:Name="RecallCard" Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                    <StackPanel Spacing="7">
+                        <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Recall" />
+                        <TextBlock x:Name="RecallText" Style="{StaticResource MetricValueTextStyle}" />
+                        <TextBlock Style="{StaticResource PremiumCaptionTextStyle}" Text="Known responses" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
             <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="14">
-                    <Grid>
-                        <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Review calendar" />
-                        <TextBlock x:Name="SummaryText" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="3">
+                            <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Review calendar" />
+                            <TextBlock x:Name="CalendarPeriodText" Style="{StaticResource PremiumCaptionTextStyle}" />
+                        </StackPanel>
+                        <ProgressRing x:Name="ActivityProgress" Grid.Column="1" Width="20" Height="20" IsActive="False" Visibility="Collapsed" />
                     </Grid>
-                    <ItemsRepeater x:Name="CalendarRepeater">
-                        <ItemsRepeater.Layout>
-                            <UniformGridLayout MaximumRowsOrColumns="13" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate>
-                                <Button MinWidth="58" Height="48" Padding="6" AutomationProperties.Name="{Binding Tooltip}" Background="{Binding Background}" BorderBrush="Transparent" CornerRadius="5" ToolTipService.ToolTip="{Binding Tooltip}" Tag="{Binding}" Click="CalendarDay_Click">
-                                    <StackPanel>
-                                        <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding Day}" />
-                                        <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Count}" />
-                                    </StackPanel>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
-                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                        <TextBlock VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Less" />
-                        <Border Width="18" Height="18" Background="{StaticResource PremiumLayerBrush}" CornerRadius="3" />
-                        <Border Width="18" Height="18" Background="#594D5F" CornerRadius="3" />
-                        <Border Width="18" Height="18" Background="#8F665E" CornerRadius="3" />
-                        <Border Width="18" Height="18" Background="{StaticResource PremiumAccentBrush}" CornerRadius="3" />
-                        <TextBlock VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="More" />
-                    </StackPanel>
+
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
+                        <Grid x:Name="ActivityCalendarGrid" HorizontalAlignment="Left" />
+                    </ScrollViewer>
+
+                    <Border x:Name="EmptyActivityPanel" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                        <StackPanel Spacing="8" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE787;" FontSize="24" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Style="{StaticResource EmptyStateTitleStyle}" Text="No reviews in this period" />
+                            <TextBlock Text="Your completed review sessions will appear here." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Each cell shows review count; hover or focus for recall details." Style="{StaticResource PremiumCaptionTextStyle}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                            <TextBlock Text="0" Style="{StaticResource PremiumCaptionTextStyle}" />
+                            <Border Width="16" Height="16" Background="{StaticResource PremiumLayerBrush}" CornerRadius="3" />
+                            <TextBlock Text="1-2" Style="{StaticResource PremiumCaptionTextStyle}" />
+                            <Border Width="16" Height="16" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="3" />
+                            <TextBlock Text="3-5" Style="{StaticResource PremiumCaptionTextStyle}" />
+                            <Border Width="16" Height="16" Background="{StaticResource PremiumWarningSoftBrush}" CornerRadius="3" />
+                            <TextBlock Text="6+" Style="{StaticResource PremiumCaptionTextStyle}" />
+                            <Border Width="16" Height="16" Background="{StaticResource PremiumAccentBrush}" CornerRadius="3" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

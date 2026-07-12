@@ -281,6 +281,60 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void LearningAnalyticsRespectsLocalDateRangeAndCalculatesRecall()
+    {
+        var timeZone = TimeZoneInfo.CreateCustomTimeZone("Test +0330", TimeSpan.FromHours(3.5), "Test", "Test");
+        var now = new DateTimeOffset(2026, 7, 13, 20, 0, 0, TimeSpan.Zero);
+        var events = new List<ReviewEvent>
+        {
+            NewReview("one", ReviewAction.Known, new DateTimeOffset(2026, 7, 10, 19, 0, 0, TimeSpan.Zero)),
+            NewReview("one", ReviewAction.Later, new DateTimeOffset(2026, 7, 11, 21, 0, 0, TimeSpan.Zero)),
+            NewReview("two", ReviewAction.Known, new DateTimeOffset(2026, 7, 12, 22, 0, 0, TimeSpan.Zero)),
+            NewReview("three", ReviewAction.Skipped, new DateTimeOffset(2026, 7, 13, 18, 0, 0, TimeSpan.Zero))
+        };
+
+        var snapshot = LearningAnalytics.Build(events, [], 3, now, timeZone);
+
+        Assert.Equal(new DateTime(2026, 7, 11), snapshot.StartDate);
+        Assert.Equal(new DateTime(2026, 7, 13), snapshot.EndDate);
+        Assert.Equal(3, snapshot.TotalReviews);
+        Assert.Equal(1, snapshot.Known);
+        Assert.Equal(2, snapshot.DifficultResponses);
+        Assert.Equal(100.0 / 3, snapshot.RecallRate, 6);
+        Assert.Equal(2, snapshot.ActiveDays);
+    }
+
+    [Fact]
+    public void LearningAnalyticsSeparatesFirstAndRepeatReviewsAndComparesLists()
+    {
+        var now = new DateTimeOffset(2026, 7, 13, 12, 0, 0, TimeSpan.Zero);
+        var list = new WordList(1, "list", "Core List", "en", null,
+        [
+            new WordEntry("one", "One", null, null, null, null, 1, null),
+            new WordEntry("two", "Two", null, null, null, null, 2, null)
+        ]);
+        var events = new List<ReviewEvent>
+        {
+            NewReview("one", ReviewAction.Known, now.AddDays(-2), "list"),
+            NewReview("one", ReviewAction.Known, now.AddDays(-1), "list"),
+            NewReview("two", ReviewAction.Later, now, "list")
+        };
+
+        var snapshot = LearningAnalytics.Build(events, [list], 7, now, TimeZoneInfo.Utc);
+
+        Assert.Equal(2, snapshot.FirstReviews);
+        Assert.Equal(1, snapshot.RepeatReviews);
+        Assert.Equal(2, snapshot.UniqueWords);
+        var comparison = Assert.Single(snapshot.WordLists);
+        Assert.Equal("Core List", comparison.Title);
+        Assert.Equal(3, comparison.Reviews);
+        Assert.Equal(2, comparison.Known);
+        Assert.Equal(2, snapshot.MasteryAtStart.New);
+        Assert.Equal(1, snapshot.MasteryAtEnd.Learning);
+        Assert.Equal(1, snapshot.MasteryAtEnd.Familiar);
+    }
+
+    [Fact]
     public async Task ReviewLogRoundTripsEvents()
     {
         var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
@@ -435,6 +489,22 @@ public sealed class CoreTests
         {
             Timestamp = timestamp,
             WordListId = "test-list",
+            WordId = wordId,
+            Term = wordId,
+            Action = action
+        };
+    }
+
+    private static ReviewEvent NewReview(
+        string wordId,
+        ReviewAction action,
+        DateTimeOffset timestamp,
+        string wordListId = "test-list")
+    {
+        return new ReviewEvent
+        {
+            Timestamp = timestamp,
+            WordListId = wordListId,
             WordId = wordId,
             Term = wordId,
             Action = action
