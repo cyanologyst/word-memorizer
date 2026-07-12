@@ -106,7 +106,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Shell, all pages, overlay, shared resources.
 - **Risk:** Low to medium; native focus behavior must not be disrupted by custom styling.
 - **Acceptance criteria:** Core review is keyboard-completable; icon-only controls are named; focus is visible; state has text/icon support; reduced motion disables nonessential transitions.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P0.4 Add Missing Empty, Loading, And Error Surfaces
 
@@ -128,7 +128,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** `App.xaml`, new resource dictionaries or lightweight reusable controls.
 - **Risk:** Medium; resource changes have broad visual impact.
 - **Acceptance criteria:** Equivalent UI uses shared resources; arbitrary styling is materially reduced; dark Fluent identity and coral accent remain intact.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P1.2 Stabilize Shell And Navigation
 
@@ -158,7 +158,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Review page, word details, taskbar progress, session records, tests.
 - **Risk:** High; must not double-record events or silently alter scheduling.
 - **Acceptance criteria:** Full session is keyboard-completable; each action records once; exit is safe; summary reports counts, time, difficult changes, mastery movement, and review-again options.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P1.5 Turn Dashboard Into A Daily Briefing
 
@@ -180,7 +180,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Wordlists page, validator/import services, storage schema, docs, tests.
 - **Risk:** High; imports and identifiers affect persistent progress.
 - **Acceptance criteria:** Valid/invalid/duplicate imports are previewed and summarized; large lists remain responsive; deletion is safe; selected state and actions remain clear at supported sizes.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P2.2 Make Mistake Lab Actionable
 
@@ -200,7 +200,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Core analytics, Statistics, Activity, tests.
 - **Risk:** High; definitions and date boundaries can mislead if incorrect.
 - **Acceptance criteria:** Every chart answers a named question; calculations are documented/tested across time zones and sparse data; calendar has month/weekday context and keyboard details.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P2.4 Searchable Review History
 
@@ -210,7 +210,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Logs page, `ReviewLogService`, tests.
 - **Risk:** Medium; pagination must preserve chronological correctness.
 - **Acceptance criteria:** Combined filters and no-results states work; large logs remain responsive; export names the destination and scope.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P2.5 Organize Settings And Support
 
@@ -220,7 +220,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Settings, About, settings model/migration, assembly metadata.
 - **Risk:** Medium; defaults and migrations must preserve existing users' choices.
 - **Acceptance criteria:** Settings are searchable and resettable; changes persist; restart requirements are explicit; About exposes version, data path, privacy, licenses, update state, and support diagnostics.
-- **Status:** In progress
+- **Status:** Complete
 
 ### P3 - Optional Delight And Advanced Customization
 
@@ -267,11 +267,12 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **2026-07-13 rich-details pass:** Expanded the shared word-details dialog with responsive sizing, pronunciation, tags, examples, synonyms, antonyms, editable notes, wordlist/enrichment provenance, review counts, last-reviewed time, and due status. Notes and audio have explicit success/failure feedback and the dialog uses semantic text resources instead of page-local colors. Debug x64 build succeeds with zero warnings and all 25 tests pass; final dialog interaction QA remains pending.
 - **2026-07-13 daily-goal pass:** Replaced the fixed 20-review target with a persisted, bounded daily goal in Settings. Dashboard progress and remaining-count language, Statistics, and weekly activity normalization all consume the same setting; existing users retain the 20-review default. Settings round-trip coverage includes the new value. Debug x64 build succeeds with zero warnings and all 25 tests pass.
 - **2026-07-13 backup-safety pass:** Moved the pure backup/archive service into Core and added round-trip coverage for settings plus wordlists and a malicious path-traversal archive test. Restore now validates extracted paths against a separator-terminated staging root before writing any user data. Debug x64 build succeeds with zero warnings and all 27 tests pass.
+- **2026-07-13 final interaction pass:** Captured the complete live accessibility tree and accepted screenshots for every major page. A temporary one-word session proved the reveal-before-score guard, Space reveal, `1` scoring, pause, resume, and completion summary; the original progress, achievement, settings, and JSONL history files were restored before final capture. Fixed a screen-reader leak that exposed the hidden meaning, refreshed action help text after reveal, removed the redundant pause action from the paused state, and moved focus intentionally between setup, reveal, pause, resume, and completion. Ctrl+K search and Enter activation now complete the command-palette workflow.
+- **2026-07-13 final responsive and performance pass:** Verified the 1426 x 836 workspace and the native approximately 746 x 633 minimum on representative dense pages. Activity now distributes 13 weeks across available width, preserves horizontal overflow at minimum width, and queries a bounded date range instead of loading the full history when a day is opened. Review and Wordlists use explicit short-window scroll extents so controls and primary actions remain reachable instead of being clipped. The accepted current-run evidence is stored in `docs/screenshots/product-polish-after/`, with the prior full-app audit in `docs/screenshots/product-polish-before/`.
+- **2026-07-13 release gate:** The x64 Release application build succeeds with zero warnings and zero errors. All 27 Release tests pass. The bundled source wordlist parses as valid JSON with exactly 550 non-empty terms and 550 unique IDs. `git diff --check` passes, every P0-P2 roadmap item is complete, and the only deferred item is the intentionally excluded P3.2 appearance/density expansion.
 
-## Current Implementation Focus
+## Final State And Deferred Work
 
-1. Resume visual QA when Windows inspection is available and exercise Wordlists at normal/minimum widths plus the reveal/scoring guard and empty/no-results states.
-2. Finish P0 operation failure handling and the accessibility/high-contrast audit.
-3. Finish visual QA for Wordlists, Statistics, Activity, Logs, Settings, and About, then complete review-session exit and summary behavior.
-4. Continue replacing page-local values with shared design tokens and reusable styles.
-5. Stabilize shell page caching and reduced-motion transitions.
+1. P0, P1, and P2 acceptance criteria are implemented and validated by live interaction, current-run screenshots, source inspection, and automated tests.
+2. P3.2 remains intentionally deferred: a theme picker, light theme, and alternate density modes would multiply the visual QA surface and were outside the selected dark-product direction.
+3. Windows high-contrast resources, accessible names, live regions, keyboard focus, reduced-motion gates, and collapsed-navigation labels were inspected. A final smoke test with the user's preferred third-party screen reader and Windows high-contrast mode remains a release-environment check rather than an application-code blocker.
