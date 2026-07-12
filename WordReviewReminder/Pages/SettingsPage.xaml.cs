@@ -210,9 +210,12 @@ public sealed partial class SettingsPage : Page
 
     private async void SaveButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var sessionPreferences = _resetSessionPreferences ? new UserSettings() : App.Data.Settings;
-        var settings = new UserSettings
+        SaveSettingsButton.IsEnabled = false;
+        try
         {
+            var sessionPreferences = _resetSessionPreferences ? new UserSettings() : App.Data.Settings;
+            var settings = new UserSettings
+            {
             ReminderIntervalMinutes = Math.Max(1, (int)IntervalBox.Value),
             NotificationMode = NotificationModeBox.SelectedIndex switch
             {
@@ -242,16 +245,26 @@ public sealed partial class SettingsPage : Page
             LastPageTag = App.Data.Settings.LastPageTag,
             PopupLeft = App.Data.Settings.PopupLeft,
             PopupTop = App.Data.Settings.PopupTop
-        };
+            };
 
-        await App.Data.SaveSettingsAsync(settings);
-        _resetSessionPreferences = false;
-        StartupService.SetStartWithWindows(settings.StartWithWindows);
-        StatusText.Text = "Saved";
-        App.Feedback.Success("Settings saved", "Reminder and review preferences are up to date.");
-        UpdatePreview(markDirty: false);
-        await Task.Delay(850);
-        await HideSaveBarAsync();
+            await App.Data.SaveSettingsAsync(settings);
+            _resetSessionPreferences = false;
+            StartupService.SetStartWithWindows(settings.StartWithWindows);
+            StatusText.Text = "Saved";
+            App.Feedback.Success("Settings saved", "Reminder and review preferences are up to date.");
+            UpdatePreview(markDirty: false);
+            await Task.Delay(850);
+            await HideSaveBarAsync();
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = "Settings were not saved";
+            App.Feedback.Error("Settings could not be saved", exception.Message);
+        }
+        finally
+        {
+            SaveSettingsButton.IsEnabled = true;
+        }
     }
 
     private void SettingsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -353,11 +366,21 @@ public sealed partial class SettingsPage : Page
     {
         var originalVoice = App.Data.Settings.VoiceName;
         var originalRate = App.Data.Settings.SpeechRate;
-        App.Data.Settings.VoiceName = VoiceBox.SelectedItem?.ToString();
-        App.Data.Settings.SpeechRate = SpeechRateSlider.Value;
-        await _speech.SpeakAsync("Vocabulary review ready");
-        App.Data.Settings.VoiceName = originalVoice;
-        App.Data.Settings.SpeechRate = originalRate;
+        try
+        {
+            App.Data.Settings.VoiceName = VoiceBox.SelectedItem?.ToString();
+            App.Data.Settings.SpeechRate = SpeechRateSlider.Value;
+            await _speech.SpeakAsync("Vocabulary review ready");
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Voice test failed", exception.Message);
+        }
+        finally
+        {
+            App.Data.Settings.VoiceName = originalVoice;
+            App.Data.Settings.SpeechRate = originalRate;
+        }
     }
 
     private async void BackupButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

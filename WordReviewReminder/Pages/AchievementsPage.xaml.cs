@@ -30,8 +30,15 @@ public sealed partial class AchievementsPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await App.Data.RefreshAchievementsAsync();
-        LoadAchievements();
+        try
+        {
+            await App.Data.RefreshAchievementsAsync();
+            LoadAchievements();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Achievements could not be loaded", exception.Message);
+        }
     }
 
     private void LoadAchievements()
@@ -207,8 +214,15 @@ public sealed partial class AchievementsPage : Page
             var file = await picker.PickSaveFileAsync();
             if (file is not null)
             {
-                await MilestoneCardService.ExportAsync(item.Snapshot, file.Path);
-                App.Feedback.Success("Milestone card exported", $"{item.Title} was saved to {file.Name}.");
+                try
+                {
+                    await MilestoneCardService.ExportAsync(item.Snapshot, file.Path);
+                    App.Feedback.Success("Milestone card exported", $"{item.Title} was saved to {file.Name}.");
+                }
+                catch (Exception exception)
+                {
+                    App.Feedback.Error("Milestone card could not be exported", exception.Message);
+                }
             }
         }
     }

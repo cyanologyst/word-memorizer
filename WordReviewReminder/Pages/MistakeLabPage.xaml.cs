@@ -17,13 +17,28 @@ public sealed partial class MistakeLabPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await App.Data.RefreshAsync();
-        _items = App.Data.GetMistakeCandidates();
-        QueueCountText.Text = _items.Count.ToString("N0");
-        HighUrgencyText.Text = _items.Count(item => item.Urgency == "High").ToString("N0");
-        UrgencyFilter.SelectedIndex = 0;
-        SortBox.SelectedIndex = 0;
-        Render();
+        try
+        {
+            await App.Data.RefreshAsync();
+            _items = App.Data.GetMistakeCandidates();
+            QueueCountText.Text = _items.Count.ToString("N0");
+            HighUrgencyText.Text = _items.Count(item => item.Urgency == "High").ToString("N0");
+            if (UrgencyFilter.SelectedIndex < 0)
+            {
+                UrgencyFilter.SelectedIndex = 0;
+            }
+
+            if (SortBox.SelectedIndex < 0)
+            {
+                SortBox.SelectedIndex = 0;
+            }
+
+            Render();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Mistake Lab could not be loaded", exception.Message);
+        }
     }
 
     private void UrgencyFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -81,7 +96,14 @@ public sealed partial class MistakeLabPage : Page
     {
         if (MistakesView.SelectedItem is MistakeWordItem item)
         {
-            await WordDetailsDialog.ShowAsync(this, item.Word);
+            try
+            {
+                await WordDetailsDialog.ShowAsync(this, item.Word);
+            }
+            catch (Exception exception)
+            {
+                App.Feedback.Error("Word details could not be opened", exception.Message);
+            }
         }
     }
 

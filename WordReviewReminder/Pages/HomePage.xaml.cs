@@ -16,7 +16,9 @@ public sealed partial class HomePage : Page
 
     public async Task RefreshAsync()
     {
-        await App.Data.RefreshAsync();
+        try
+        {
+            await App.Data.RefreshAsync();
         _recommendedPlan = App.Data.PlanReviewSession(App.Data.Settings.DefaultSessionSize);
         DueReviewText.Text = _recommendedPlan.DueCount.ToString("N0");
         ReviewedTodayText.Text = $"{App.Data.ReviewedToday:N0}/{App.Data.DailyGoalCount}";
@@ -44,8 +46,13 @@ public sealed partial class HomePage : Page
             : "Review unavailable";
         var enabledLists = App.Data.WordLists.Where(list => list.IsEnabled).ToList();
         EnabledListsRepeater.ItemsSource = enabledLists;
-        NoEnabledListsText.Visibility = enabledLists.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        ActivityRepeater.ItemsSource = App.Data.GetWeeklyActivity();
+        NoEnabledListsPanel.Visibility = enabledLists.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            ActivityRepeater.ItemsSource = App.Data.GetWeeklyActivity();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Dashboard could not be refreshed", exception.Message);
+        }
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -102,6 +109,11 @@ public sealed partial class HomePage : Page
     private void CustomizeReviewButton_Click(object sender, RoutedEventArgs e)
     {
         (App.MainWindow as MainWindow)?.NavigateTo("review");
+    }
+
+    private void OpenWordlistsButton_Click(object sender, RoutedEventArgs e)
+    {
+        (App.MainWindow as MainWindow)?.NavigateTo("wordlists");
     }
 
     private void MiniButton_Click(object sender, RoutedEventArgs e)

@@ -263,7 +263,7 @@
         <Border x:Name="SaveBar" VerticalAlignment="Bottom" Padding="24,12" Background="{StaticResource GlassRaisedBrush}" BorderBrush="{StaticResource PremiumGlassBorderBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                 <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" AutomationProperties.Name="Save settings" Click="SaveButton_Click" />
+                <Button x:Name="SaveSettingsButton" Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" AutomationProperties.Name="Save settings" Click="SaveButton_Click" />
             </StackPanel>
         </Border>
     </Grid>

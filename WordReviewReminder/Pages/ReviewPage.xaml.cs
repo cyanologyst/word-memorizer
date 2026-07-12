@@ -50,24 +50,32 @@ public sealed partial class ReviewPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await App.Data.RefreshAsync();
-        SessionWordListBox.ItemsSource = new[] { new WordListOption(null, "All enabled wordlists") }
-            .Concat(App.Data.WordLists.Where(list => list.IsEnabled).Select(list => new WordListOption(list.Id, list.Title)))
-            .ToList();
-        SessionWordListBox.SelectedItem = (SessionWordListBox.ItemsSource as IEnumerable<WordListOption>)?
-            .FirstOrDefault(item => string.Equals(item.Id, App.Data.Settings.LastSessionWordListId, StringComparison.OrdinalIgnoreCase));
-        SessionWordListBox.SelectedIndex = SessionWordListBox.SelectedIndex < 0 ? 0 : SessionWordListBox.SelectedIndex;
-        SessionGoalBox.Value = Math.Clamp(App.Data.Settings.LastSessionGoal, 1, 100);
-        SessionModeBox.SelectedIndex = App.Data.Settings.LastSessionDifficultOnly ? 1 : 0;
-        TimedSessionToggle.IsOn = App.Data.Settings.LastSessionTimed;
-        FocusModeToggle.IsOn = App.Data.Settings.LastSessionFocusMode;
-        UpdateSessionPlans();
-
-        if (_pendingOptions is not null)
+        try
         {
-            ApplyOptionsToControls(_pendingOptions);
-            await StartSessionAsync(_pendingOptions);
-            _pendingOptions = null;
+            await App.Data.RefreshAsync();
+            SessionWordListBox.ItemsSource = new[] { new WordListOption(null, "All enabled wordlists") }
+                .Concat(App.Data.WordLists.Where(list => list.IsEnabled).Select(list => new WordListOption(list.Id, list.Title)))
+                .ToList();
+            SessionWordListBox.SelectedItem = (SessionWordListBox.ItemsSource as IEnumerable<WordListOption>)?
+                .FirstOrDefault(item => string.Equals(item.Id, App.Data.Settings.LastSessionWordListId, StringComparison.OrdinalIgnoreCase));
+            SessionWordListBox.SelectedIndex = SessionWordListBox.SelectedIndex < 0 ? 0 : SessionWordListBox.SelectedIndex;
+            SessionGoalBox.Value = Math.Clamp(App.Data.Settings.LastSessionGoal, 1, 100);
+            SessionModeBox.SelectedIndex = App.Data.Settings.LastSessionDifficultOnly ? 1 : 0;
+            TimedSessionToggle.IsOn = App.Data.Settings.LastSessionTimed;
+            FocusModeToggle.IsOn = App.Data.Settings.LastSessionFocusMode;
+            UpdateSessionPlans();
+
+            if (_pendingOptions is not null)
+            {
+                ApplyOptionsToControls(_pendingOptions);
+                await StartSessionAsync(_pendingOptions);
+                _pendingOptions = null;
+            }
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Review could not be prepared", exception.Message);
+            SessionSetupPanel.Visibility = Visibility.Visible;
         }
     }
 
@@ -368,8 +376,15 @@ public sealed partial class ReviewPage : Page
     {
         if (_currentWord is not null)
         {
-            await _speech.SpeakAsync(_currentWord.Term);
-            await App.Data.RecordPronunciationAsync(_currentWord);
+            try
+            {
+                await _speech.SpeakAsync(_currentWord.Term);
+                await App.Data.RecordPronunciationAsync(_currentWord);
+            }
+            catch (Exception exception)
+            {
+                App.Feedback.Error("Pronunciation is unavailable", exception.Message);
+            }
         }
     }
 

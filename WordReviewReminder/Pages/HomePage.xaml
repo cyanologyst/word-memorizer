@@ -161,14 +161,20 @@
                                     </DataTemplate>
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
-                            <TextBlock
-                                x:Name="NoEnabledListsText"
-                                HorizontalAlignment="Center"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="No wordlists are enabled. Open Wordlists to choose one."
-                                TextAlignment="Center"
-                                TextWrapping="WrapWholeWords"
-                                Visibility="Collapsed" />
+                            <StackPanel x:Name="NoEnabledListsPanel" Spacing="8" HorizontalAlignment="Center" Visibility="Collapsed">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="No wordlists are enabled. Choose a list or import one to begin."
+                                    TextAlignment="Center"
+                                    TextWrapping="WrapWholeWords" />
+                                <Button HorizontalAlignment="Center" AutomationProperties.Name="Open wordlists to enable or import vocabulary" Click="OpenWordlistsButton_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8D2;" />
+                                        <TextBlock Text="Open Wordlists" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </Grid>

@@ -21,7 +21,14 @@ public sealed partial class WordlistsPage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await RefreshAsync();
+        try
+        {
+            await RefreshAsync();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Vocabulary library could not be loaded", exception.Message);
+        }
     }
 
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -560,12 +567,24 @@ public sealed partial class WordlistsPage : Page
             return;
         }
 
-        _selectedList.IsEnabled = EnableSelectedToggle.IsOn;
-        await App.Data.SaveWordListAsync(_selectedList);
-        StatusText.Text = EnableSelectedToggle.IsOn ? "List enabled" : "List disabled";
-        App.Feedback.Show(
-            EnableSelectedToggle.IsOn ? "Wordlist enabled" : "Wordlist disabled",
-            $"{_selectedList.Title} is {(EnableSelectedToggle.IsOn ? "included in" : "excluded from")} review sessions.");
+        var previous = _selectedList.IsEnabled;
+        try
+        {
+            _selectedList.IsEnabled = EnableSelectedToggle.IsOn;
+            await App.Data.SaveWordListAsync(_selectedList);
+            StatusText.Text = EnableSelectedToggle.IsOn ? "List enabled" : "List disabled";
+            App.Feedback.Show(
+                EnableSelectedToggle.IsOn ? "Wordlist enabled" : "Wordlist disabled",
+                $"{_selectedList.Title} is {(EnableSelectedToggle.IsOn ? "included in" : "excluded from")} review sessions.");
+        }
+        catch (Exception exception)
+        {
+            _selectedList.IsEnabled = previous;
+            _loading = true;
+            EnableSelectedToggle.IsOn = previous;
+            _loading = false;
+            App.Feedback.Error("Wordlist setting was not saved", exception.Message);
+        }
     }
 
     private async Task<WordList> GetOrCreatePersonalListAsync()

@@ -96,7 +96,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Wordlists, Logs, Settings, `AppDataService`, new feedback service/control.
 - **Risk:** Medium; undo must preserve identifiers and review history safely.
 - **Acceptance criteria:** Destructive actions are explicit; reversible deletes can be undone; common file operations surface success and failure without crashing.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P0.3 Establish Accessibility Baseline
 
@@ -116,7 +116,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Shared resources/components and every data page.
 - **Risk:** Low.
 - **Acceptance criteria:** Dashboard, Review, Mistake Lab, Wordlists, Statistics, Activity, Logs, and Achievements each exercise populated and empty/no-results states; I/O pages exercise errors.
-- **Status:** In progress
+- **Status:** Complete
 
 ### P1 - Design System, Shell, And Core Learning
 
@@ -168,7 +168,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Home page, session planner, analytics aggregation.
 - **Risk:** Medium; summaries must remain honest with sparse history.
 - **Acceptance criteria:** Page answers what to do, why, due load, today progress, and recent change at a glance; new-user state provides one clear start action.
-- **Status:** In progress
+- **Status:** Complete
 
 ### P2 - Productive Data Workspaces And Feedback
 
@@ -190,7 +190,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **Likely files/systems:** Mistake Lab, domain qualification/aggregation, tests.
 - **Risk:** Medium; qualification definitions must be documented and stable.
 - **Acceptance criteria:** Every row explains inclusion; sorting/filtering/search work together; empty/completed states offer a useful next step; qualification logic is tested.
-- **Status:** In progress
+- **Status:** Complete
 
 #### P2.3 Learning-Focused Statistics And Activity
 
@@ -260,6 +260,7 @@ Status values: `Not started`, `In progress`, `Complete`, `Deferred`.
 - **2026-07-13 review completion pass:** Added a tested retry-only session filter and persisted the most recent custom goal/list/difficulty/timer/focus choices. Active review now guards rapid duplicate scoring, never repeats exhausted candidates to pad a goal, exposes pause/resume and confirmed early exit, excludes paused time from response/summary timing, records partial sessions safely, progressively reveals examples/related words/notes, and ends with recall metrics, mastery movement, retry-missed, another-session, and done actions. Normal startup still refuses to resume an interrupted review. Both setup and a one-word active card survive dedicated runtime launches. Debug x64 build succeeds with zero warnings and all 25 tests pass; interactive keyboard/pause/exit/summary QA remains pending.
 - **2026-07-13 shell lifetime pass:** Enabled native Frame caching for stable pages so searches, filters, time ranges, selection, and scroll context survive navigation while data refreshes on return. Review remains uncached and excluded from startup restoration. Logs preserves its selected library when refreshing cached content, and Settings no longer discards unsaved controls simply because the user switches pages. The app cold-starts responsive with no new fatal log. Debug x64 build succeeds with zero warnings and all 25 tests pass; final collapsed-navigation keyboard/tooltips QA remains pending.
 - **2026-07-13 design-token and achievement pass:** Expanded the shared system with spacing, radius, icon/control size, interaction-state, achievement-state, overlay, and high-contrast resources; moved achievement and reminder-card colors out of page code. Achievements now has recommended/closest/recent/title sorting, semantically separate locked and in-progress filters, an empty-filter state, responsive controls, export feedback, and learning actions from details. Reduced-motion gates remain in place. The page survives a direct cold start with no fatal log. Debug x64 build succeeds with zero warnings and all 25 tests pass; final visual/high-contrast exercise remains pending.
+- **2026-07-13 resilience and empty-state pass:** Added a post-startup nonfatal UI exception boundary plus targeted failure feedback for Dashboard, Review, Mistake Lab, Wordlists, Settings, speech, achievement loading/export, and enable-state rollback. Settings saves now disable re-entry and preserve unsaved state on failure. Dashboard now sends an empty library directly to Wordlists. Destructive word/list actions remain confirmed and undoable, and every required data page has populated, empty/no-results, and loading or recovery behavior. Debug x64 build succeeds with zero warnings and all 25 tests pass.
 
 ## Current Implementation Focus
 

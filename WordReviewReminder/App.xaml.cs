@@ -28,7 +28,19 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        UnhandledException += (_, args) => LogFatalException(args.Exception);
+        UnhandledException += App_UnhandledException;
+    }
+
+    private static void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs args)
+    {
+        LogFatalException(args.Exception);
+        if (MainWindow is null)
+        {
+            return;
+        }
+
+        args.Handled = true;
+        Feedback.Error("Something went wrong", "The action could not be completed. Your saved review data was not removed.");
     }
 
     /// <summary>
