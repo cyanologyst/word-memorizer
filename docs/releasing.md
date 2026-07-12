@@ -1,6 +1,6 @@
 # Releasing Word Review Reminder
 
-Word Review Reminder is distributed as both a signed x64 MSIX and a signed x64 MSI. App Installer checks MSIX releases for updates at launch every six hours and also registers a background update check. The MSI provides a traditional per-machine install and supports major upgrades when users run a newer MSI.
+Word Review Reminder is distributed as a signed x64 setup bundle, MSI, and MSIX. The setup bundle is the recommended consumer download because it installs the official Microsoft Windows App Runtime prerequisite before the MSI. App Installer checks MSIX releases for updates at launch every six hours and also registers a background update check. The MSI supports managed per-machine deployment, repair, and major upgrades.
 
 ## One-time setup
 
@@ -28,6 +28,7 @@ The command creates these files under `artifacts/release`:
 
 - `WordReviewReminder-x64.msix`
 - `WordReviewReminder-x64.msi`
+- `WordReviewReminder-Setup-x64.exe`
 - `WordReviewReminder.appinstaller`
 - `WordReviewReminder.cer`
 - `SHA256SUMS.txt`
@@ -43,7 +44,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow tests the app, builds and signs both installers with the configured certificate, generates the App Installer feed, and uploads all release assets. Keep the same package identity, publisher, MSI upgrade code, and signing certificate across releases.
+The release workflow tests the app, builds and signs the setup bundle, MSI, and MSIX with the configured certificate, generates the App Installer feed, and uploads all release assets. Burn bundles are signed in two stages: the detached engine is signed first, then reattached before the complete bundle is signed. Keep the same package identity, publisher, MSI and bundle upgrade codes, and signing certificate across releases.
 
 The App Installer URL remains stable:
 

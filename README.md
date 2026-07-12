@@ -42,7 +42,13 @@ dotnet test .\WordReviewReminder.Tests\WordReviewReminder.Tests.csproj -p:Platfo
 
 ## Install And Update
 
-Production releases provide two signed x64 installers. Use `WordReviewReminder.appinstaller` for automatic Windows update checks at launch and in the background, or use `WordReviewReminder-x64.msi` for a traditional per-machine installation. The About page also provides a manual update check for App Installer releases.
+Production releases provide three signed x64 installation paths:
+
+- `WordReviewReminder-Setup-x64.exe` is the recommended installer. It includes Microsoft's official Windows App Runtime prerequisite and provides install, repair, upgrade, and uninstall maintenance.
+- `WordReviewReminder-x64.msi` is intended for managed or enterprise deployment where Windows App Runtime 1.8 is already provisioned.
+- `WordReviewReminder.appinstaller` provides MSIX installation and automatic Windows update checks at launch and in the background.
+
+The setup and MSI create Start menu launch and uninstall entries and register a standard Apps & Features maintenance experience. The About page also provides a manual update check for App Installer releases.
 
 Release signing, local packaging, GitHub Actions secrets, and version-tag instructions are documented in [docs/releasing.md](docs/releasing.md).
 

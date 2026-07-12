@@ -14,6 +14,8 @@ $project = Join-Path $repoRoot "WordReviewReminder\WordReviewReminder.csproj"
 $certificate = [System.IO.Path]::GetFullPath($CertificatePath)
 $output = [System.IO.Path]::GetFullPath($OutputDirectory)
 $template = Join-Path $repoRoot "installer\WordReviewReminder.appinstaller.template"
+$parsedVersion = [Version]$Version
+$semanticVersion = "$($parsedVersion.Major).$($parsedVersion.Minor).$($parsedVersion.Build)"
 
 if (-not (Test-Path -LiteralPath $certificate)) {
     throw "Signing certificate not found: $certificate"
@@ -43,6 +45,9 @@ $arguments = @(
     "-p:AppxPackageSigningEnabled=true",
     "-p:PackageCertificateThumbprint=$($signingCertificate.Thumbprint)",
     "-p:AppxPackageVersion=$Version",
+    "-p:Version=$semanticVersion",
+    "-p:AssemblyVersion=$Version",
+    "-p:FileVersion=$Version",
     "-p:AppxBundle=Never",
     "-p:AppxSymbolPackageEnabled=false",
     "-p:DebugSymbols=false",
@@ -86,10 +91,20 @@ if ($LASTEXITCODE -ne 0) {
 }
 $msiPath = Join-Path $output "WordReviewReminder-x64.msi"
 
+& (Join-Path $PSScriptRoot "Build-Setup.ps1") `
+    -Version $Version `
+    -CertificateThumbprint $signingCertificate.Thumbprint `
+    -MsiPath $msiPath `
+    -OutputDirectory $output
+if ($LASTEXITCODE -ne 0) {
+    throw "Setup bundle build failed with exit code $LASTEXITCODE."
+}
+$setupPath = Join-Path $output "WordReviewReminder-Setup-x64.exe"
+
 $cerPath = Join-Path $output "WordReviewReminder.cer"
 Export-Certificate -Cert $signingCertificate -FilePath $cerPath -Force | Out-Null
 
-$checksums = Get-FileHash -Algorithm SHA256 -LiteralPath $msixPath, $msiPath, $appInstallerPath, $cerPath
+$checksums = Get-FileHash -Algorithm SHA256 -LiteralPath $setupPath, $msixPath, $msiPath, $appInstallerPath, $cerPath
 $checksumPath = Join-Path $output "SHA256SUMS.txt"
 $checksumLines = $checksums | ForEach-Object { "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)" }
 [System.IO.File]::WriteAllLines($checksumPath, $checksumLines, [System.Text.UTF8Encoding]::new($false))

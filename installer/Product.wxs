@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package
       Name="Word Review Reminder"
       Manufacturer="cyanologyst"
@@ -11,7 +12,9 @@
       Compressed="yes"
       Scope="perMachine">
 
-    <SummaryInformation Description="Word Review Reminder installer" />
+    <SummaryInformation
+        Description="Word Review Reminder setup"
+        Manufacturer="cyanologyst" />
     <MajorUpgrade
         DowngradeErrorMessage="A newer version of Word Review Reminder is already installed."
         Schedule="afterInstallInitialize" />
@@ -20,7 +23,36 @@
     <Icon Id="ProductIcon" SourceFile="$(var.PublishDir)\Assets\AppIcon.ico" />
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/cyanologyst/word-memorizer" />
-    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/cyanologyst/word-memorizer/issues" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/cyanologyst/word-memorizer/releases" />
+    <Property Id="ARPCOMMENTS" Value="A calm Windows 11 vocabulary companion." />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Word Review Reminder is ready to help make vocabulary review part of your day." />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Word Review Reminder" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WixShellExecTarget" Value="[#MainExecutable]" />
+
+    <ui:WixUI
+        Id="WixUI_InstallDir"
+        InstallDirectory="INSTALLFOLDER"
+        ExtendedPathValidation="yes" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.InstallerDir)\License.rtf" />
+
+    <CustomAction
+        Id="LaunchApplication"
+        BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+        DllEntry="WixShellExec"
+        Execute="immediate"
+        Return="ignore"
+        Impersonate="yes" />
+    <UI>
+      <Publish
+          Dialog="ExitDialog"
+          Control="Finish"
+          Event="DoAction"
+          Value="LaunchApplication"
+          Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed" />
+    </UI>
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="CompanyFolder" Name="cyanologyst">
@@ -34,14 +66,28 @@
 
     <Feature Id="MainFeature" Title="Word Review Reminder" Level="1">
       <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentRef Id="MainExecutableComponent" />
       <ComponentRef Id="ApplicationShortcut" />
     </Feature>
   </Package>
 
   <Fragment>
     <ComponentGroup Id="ApplicationFiles" Directory="INSTALLFOLDER">
-      <Files Include="$(var.PublishDir)\**" />
+      <Files Include="$(var.PublishDir)\**">
+        <Exclude Files="$(var.PublishDir)\WordReviewReminder.exe" />
+      </Files>
     </ComponentGroup>
+
+    <Component
+        Id="MainExecutableComponent"
+        Directory="INSTALLFOLDER"
+        Guid="5D537C03-58C1-41A2-9569-CB54489D4F2C">
+      <File
+          Id="MainExecutable"
+          Source="$(var.PublishDir)\WordReviewReminder.exe"
+          KeyPath="yes"
+          Checksum="yes" />
+    </Component>
   </Fragment>
 
   <Fragment>
@@ -53,6 +99,12 @@
           Target="[INSTALLFOLDER]WordReviewReminder.exe"
           WorkingDirectory="INSTALLFOLDER"
           Icon="ProductIcon" />
+      <Shortcut
+          Id="UninstallShortcut"
+          Name="Uninstall Word Review Reminder"
+          Description="Remove Word Review Reminder from this PC"
+          Target="[System64Folder]msiexec.exe"
+          Arguments="/x [ProductCode]" />
       <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
       <RegistryValue
           Root="HKLM"

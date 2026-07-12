@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle
+      Name="Word Review Reminder"
+      Manufacturer="cyanologyst"
+      Version="$(var.BundleVersion)"
+      UpgradeCode="0F26830E-A4E3-461A-BE01-A91B9A778BF4"
+      IconSourceFile="$(var.IconPath)"
+      Compressed="yes">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          Theme="rtfLargeLicense"
+          LicenseFile="$(var.LicensePath)"
+          LogoFile="$(var.LogoPath)"
+          ShowVersion="yes"
+          SuppressOptionsUI="yes"
+          LaunchTarget="[ProgramFiles64Folder]cyanologyst\Word Review Reminder\WordReviewReminder.exe"
+          LaunchWorkingFolder="[ProgramFiles64Folder]cyanologyst\Word Review Reminder" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <ExePackage
+          Id="WindowsAppRuntime"
+          SourceFile="$(var.RuntimeInstaller)"
+          InstallArguments="--quiet"
+          RepairArguments="--quiet"
+          UninstallArguments="--quiet"
+          DetectCondition="0"
+          PerMachine="yes"
+          Permanent="yes"
+          Vital="yes" />
+      <MsiPackage
+          Id="WordReviewReminderMsi"
+          SourceFile="$(var.MsiPath)"
+          Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

@@ -10,7 +10,7 @@
   <Identity
     Name="cyanologyst.WordReviewReminder"
     Publisher="CN=cyanologyst"
-    Version="1.0.0.0" />
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="8D196906-F452-4788-B7DE-0E40FF24B160" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

@@ -25,6 +25,16 @@ if ($LASTEXITCODE -ne 0) {
     throw "WiX tool restore failed with exit code $LASTEXITCODE."
 }
 
+& dotnet wix extension add -g WixToolset.UI.wixext/6.0.2
+if ($LASTEXITCODE -ne 0) {
+    throw "WiX UI extension restore failed with exit code $LASTEXITCODE."
+}
+
+& dotnet wix extension add -g WixToolset.Util.wixext/6.0.2
+if ($LASTEXITCODE -ne 0) {
+    throw "WiX utility extension restore failed with exit code $LASTEXITCODE."
+}
+
 $publishArguments = @(
     "publish", $project,
     "-c", "Release",
@@ -33,8 +43,11 @@ $publishArguments = @(
     "-o", $publish,
     "-p:Platform=x64",
     "-p:WindowsPackageType=None",
-    "-p:WindowsAppSDKSelfContained=true",
+    "-p:WindowsAppSDKSelfContained=false",
     "-p:GenerateAppxPackageOnBuild=false",
+    "-p:Version=$msiVersion",
+    "-p:AssemblyVersion=$Version",
+    "-p:FileVersion=$Version",
     "-p:DebugSymbols=false",
     "-p:DebugType=None"
 )
@@ -52,6 +65,10 @@ if (-not (Test-Path -LiteralPath (Join-Path $publish "WordReviewReminder.exe")))
     -arch x64 `
     -d "ProductVersion=$msiVersion" `
     -d "PublishDir=$publish" `
+    -d "InstallerDir=$repoRoot\installer" `
+    -ext WixToolset.UI.wixext `
+    -ext WixToolset.Util.wixext `
+    -culture en-US `
     -pdbtype none `
     -out $msiPath
 if ($LASTEXITCODE -ne 0) {

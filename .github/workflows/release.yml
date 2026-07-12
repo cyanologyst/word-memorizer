@@ -33,7 +33,7 @@ jobs:
         run: |
           dotnet test .\WordReviewReminder.Tests\WordReviewReminder.Tests.csproj -p:Platform=x64 -c Release
 
-      - name: Build signed MSIX, MSI, and App Installer feed
+      - name: Build signed Setup, MSI, MSIX, and App Installer feed
         shell: pwsh
         env:
           CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
@@ -43,6 +43,12 @@ jobs:
           .\scripts\Build-Release.ps1 `
             -Version $packageVersion `
             -CertificatePassword $env:CERTIFICATE_PASSWORD
+
+      - name: Verify release artifacts
+        shell: pwsh
+        run: |
+          $semanticVersion = "${{ github.ref_name }}" -replace '^v', ''
+          .\scripts\Test-ReleaseArtifacts.ps1 -Version "$semanticVersion.0"
 
       - name: Publish GitHub release assets
         shell: pwsh
