@@ -10,10 +10,11 @@
     Loaded="Page_Loaded"
     SizeChanged="Page_SizeChanged">
 
-    <Grid Padding="{StaticResource StandardPagePadding}" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
+    <Grid x:Name="LayoutRoot" Padding="{StaticResource StandardPagePadding}" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition x:Name="WorkspaceRow" Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -232,4 +233,5 @@
             <TextBlock x:Name="StatusText" Grid.Column="1" AutomationProperties.LiveSetting="Polite" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </Grid>
     </Grid>
+    </ScrollViewer>
 </Page>

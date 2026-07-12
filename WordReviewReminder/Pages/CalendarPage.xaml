@@ -83,8 +83,8 @@
                         <ProgressRing x:Name="ActivityProgress" Grid.Column="1" Width="20" Height="20" IsActive="False" Visibility="Collapsed" />
                     </Grid>
 
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
-                        <Grid x:Name="ActivityCalendarGrid" HorizontalAlignment="Left" />
+                    <ScrollViewer x:Name="CalendarScrollViewer" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
+                        <Grid x:Name="ActivityCalendarGrid" HorizontalAlignment="Stretch" />
                     </ScrollViewer>
 
                     <Border x:Name="EmptyActivityPanel" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">

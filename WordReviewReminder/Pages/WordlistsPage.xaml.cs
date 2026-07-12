@@ -35,6 +35,9 @@ public sealed partial class WordlistsPage : Page
     {
         var compact = e.NewSize.Width < UiLayout.CompactPageWidth;
         var showPreview = e.NewSize.Width >= UiLayout.WidePageWidth;
+        LayoutRoot.MinHeight = e.NewSize.Height;
+        LayoutRoot.Height = compact && e.NewSize.Height < 760 ? 760 : double.NaN;
+        WorkspaceRow.MinHeight = compact ? 610 : 0;
         PreviewPane.Visibility = showPreview ? Visibility.Visible : Visibility.Collapsed;
         PreviewColumn.Width = showPreview ? new GridLength(280) : new GridLength(0);
 

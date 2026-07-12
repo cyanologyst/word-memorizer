@@ -99,7 +99,11 @@ public sealed partial class CalendarPage : Page
 
         for (var week = 0; week < weekCount; week++)
         {
-            ActivityCalendarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(46) });
+            ActivityCalendarGrid.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(1, GridUnitType.Star),
+                MinWidth = 46
+            });
             var monday = weekStart.AddDays(week * 7);
             if (week == 0 || monday.Month != monday.AddDays(-7).Month || monday.Day <= 7)
             {
@@ -126,8 +130,9 @@ public sealed partial class CalendarPage : Page
                     : $"{date:dddd, MMMM d}: {day.Reviews:N0} reviews, {day.RecallRate:0}% recall, {day.DifficultResponses:N0} difficult responses";
                 var button = new Button
                 {
-                    Width = 42,
+                    MinWidth = 42,
                     Height = 42,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
                     Padding = new Thickness(2),
                     Margin = new Thickness(1),
                     CornerRadius = new CornerRadius(4),
@@ -174,11 +179,15 @@ public sealed partial class CalendarPage : Page
             return;
         }
 
-        var allEvents = await App.Data.LogService.ReadAllAsync();
-        var events = allEvents
-            .Where(item => item.Timestamp.ToLocalTime().Date == day.Date)
-            .OrderByDescending(item => item.Timestamp)
-            .ToList();
+        var localStart = new DateTimeOffset(day.Date, TimeZoneInfo.Local.GetUtcOffset(day.Date));
+        var result = await App.Data.LogService.QueryAsync(new ReviewLogQuery
+        {
+            From = localStart,
+            To = localStart.AddDays(1).AddTicks(-1),
+            Sort = ReviewLogSort.Newest,
+            PageSize = 5000
+        });
+        var events = result.Items;
         var text = events.Count == 0
             ? "No reviews on this day."
             : string.Join(Environment.NewLine, events.Take(40).Select(item => $"{item.Timestamp.ToLocalTime():HH:mm}  {item.Term}  {ActionLabel(item.Action)}"));
@@ -220,6 +229,7 @@ public sealed partial class CalendarPage : Page
         Grid.SetColumn(BestDayCard, compact ? 0 : 2);
         Grid.SetRow(RecallCard, compact ? 1 : 0);
         Grid.SetColumn(RecallCard, compact ? 1 : 3);
+        ActivityCalendarGrid.MinWidth = Math.Max(0, CalendarScrollViewer.ActualWidth);
     }
 
     private static string ActionLabel(ReviewAction action) => action switch

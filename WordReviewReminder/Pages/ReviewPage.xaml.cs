@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
@@ -71,6 +72,10 @@ public sealed partial class ReviewPage : Page
                 await StartSessionAsync(_pendingOptions);
                 _pendingOptions = null;
             }
+            else
+            {
+                DispatcherQueue.TryEnqueue(() => StartRecommendedButton.Focus(FocusState.Programmatic));
+            }
         }
         catch (Exception exception)
         {
@@ -95,6 +100,13 @@ public sealed partial class ReviewPage : Page
 
         (App.MainWindow as MainWindow)?.SetFocusMode(false);
         (App.MainWindow as MainWindow)?.ClearTaskbarProgress();
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        LayoutRoot.MinHeight = e.NewSize.Height;
+        LayoutRoot.Height = e.NewSize.Height < 700 ? 720 : double.NaN;
+        MainContentRow.MinHeight = e.NewSize.Height < 700 ? 560 : 0;
     }
 
     private async void StartConfiguredSessionButton_Click(object sender, RoutedEventArgs e)
@@ -219,7 +231,7 @@ public sealed partial class ReviewPage : Page
         SessionControlPanel.Visibility = Visibility.Visible;
         (App.MainWindow as MainWindow)?.SetFocusMode(options.FocusMode);
         await LoadNextAsync();
-        Focus(FocusState.Programmatic);
+        RevealButton.Focus(FocusState.Programmatic);
     }
 
     private async Task LoadNextAsync()
@@ -254,7 +266,7 @@ public sealed partial class ReviewPage : Page
         CompletionPanel.Visibility = sessionComplete ? Visibility.Visible : Visibility.Collapsed;
         FocusCard.Visibility = sessionComplete || _paused ? Visibility.Collapsed : Visibility.Visible;
         PausedPanel.Visibility = _paused && !sessionComplete ? Visibility.Visible : Visibility.Collapsed;
-        SessionControlPanel.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
+        SessionControlPanel.Visibility = sessionComplete || _paused ? Visibility.Collapsed : Visibility.Visible;
         KnowButton.IsEnabled = hasWord && _revealed && !_recording && !_paused;
         LaterButton.IsEnabled = hasWord && _revealed && !_recording && !_paused;
         SkipButton.IsEnabled = hasWord && !_recording && !_paused;
@@ -284,9 +296,16 @@ public sealed partial class ReviewPage : Page
         SourceText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "Wordlist";
         HiddenPromptText.Visibility = _revealed ? Visibility.Collapsed : Visibility.Visible;
         HiddenPromptText.Opacity = _revealed ? 0 : 1;
+        MeaningText.Visibility = _revealed ? Visibility.Visible : Visibility.Collapsed;
         MeaningText.Opacity = _revealed ? 1 : 0;
         MeaningText.Text = _currentWord.ShortMeaning ?? "";
         RevealButtonText.Text = _revealed ? "Revealed" : "Reveal";
+        AutomationProperties.SetHelpText(KnowButton, _revealed
+            ? "Mark this word as known."
+            : "Reveal the meaning before rating your recall.");
+        AutomationProperties.SetHelpText(LaterButton, _revealed
+            ? "Schedule this word for another review."
+            : "Reveal the meaning before rating your recall.");
         AdditionalDetailsExpander.IsExpanded = false;
         PopulateAdditionalDetails(_currentWord, _revealed);
         StatusText.Text = App.Data.FindListForWord(_currentWord)?.Title ?? "";
@@ -316,6 +335,7 @@ public sealed partial class ReviewPage : Page
         ReviewMissedButton.IsEnabled = retryCount > 0;
         ReviewMissedButton.Visibility = retryCount > 0 ? Visibility.Visible : Visibility.Collapsed;
         StatusText.Text = _sessionEndedEarly ? "Session ended safely" : "Session complete";
+        (retryCount > 0 ? ReviewMissedButton : AnotherSessionButton).Focus(FocusState.Programmatic);
         SoundService.Play("session-complete");
     }
 
@@ -451,6 +471,7 @@ public sealed partial class ReviewPage : Page
         PausedSummaryText.Text = $"{_sessionCount:N0} of {_sessionGoal:N0} words completed. The current word and timer are preserved.";
         StatusText.Text = "Session paused";
         Render();
+        ResumeSessionButton.Focus(FocusState.Programmatic);
     }
 
     private void ResumeSessionButton_Click(object sender, RoutedEventArgs e)
@@ -464,7 +485,7 @@ public sealed partial class ReviewPage : Page
         StatusText.Text = "Session resumed";
         Render();
         StartRecallTimer(reset: false);
-        Focus(FocusState.Programmatic);
+        RevealButton.Focus(FocusState.Programmatic);
     }
 
     private async void EndSessionButton_Click(object sender, RoutedEventArgs e)
@@ -549,6 +570,7 @@ public sealed partial class ReviewPage : Page
         PausedPanel.Visibility = Visibility.Collapsed;
         SessionControlPanel.Visibility = Visibility.Collapsed;
         SessionSetupPanel.Visibility = Visibility.Visible;
+        StartRecommendedButton.Focus(FocusState.Programmatic);
     }
 
     private void RevealMeaning()
@@ -562,6 +584,7 @@ public sealed partial class ReviewPage : Page
         KnowButton.IsEnabled = true;
         LaterButton.IsEnabled = true;
         HiddenPromptText.Visibility = Visibility.Visible;
+        MeaningText.Visibility = Visibility.Visible;
         MeaningText.Opacity = 0;
         MeaningTransform.TranslateY = 8;
         RevealButtonText.Text = "Revealed";
@@ -578,6 +601,11 @@ public sealed partial class ReviewPage : Page
             MeaningText.Opacity = 1;
             MeaningTransform.TranslateY = 0;
         }
+    }
+
+    private void RevealStoryboard_Completed(object? sender, object e)
+    {
+        HiddenPromptText.Visibility = Visibility.Collapsed;
     }
 
     private void PopulateAdditionalDetails(WordEntry word, bool revealed)

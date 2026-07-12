@@ -8,6 +8,7 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded"
     Unloaded="Page_Unloaded"
+    SizeChanged="Page_SizeChanged"
     KeyDown="Page_KeyDown"
     IsTabStop="True">
 
@@ -20,7 +21,7 @@
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
-        <Storyboard x:Name="RevealStoryboard">
+        <Storyboard x:Name="RevealStoryboard" Completed="RevealStoryboard_Completed">
             <DoubleAnimation Storyboard.TargetName="HiddenPromptText" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.10" />
             <DoubleAnimation Storyboard.TargetName="MeaningText" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" BeginTime="0:0:0.05" />
             <DoubleAnimation Storyboard.TargetName="MeaningTransform" Storyboard.TargetProperty="TranslateY" From="8" To="0" Duration="0:0:0.22" BeginTime="0:0:0.05">
@@ -31,10 +32,11 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid Padding="{StaticResource CompactPagePadding}" RowSpacing="14" Background="{StaticResource GlassBaseBrush}">
+    <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
+    <Grid x:Name="LayoutRoot" Padding="{StaticResource CompactPagePadding}" RowSpacing="14" Background="{StaticResource GlassBaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition x:Name="MainContentRow" Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -170,7 +172,7 @@
                             <TextBlock HorizontalAlignment="Center" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Meaning hidden" />
                             <TextBlock HorizontalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="Press Space when ready" />
                         </StackPanel>
-                        <TextBlock x:Name="MeaningText" MaxWidth="760" FontSize="22" TextWrapping="WrapWholeWords" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Opacity="0">
+                        <TextBlock x:Name="MeaningText" MaxWidth="760" FontSize="22" TextWrapping="WrapWholeWords" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Opacity="0" Visibility="Collapsed">
                             <TextBlock.RenderTransform>
                                 <CompositeTransform x:Name="MeaningTransform" />
                             </TextBlock.RenderTransform>
@@ -205,13 +207,13 @@
                             <TextBlock Text="Listen" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="KnowButton" Grid.Column="2" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Mark known, 1" AutomationProperties.HelpText="Reveal the meaning before rating your recall." Click="KnowButton_Click">
+                    <Button x:Name="KnowButton" Grid.Column="2" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Mark known, 1" Click="KnowButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE73E;" />
                             <TextBlock Text="Know" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="LaterButton" Grid.Column="3" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Review later, 2" AutomationProperties.HelpText="Reveal the meaning before rating your recall." Click="LaterButton_Click">
+                    <Button x:Name="LaterButton" Grid.Column="3" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Review later, 2" Click="LaterButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE916;" />
                             <TextBlock Text="Later" />
@@ -233,7 +235,7 @@
                 <TextBlock Text="Session paused" FontSize="28" FontWeight="SemiBold" />
                 <TextBlock x:Name="PausedSummaryText" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Resume review session" Click="ResumeSessionButton_Click">
+                    <Button x:Name="ResumeSessionButton" Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Resume review session" Click="ResumeSessionButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE768;" />
                             <TextBlock Text="Resume" />
@@ -271,7 +273,7 @@
                     <Button x:Name="ReviewMissedButton" AutomationProperties.Name="Review missed and skipped words again" Click="ReviewMissedButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72C;" /><TextBlock Text="Review missed" /></StackPanel>
                     </Button>
-                    <Button Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Configure another review session" Click="RestartSessionButton_Click">
+                    <Button x:Name="AnotherSessionButton" Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Configure another review session" Click="RestartSessionButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE768;" /><TextBlock Text="Another session" /></StackPanel>
                     </Button>
                     <Button AutomationProperties.Name="Return to dashboard" Click="DoneButton_Click">
@@ -286,4 +288,5 @@
             <TextBlock HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Space reveal   1 know   2 later   3 skip" />
         </Grid>
     </Grid>
+    </ScrollViewer>
 </Page>

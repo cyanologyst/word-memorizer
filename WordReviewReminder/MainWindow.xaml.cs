@@ -307,9 +307,27 @@ public sealed partial class MainWindow : Window
             CloseButtonText = "Close",
             DefaultButton = ContentDialogButton.Primary
         };
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary && results.SelectedItem is PaletteEntry selected)
+
+        PaletteEntry? submittedEntry = null;
+        void SubmitSelection()
         {
-            await selected.Action();
+            if (results.SelectedItem is not PaletteEntry selected)
+            {
+                return;
+            }
+
+            submittedEntry = selected;
+            dialog.Hide();
+        }
+
+        search.QuerySubmitted += (_, _) => SubmitSelection();
+        results.DoubleTapped += (_, _) => SubmitSelection();
+        var result = await dialog.ShowAsync();
+        var entryToOpen = submittedEntry ??
+            (result == ContentDialogResult.Primary ? results.SelectedItem as PaletteEntry : null);
+        if (entryToOpen is not null)
+        {
+            await entryToOpen.Action();
         }
     }
 
