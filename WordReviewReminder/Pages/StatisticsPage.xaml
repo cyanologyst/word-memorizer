@@ -6,26 +6,31 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <StackPanel Padding="24,18,24,24" Spacing="14">
+        <StackPanel Padding="{StaticResource StandardPagePadding}" Spacing="14">
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
                     <EntranceThemeTransition FromVerticalOffset="10" />
                 </TransitionCollection>
             </StackPanel.ChildrenTransitions>
 
-            <Grid ColumnSpacing="16">
+            <Grid x:Name="HeaderGrid" ColumnSpacing="16" RowSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="330" />
+                    <ColumnDefinition x:Name="HeaderActionColumn" Width="330" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <StackPanel Spacing="6">
-                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Statistics" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Momentum, mastery, and words that need attention" />
+                    <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Statistics" />
+                    <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Momentum, mastery, and words that need attention" />
                 </StackPanel>
-                <Border Grid.Column="1" Padding="14" Style="{StaticResource PremiumPanelStyle}">
+                <Border x:Name="NextActionCard" Grid.Column="1" Padding="14" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -42,13 +47,17 @@
                 </Border>
             </Grid>
 
-            <Grid ColumnSpacing="14">
+            <Grid x:Name="MetricGrid" ColumnSpacing="14" RowSpacing="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.15*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="MetricColumn3" Width="*" />
+                    <ColumnDefinition x:Name="MetricColumn4" Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Border Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <Grid ColumnSpacing="14">
                         <Grid.ColumnDefinitions>
@@ -70,14 +79,14 @@
                         <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Keep it alive today" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                <Border x:Name="DueNowCard" Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
                         <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
                         <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Ready for review" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+                <Border x:Name="TotalActiveCard" Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Total active" />
                         <TextBlock x:Name="TotalActiveText" Style="{StaticResource MetricValueTextStyle}" />
@@ -86,11 +95,15 @@
                 </Border>
             </Grid>
 
-            <Grid ColumnSpacing="18">
+            <Grid x:Name="InsightGrid" ColumnSpacing="18" RowSpacing="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.25*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="InsightColumn2" Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
                 <Border Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="14">
@@ -147,7 +160,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
+                <Border x:Name="NeedsAttentionCard" Grid.Column="1" Padding="20" Style="{StaticResource PremiumPanelStyle}">
                     <StackPanel Spacing="14">
                         <TextBlock Text="Needs attention" Style="{StaticResource SubtitleTextBlockStyle}" />
                         <ItemsRepeater x:Name="MissedRepeater">

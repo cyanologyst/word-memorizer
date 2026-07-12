@@ -12,6 +12,7 @@ public sealed partial class ReviewPage : Page
 {
     private readonly SpeechService _speech = new();
     private readonly DispatcherTimer _recallTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
     private readonly List<ReviewAction> _sessionActions = [];
     private readonly HashSet<string> _reviewedWordIds = new(StringComparer.OrdinalIgnoreCase);
     private WordEntry? _currentWord;
@@ -23,6 +24,7 @@ public sealed partial class ReviewPage : Page
     private bool _revealed;
     private DateTimeOffset _sessionStartedAt;
     private DateTimeOffset _wordShownAt;
+    private ReviewSessionPlan? _recommendedPlan;
 
     public ReviewPage()
     {
@@ -44,6 +46,7 @@ public sealed partial class ReviewPage : Page
             .ToList();
         SessionWordListBox.SelectedIndex = 0;
         SessionGoalBox.Value = App.Data.Settings.DefaultSessionSize;
+        UpdateSessionPlans();
 
         if (_pendingOptions is not null)
         {
@@ -63,15 +66,33 @@ public sealed partial class ReviewPage : Page
     private async void StartConfiguredSessionButton_Click(object sender, RoutedEventArgs e)
     {
         var selectedList = SessionWordListBox.SelectedItem as WordListOption;
-        var options = new ReviewSessionOptions
+        var plan = App.Data.PlanReviewSession(
+            Math.Max(1, (int)SessionGoalBox.Value),
+            selectedList?.Id,
+            SessionModeBox.SelectedIndex == 1);
+        if (!plan.HasEligibleWords)
         {
-            Goal = Math.Max(5, (int)SessionGoalBox.Value),
-            WordListId = selectedList?.Id,
-            DifficultOnly = SessionModeBox.SelectedIndex == 1,
+            App.Feedback.Show("No words match this session", plan.Reason, AppFeedbackSeverity.Warning);
+            return;
+        }
+
+        var options = plan.Options with
+        {
             Timed = TimedSessionToggle.IsOn,
             FocusMode = FocusModeToggle.IsOn
         };
         await StartSessionAsync(options);
+    }
+
+    private async void StartRecommendedButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_recommendedPlan is not { HasEligibleWords: true } plan)
+        {
+            App.Feedback.Show("No words are ready", _recommendedPlan?.Reason ?? "Enable a wordlist to begin.");
+            return;
+        }
+
+        await StartSessionAsync(plan.Options);
     }
 
     private void SessionGoalPreset_Click(object sender, RoutedEventArgs e)
@@ -81,6 +102,7 @@ public sealed partial class ReviewPage : Page
         {
             SessionGoalBox.Value = goal;
             UpdateGoalPresetChecks(goal);
+            UpdateSessionPlans();
         }
     }
 
@@ -89,7 +111,45 @@ public sealed partial class ReviewPage : Page
         if (!double.IsNaN(args.NewValue))
         {
             UpdateGoalPresetChecks((int)Math.Round(args.NewValue));
+            UpdateSessionPlans();
         }
+    }
+
+    private void SessionConfiguration_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateSessionPlans();
+    }
+
+    private void UpdateSessionPlans()
+    {
+        if (!IsLoaded || SessionWordListBox.SelectedItem is not WordListOption selectedList)
+        {
+            return;
+        }
+
+        _recommendedPlan = App.Data.PlanReviewSession(App.Data.Settings.DefaultSessionSize);
+        RecommendedSummaryText.Text = FormatPlan(_recommendedPlan);
+        RecommendedReasonText.Text = _recommendedPlan.Reason;
+        StartRecommendedButton.IsEnabled = _recommendedPlan.HasEligibleWords;
+
+        var customPlan = App.Data.PlanReviewSession(
+            Math.Max(1, (int)Math.Round(SessionGoalBox.Value)),
+            selectedList.Id,
+            SessionModeBox.SelectedIndex == 1);
+        CustomSessionSummaryText.Text = FormatPlan(customPlan);
+        StartConfiguredSessionButton.IsEnabled = customPlan.HasEligibleWords;
+        NoEligibleWordsText.Text = customPlan.Reason;
+        NoEligibleWordsText.Visibility = customPlan.HasEligibleWords ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private static string FormatPlan(ReviewSessionPlan plan)
+    {
+        if (!plan.HasEligibleWords)
+        {
+            return "No eligible words";
+        }
+
+        return $"{plan.Options.Goal} words | about {plan.EstimatedMinutes} min | {plan.DueCount} due | {plan.NewCount} new";
     }
 
     private void UpdateGoalPresetChecks(int goal)
@@ -102,7 +162,7 @@ public sealed partial class ReviewPage : Page
     private async Task StartSessionAsync(ReviewSessionOptions options)
     {
         _options = options;
-        _sessionGoal = Math.Clamp(options.Goal, 5, 100);
+        _sessionGoal = Math.Clamp(options.Goal, 1, 100);
         _sessionCount = 0;
         _sessionActions.Clear();
         _reviewedWordIds.Clear();
@@ -129,7 +189,15 @@ public sealed partial class ReviewPage : Page
         _wordShownAt = DateTimeOffset.UtcNow;
         Render();
         StartRecallTimer();
-        CardEntranceStoryboard.Begin();
+        if (_animationsEnabled)
+        {
+            CardEntranceStoryboard.Begin();
+        }
+        else
+        {
+            FocusCard.Opacity = 1;
+            FocusCardTransform.TranslateY = 0;
+        }
     }
 
     private void Render()
@@ -138,8 +206,8 @@ public sealed partial class ReviewPage : Page
         var sessionComplete = _sessionCount >= _sessionGoal;
         CompletionPanel.Visibility = sessionComplete ? Visibility.Visible : Visibility.Collapsed;
         FocusCard.Visibility = sessionComplete ? Visibility.Collapsed : Visibility.Visible;
-        KnowButton.IsEnabled = hasWord;
-        LaterButton.IsEnabled = hasWord;
+        KnowButton.IsEnabled = hasWord && _revealed;
+        LaterButton.IsEnabled = hasWord && _revealed;
         SkipButton.IsEnabled = hasWord;
         RevealButton.IsEnabled = hasWord;
         ProgressText.Text = $"{_sessionCount} / {_sessionGoal}";
@@ -235,6 +303,12 @@ public sealed partial class ReviewPage : Page
             return;
         }
 
+        if (!_revealed && action is ReviewAction.Known or ReviewAction.Later)
+        {
+            App.Feedback.Show("Reveal the meaning first", "Press Space, then rate how well you remembered the word.");
+            return;
+        }
+
         _recallTimer.Stop();
         var responseSeconds = Math.Max(0, (DateTimeOffset.UtcNow - _wordShownAt).TotalSeconds);
         var reviewedWord = _currentWord;
@@ -273,11 +347,23 @@ public sealed partial class ReviewPage : Page
         }
 
         _revealed = true;
+        KnowButton.IsEnabled = true;
+        LaterButton.IsEnabled = true;
         HiddenPromptText.Visibility = Visibility.Visible;
         MeaningText.Opacity = 0;
         MeaningTransform.TranslateY = 8;
         RevealButtonText.Text = "Revealed";
-        RevealStoryboard.Begin();
+        if (_animationsEnabled)
+        {
+            RevealStoryboard.Begin();
+        }
+        else
+        {
+            HiddenPromptText.Visibility = Visibility.Collapsed;
+            HiddenPromptText.Opacity = 0;
+            MeaningText.Opacity = 1;
+            MeaningTransform.TranslateY = 0;
+        }
     }
 
     private async void Page_KeyDown(object sender, KeyRoutedEventArgs e)

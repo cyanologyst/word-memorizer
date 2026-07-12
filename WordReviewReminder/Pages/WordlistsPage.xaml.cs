@@ -25,10 +25,25 @@ public sealed partial class WordlistsPage : Page
 
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        var showPreview = e.NewSize.Width >= 1120;
+        var compact = e.NewSize.Width < UiLayout.CompactPageWidth;
+        var showPreview = e.NewSize.Width >= UiLayout.WidePageWidth;
         PreviewPane.Visibility = showPreview ? Visibility.Visible : Visibility.Collapsed;
         PreviewColumn.Width = showPreview ? new GridLength(280) : new GridLength(0);
-        ListsColumn.Width = e.NewSize.Width >= 900 ? new GridLength(240) : new GridLength(210);
+
+        HeaderActionColumn.Width = compact ? new GridLength(0) : GridLength.Auto;
+        Grid.SetRow(PageCommandBar, compact ? 1 : 0);
+        Grid.SetColumn(PageCommandBar, compact ? 0 : 1);
+        PageCommandBar.HorizontalAlignment = compact ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+
+        ListsColumn.Width = compact ? new GridLength(1, GridUnitType.Star) : new GridLength(240);
+        WordsColumn.Width = compact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        ListsRow.Height = compact ? new GridLength(116) : new GridLength(1, GridUnitType.Star);
+        WordsRow.Height = compact ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        Grid.SetRow(WordListView, 0);
+        Grid.SetColumn(WordListView, 0);
+        Grid.SetRow(WordsPane, compact ? 1 : 0);
+        Grid.SetColumn(WordsPane, compact ? 0 : 1);
+        Grid.SetColumnSpan(WordsPane, compact ? 2 : 1);
     }
 
     private async Task RefreshAsync()
@@ -47,6 +62,8 @@ public sealed partial class WordlistsPage : Page
 
         _loading = false;
         RenderSelectedList();
+        NoWordlistsPanel.Visibility = App.Data.WordLists.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ContentGrid.IsHitTestVisible = App.Data.WordLists.Count > 0;
     }
 
     private void WordListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -105,6 +122,12 @@ public sealed partial class WordlistsPage : Page
 
         var orderedWords = words.OrderBy(word => word.Order ?? int.MaxValue).ToList();
         WordsView.ItemsSource = orderedWords;
+        WordsView.Visibility = orderedWords.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyWordsPanel.Visibility = orderedWords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyWordsTitle.Text = _selectedList.Words.Count == 0 ? "No words in this list" : "No matching words";
+        EmptyWordsMessage.Text = _selectedList.Words.Count == 0
+            ? "Add a word or import a populated wordlist."
+            : "Clear the search or try a broader term.";
         if (WordsView.SelectedItem is not WordEntry selected || !orderedWords.Any(word => word.Id == selected.Id))
         {
             WordsView.SelectedIndex = orderedWords.Count > 0 ? 0 : -1;
@@ -164,9 +187,11 @@ public sealed partial class WordlistsPage : Page
             await App.Data.ImportWordListAsync(file.Path);
             StatusText.Text = "Imported";
             await RefreshAsync();
+            App.Feedback.Success("Wordlist imported", $"{file.Name} is ready to review.");
         }
         catch (Exception ex)
         {
+            App.Feedback.Error("Import failed", ex.Message);
             await ShowMessageAsync("Import failed", ex.Message);
         }
     }
@@ -223,6 +248,7 @@ public sealed partial class WordlistsPage : Page
         _selectedList = list;
         StatusText.Text = "Word added";
         await RefreshAsync();
+        App.Feedback.Success("Word added", $"{word.Term} was added to Personal Words.");
     }
 
     private async void EditWordButton_Click(object sender, RoutedEventArgs e)
@@ -245,6 +271,7 @@ public sealed partial class WordlistsPage : Page
             await App.Data.SaveWordListAsync(_selectedList);
             StatusText.Text = "Word saved";
             await RefreshAsync();
+            App.Feedback.Success("Word updated", $"Changes to {edited.Term} were saved.");
         }
     }
 
@@ -255,10 +282,34 @@ public sealed partial class WordlistsPage : Page
             return;
         }
 
+        var listId = _selectedList.Id;
+        var originalIndex = _selectedList.Words.FindIndex(word => word.Id == selectedWord.Id);
         _selectedList.Words.RemoveAll(word => word.Id == selectedWord.Id);
         await App.Data.SaveWordListAsync(_selectedList);
         StatusText.Text = "Word deleted";
         await RefreshAsync();
+        App.Feedback.Success(
+            "Word deleted",
+            $"{selectedWord.Term} was removed. Review history was kept.",
+            "Undo",
+            async () =>
+            {
+                var list = App.Data.WordLists.FirstOrDefault(candidate => candidate.Id == listId);
+                if (list is null || list.Words.Any(word => word.Id == selectedWord.Id))
+                {
+                    return;
+                }
+
+                list.Words.Insert(Math.Clamp(originalIndex, 0, list.Words.Count), selectedWord);
+                await App.Data.SaveWordListAsync(list);
+                if (IsLoaded)
+                {
+                    _selectedList = list;
+                    await RefreshAsync();
+                }
+
+                App.Feedback.Success("Word restored", $"{selectedWord.Term} is back in {list.Title}.");
+            });
     }
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -276,6 +327,9 @@ public sealed partial class WordlistsPage : Page
         _selectedList.IsEnabled = EnableSelectedToggle.IsOn;
         await App.Data.SaveWordListAsync(_selectedList);
         StatusText.Text = EnableSelectedToggle.IsOn ? "List enabled" : "List disabled";
+        App.Feedback.Show(
+            EnableSelectedToggle.IsOn ? "Wordlist enabled" : "Wordlist disabled",
+            $"{_selectedList.Title} is {(EnableSelectedToggle.IsOn ? "included in" : "excluded from")} review sessions.");
     }
 
     private async Task<WordList> GetOrCreatePersonalListAsync()

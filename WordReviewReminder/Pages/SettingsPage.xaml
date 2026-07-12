@@ -11,7 +11,7 @@
 
     <Grid Background="{StaticResource GlassBaseBrush}">
         <ScrollViewer>
-            <StackPanel MaxWidth="1280" Padding="24,18,24,80" Spacing="14" HorizontalAlignment="Stretch">
+            <StackPanel MaxWidth="1280" Padding="{StaticResource SettingsPagePadding}" Spacing="14" HorizontalAlignment="Stretch">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="10" />
@@ -20,7 +20,7 @@
 
                 <StackPanel Spacing="6">
                     <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Settings" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Reminder timing, quiet hours, and notification behavior" />
+                    <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Reminder timing, quiet hours, and notification behavior" />
                 </StackPanel>
 
                 <Grid ColumnSpacing="18">
@@ -165,13 +165,13 @@
                                 <TextBlock Text="Backup and restore" Style="{StaticResource SubtitleTextBlockStyle}" />
                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Create one portable archive containing wordlists, progress, settings, achievements, enrichment cache, and logs." TextWrapping="WrapWholeWords" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Click="BackupButton_Click">
+                                    <Button AutomationProperties.Name="Create a local data backup" Click="BackupButton_Click">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <FontIcon Glyph="&#xE74E;" />
                                             <TextBlock Text="Create backup" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="RestoreButton_Click">
+                                    <Button AutomationProperties.Name="Restore a local data backup" Click="RestoreButton_Click">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <FontIcon Glyph="&#xE777;" />
                                             <TextBlock Text="Restore backup" />
@@ -194,9 +194,9 @@
                             <Rectangle Height="1" Fill="{StaticResource PremiumGlassBorderSubtleBrush}" />
                             <TextBlock x:Name="PreviewSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Content="15 min" Click="Preset15Button_Click" />
-                                <Button Content="30 min" Click="Preset30Button_Click" />
-                                <Button Content="60 min" Click="Preset60Button_Click" />
+                                <Button Content="15 min" AutomationProperties.Name="Set reminder interval to 15 minutes" Click="Preset15Button_Click" />
+                                <Button Content="30 min" AutomationProperties.Name="Set reminder interval to 30 minutes" Click="Preset30Button_Click" />
+                                <Button Content="60 min" AutomationProperties.Name="Set reminder interval to 60 minutes" Click="Preset60Button_Click" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -207,7 +207,7 @@
         <Border x:Name="SaveBar" VerticalAlignment="Bottom" Padding="24,12" Background="{StaticResource GlassRaisedBrush}" BorderBrush="{StaticResource PremiumGlassBorderBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                 <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" Click="SaveButton_Click" />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}" Content="Save settings" AutomationProperties.Name="Save settings" Click="SaveButton_Click" />
             </StackPanel>
         </Border>
     </Grid>

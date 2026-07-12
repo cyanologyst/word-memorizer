@@ -18,16 +18,32 @@ namespace WordReviewReminder;
 
 public sealed partial class MainWindow : Window
 {
+    private static readonly IReadOnlyDictionary<string, Type> PageTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["home"] = typeof(HomePage),
+        ["review"] = typeof(ReviewPage),
+        ["mistakes"] = typeof(MistakeLabPage),
+        ["wordlists"] = typeof(WordlistsPage),
+        ["statistics"] = typeof(StatisticsPage),
+        ["calendar"] = typeof(CalendarPage),
+        ["achievements"] = typeof(AchievementsPage),
+        ["logs"] = typeof(LogsPage),
+        ["about"] = typeof(AboutPage)
+    };
+
     private readonly DispatcherTimer _timer = new();
     private DateTimeOffset _nextReminderAt = DateTimeOffset.Now.AddSeconds(15);
     private ReminderOverlayWindow? _reminderWindow;
     private readonly DispatcherTimer _achievementDismissTimer = new();
+    private readonly DispatcherTimer _feedbackDismissTimer = new();
     private readonly bool _animationsEnabled = new Windows.UI.ViewManagement.UISettings().AnimationsEnabled;
     private ReviewSessionOptions? _pendingReviewOptions;
     private readonly HotKeyService _hotKeyService = new();
     private readonly ClipboardMonitorService _clipboardMonitor = new();
     private readonly TrayService _trayService;
     private readonly TaskbarProgressService _taskbarProgress;
+    private readonly WindowSizeConstraints _windowSizeConstraints;
+    private Func<Task>? _pendingFeedbackAction;
     private MiniWidgetWindow? _miniWidgetWindow;
 
     public MainWindow()
@@ -41,6 +57,10 @@ public sealed partial class MainWindow : Window
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
         var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        _windowSizeConstraints = new WindowSizeConstraints(
+            windowHandle,
+            UiLayout.MinimumWindowWidth,
+            UiLayout.MinimumWindowHeight);
         _taskbarProgress = new TaskbarProgressService(windowHandle);
         _hotKeyService.Pressed += (_, _) => DispatcherQueue.TryEnqueue(ReviewNow);
         _clipboardMonitor.WordDetected += ClipboardMonitor_WordDetected;
@@ -52,11 +72,23 @@ public sealed partial class MainWindow : Window
             () => DispatcherQueue.TryEnqueue(() => App.Current.Exit()));
         UpdateWindowsIntegrations();
 
-        NavFrame.Navigate(typeof(HomePage));
+        var initialPageTag = PageTypes.ContainsKey(App.Data.Settings.LastPageTag) &&
+                             !string.Equals(App.Data.Settings.LastPageTag, "review", StringComparison.OrdinalIgnoreCase)
+            ? App.Data.Settings.LastPageTag
+            : "home";
+        var initialItem = FindNavigationItem(initialPageTag);
+        if (initialItem is not null)
+        {
+            NavView.SelectedItem = initialItem;
+        }
+
+        NavigateToPage(initialPageTag);
         App.Data.AchievementUnlocked += Data_AchievementUnlocked;
         App.Data.SettingsChanged += Data_SettingsChanged;
+        App.Feedback.MessageRequested += Feedback_MessageRequested;
         _achievementDismissTimer.Interval = TimeSpan.FromSeconds(5.5);
         _achievementDismissTimer.Tick += AchievementDismissTimer_Tick;
+        _feedbackDismissTimer.Tick += FeedbackDismissTimer_Tick;
         _timer.Interval = TimeSpan.FromSeconds(5);
         _timer.Tick += Timer_Tick;
         _timer.Start();
@@ -73,48 +105,60 @@ public sealed partial class MainWindow : Window
         NavFrame.GoBack();
     }
 
-    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.IsSettingsSelected)
         {
-            NavFrame.Navigate(typeof(SettingsPage));
+            NavigateToPage("settings");
         }
         else if (args.SelectedItem is NavigationViewItem item)
         {
-            switch (item.Tag)
+            var tag = item.Tag?.ToString();
+            if (string.IsNullOrWhiteSpace(tag))
             {
-                case "home":
-                    NavFrame.Navigate(typeof(HomePage));
-                    break;
-                case "review":
-                    NavFrame.Navigate(typeof(ReviewPage), _pendingReviewOptions);
-                    _pendingReviewOptions = null;
-                    break;
-                case "mistakes":
-                    NavFrame.Navigate(typeof(MistakeLabPage));
-                    break;
-                case "wordlists":
-                    NavFrame.Navigate(typeof(WordlistsPage));
-                    break;
-                case "statistics":
-                    NavFrame.Navigate(typeof(StatisticsPage));
-                    break;
-                case "calendar":
-                    NavFrame.Navigate(typeof(CalendarPage));
-                    break;
-                case "achievements":
-                    NavFrame.Navigate(typeof(AchievementsPage));
-                    break;
-                case "logs":
-                    NavFrame.Navigate(typeof(LogsPage));
-                    break;
-                case "about":
-                    NavFrame.Navigate(typeof(AboutPage));
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unknown navigation item tag: {item.Tag}");
+                return;
+            }
+
+            var parameter = string.Equals(tag, "review", StringComparison.OrdinalIgnoreCase)
+                ? _pendingReviewOptions
+                : null;
+            _pendingReviewOptions = null;
+            NavigateToPage(tag, parameter);
+
+            if (!string.Equals(tag, "review", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    await App.Data.SaveLastPageAsync(tag);
+                }
+                catch (Exception exception)
+                {
+                    App.Feedback.Error("Navigation state was not saved", exception.Message);
+                }
             }
         }
+    }
+
+    private void NavigateToPage(string tag, object? parameter = null)
+    {
+        var pageType = string.Equals(tag, "settings", StringComparison.OrdinalIgnoreCase)
+            ? typeof(SettingsPage)
+            : PageTypes.GetValueOrDefault(tag)
+              ?? throw new InvalidOperationException($"Unknown navigation item tag: {tag}");
+
+        if (NavFrame.CurrentSourcePageType == pageType && parameter is null)
+        {
+            return;
+        }
+
+        NavFrame.Navigate(pageType, parameter);
+    }
+
+    private NavigationViewItem? FindNavigationItem(string tag)
+    {
+        return NavView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(candidate => string.Equals(candidate.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
     }
 
     private void NavFrame_Navigated(object sender, NavigationEventArgs e)
@@ -147,12 +191,17 @@ public sealed partial class MainWindow : Window
 
     public void NavigateTo(string tag)
     {
-        var item = NavView.MenuItems
-            .OfType<NavigationViewItem>()
-            .FirstOrDefault(candidate => string.Equals(candidate.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        var item = FindNavigationItem(tag);
         if (item is not null)
         {
-            NavView.SelectedItem = item;
+            if (ReferenceEquals(NavView.SelectedItem, item))
+            {
+                NavigateToPage(tag);
+            }
+            else
+            {
+                NavView.SelectedItem = item;
+            }
         }
     }
 
@@ -310,12 +359,73 @@ public sealed partial class MainWindow : Window
 
     private void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        _windowSizeConstraints.Dispose();
         _timer.Stop();
+        _feedbackDismissTimer.Stop();
+        App.Feedback.MessageRequested -= Feedback_MessageRequested;
         _achievementDismissTimer.Stop();
         _trayService.Dispose();
         _hotKeyService.Dispose();
         _clipboardMonitor.Update(false);
         _taskbarProgress.Clear();
+    }
+
+    private void Feedback_MessageRequested(object? sender, AppFeedbackMessage message)
+    {
+        DispatcherQueue.TryEnqueue(() => ShowFeedback(message));
+    }
+
+    private void ShowFeedback(AppFeedbackMessage message)
+    {
+        _feedbackDismissTimer.Stop();
+        GlobalFeedbackBar.Title = message.Title;
+        GlobalFeedbackBar.Message = message.Message;
+        GlobalFeedbackBar.Severity = message.Severity switch
+        {
+            AppFeedbackSeverity.Success => InfoBarSeverity.Success,
+            AppFeedbackSeverity.Warning => InfoBarSeverity.Warning,
+            AppFeedbackSeverity.Error => InfoBarSeverity.Error,
+            _ => InfoBarSeverity.Informational
+        };
+
+        _pendingFeedbackAction = message.Action;
+        FeedbackActionButton.Content = message.ActionLabel;
+        FeedbackActionButton.Visibility = message.Action is null || string.IsNullOrWhiteSpace(message.ActionLabel)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        GlobalFeedbackBar.IsOpen = true;
+        _feedbackDismissTimer.Interval = message.Duration ?? (message.Action is null
+            ? TimeSpan.FromSeconds(5)
+            : TimeSpan.FromSeconds(15));
+        _feedbackDismissTimer.Start();
+    }
+
+    private void FeedbackDismissTimer_Tick(object? sender, object e)
+    {
+        _feedbackDismissTimer.Stop();
+        GlobalFeedbackBar.IsOpen = false;
+        _pendingFeedbackAction = null;
+    }
+
+    private async void FeedbackActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        var action = _pendingFeedbackAction;
+        _feedbackDismissTimer.Stop();
+        GlobalFeedbackBar.IsOpen = false;
+        _pendingFeedbackAction = null;
+        if (action is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            App.Feedback.Error("Action failed", exception.Message);
+        }
     }
 
     private sealed record PaletteEntry(string Label, string Context, Func<Task> Action);

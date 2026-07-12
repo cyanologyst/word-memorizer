@@ -35,14 +35,21 @@ public sealed partial class MistakeLabPage : Page
     private void Render()
     {
         var filter = (UrgencyFilter.SelectedItem as ComboBoxItem)?.Content?.ToString();
-        MistakesView.ItemsSource = filter is null or "All" ? _items : _items.Where(item => item.Urgency == filter).ToList();
+        var visibleItems = filter is null or "All" ? _items : _items.Where(item => item.Urgency == filter).ToList();
+        MistakesView.ItemsSource = visibleItems;
+        MistakesView.Visibility = visibleItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyMistakesPanel.Visibility = visibleItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyMistakesTitle.Text = _items.Count == 0 ? "No difficult words here" : $"No {filter?.ToLowerInvariant()} urgency words";
+        EmptyMistakesMessage.Text = _items.Count == 0
+            ? "Words appear after they are skipped or marked for later review."
+            : "Try another urgency filter to see the rest of your practice queue.";
     }
 
     private void StartPracticeButton_Click(object sender, RoutedEventArgs e)
     {
         (App.MainWindow as MainWindow)?.StartReviewSession(new ReviewSessionOptions
         {
-            Goal = Math.Min(20, Math.Max(5, _items.Count)),
+            Goal = Math.Min(20, Math.Max(1, _items.Count)),
             DifficultOnly = true,
             FocusMode = true
         });

@@ -119,6 +119,51 @@ public sealed class CoreTests
     }
 
     [Fact]
+    public void SessionPlannerCapsGoalAndSummarizesDueAndNewWords()
+    {
+        var now = new DateTimeOffset(2026, 7, 13, 12, 0, 0, TimeSpan.Zero);
+        var words = Enumerable.Range(1, 4)
+            .Select(index => new WordEntry($"word-{index}", $"Word {index}", null, null, null, null, index, null))
+            .ToArray();
+        var progress = new ReviewProgress();
+        progress.Entries["word-1"] = new ReviewProgressEntry
+        {
+            WordId = "word-1",
+            TimesSeen = 1,
+            DueAt = now.AddMinutes(-5)
+        };
+        progress.Entries["word-2"] = new ReviewProgressEntry
+        {
+            WordId = "word-2",
+            TimesSeen = 1,
+            DueAt = now.AddDays(2)
+        };
+
+        var plan = ReviewSessionPlanner.Create([NewList(words)], progress, now, requestedGoal: 20);
+
+        Assert.Equal(4, plan.Options.Goal);
+        Assert.Equal(4, plan.EligibleCount);
+        Assert.Equal(1, plan.DueCount);
+        Assert.Equal(2, plan.NewCount);
+        Assert.Equal(2, plan.EstimatedMinutes);
+    }
+
+    [Fact]
+    public void SessionPlannerExplainsWhenNoDifficultWordsQualify()
+    {
+        var plan = ReviewSessionPlanner.Create(
+            [NewList(new WordEntry("word-1", "Dissolve", null, null, null, null, 1, null))],
+            new ReviewProgress(),
+            DateTimeOffset.UtcNow,
+            requestedGoal: 20,
+            difficultOnly: true);
+
+        Assert.False(plan.HasEligibleWords);
+        Assert.Equal(0, plan.Options.Goal);
+        Assert.Contains("difficult-word criteria", plan.Reason);
+    }
+
+    [Fact]
     public async Task EnrichedWordFieldsRoundTripThroughJsonStorage()
     {
         var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
@@ -182,6 +227,29 @@ public sealed class CoreTests
         finally
         {
             Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SettingsRoundTripLastVisitedPage()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "WordReviewReminderTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new LocalDataStore(root);
+            var settings = new UserSettings { LastPageTag = "statistics" };
+
+            await store.SaveSettingsAsync(settings);
+            var loaded = await store.LoadSettingsAsync();
+
+            Assert.Equal("statistics", loaded.LastPageTag);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
         }
     }
 

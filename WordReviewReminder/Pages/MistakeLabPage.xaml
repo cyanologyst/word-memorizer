@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Loaded="Page_Loaded">
-    <Grid Padding="24,18,24,22" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="{StaticResource StandardPagePadding}" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -12,10 +12,10 @@
         </Grid.RowDefinitions>
         <Grid>
             <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Mistake Lab" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Words that need more deliberate practice" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Mistake Lab" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Words that need more deliberate practice" />
             </StackPanel>
-            <Button HorizontalAlignment="Right" Style="{StaticResource PrimaryActionButtonStyle}" Click="StartPracticeButton_Click">
+            <Button HorizontalAlignment="Right" Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Practice difficult words" Click="StartPracticeButton_Click">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon Glyph="&#xE768;" />
                     <TextBlock Text="Practice difficult words" />
@@ -46,6 +46,7 @@
             </Grid>
         </Border>
         <Border Grid.Row="2" Style="{StaticResource PremiumPanelStyle}">
+            <Grid>
             <ListView x:Name="MistakesView" Padding="8" HorizontalContentAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
@@ -55,7 +56,7 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnSpacing="14">
+                        <Grid ColumnSpacing="14" AutomationProperties.Name="{Binding Term}" AutomationProperties.HelpText="{Binding Meaning}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="100" />
@@ -64,7 +65,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Spacing="3">
                                 <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding Term}" />
-                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Meaning}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Meaning}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Meaning}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" Text="MISSES" />
@@ -81,6 +82,14 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+                <Border x:Name="EmptyMistakesPanel" Margin="16" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="{StaticResource PremiumSuccessBrush}" />
+                        <TextBlock x:Name="EmptyMistakesTitle" Style="{StaticResource EmptyStateTitleStyle}" Text="No difficult words here" />
+                        <TextBlock x:Name="EmptyMistakesMessage" MaxWidth="420" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Words appear after they are skipped or marked for later review." TextAlignment="Center" TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
     </Grid>
 </Page>

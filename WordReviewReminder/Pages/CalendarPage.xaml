@@ -5,10 +5,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Loaded="Page_Loaded">
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <StackPanel Padding="24,18,24,24" Spacing="14">
+        <StackPanel Padding="{StaticResource StandardPagePadding}" Spacing="14">
             <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Activity" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Thirteen weeks of review consistency" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Activity" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Thirteen weeks of review consistency" />
             </StackPanel>
             <Border Padding="18" Style="{StaticResource PremiumPanelStyle}">
                 <StackPanel Spacing="14">
@@ -22,7 +22,7 @@
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate>
-                                <Button MinWidth="58" Height="48" Padding="6" Background="{Binding Background}" BorderBrush="Transparent" CornerRadius="5" ToolTipService.ToolTip="{Binding Tooltip}" Tag="{Binding}" Click="CalendarDay_Click">
+                                <Button MinWidth="58" Height="48" Padding="6" AutomationProperties.Name="{Binding Tooltip}" Background="{Binding Background}" BorderBrush="Transparent" CornerRadius="5" ToolTipService.ToolTip="{Binding Tooltip}" Tag="{Binding}" Click="CalendarDay_Click">
                                     <StackPanel>
                                         <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding Day}" />
                                         <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Count}" />

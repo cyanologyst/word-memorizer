@@ -69,6 +69,7 @@ public sealed record UserSettings
     public string? VoiceName { get; set; }
     public double SpeechRate { get; set; } = 1.0;
     public int DefaultSessionSize { get; set; } = 20;
+    public string LastPageTag { get; set; } = "home";
     public double? PopupLeft { get; set; }
     public double? PopupTop { get; set; }
 }

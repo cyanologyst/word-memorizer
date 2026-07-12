@@ -31,7 +31,7 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid Padding="24,18,24,20" RowSpacing="14" Background="{StaticResource GlassBaseBrush}">
+    <Grid Padding="{StaticResource CompactPagePadding}" RowSpacing="14" Background="{StaticResource GlassBaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -45,7 +45,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
                 <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Review" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Focus on one word, reveal its meaning, then rate your recall" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Focus on one word, reveal its meaning, then rate your recall" />
             </StackPanel>
             <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
                 <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" FontSize="16" FontWeight="SemiBold" />
@@ -59,6 +59,26 @@
                     <TextBlock Style="{StaticResource PageSectionTitleStyle}" Text="Build a review session" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Choose the shape of this session before you begin." />
                 </StackPanel>
+                <Border Padding="16" Style="{StaticResource PremiumLayerStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="5">
+                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="Recommended session" />
+                            <TextBlock x:Name="RecommendedSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                            <TextBlock x:Name="RecommendedReasonText" Style="{StaticResource PremiumCaptionTextStyle}" />
+                        </StackPanel>
+                        <Button x:Name="StartRecommendedButton" Grid.Column="1" Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Start recommended review session" Click="StartRecommendedButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE768;" />
+                                <TextBlock Text="Start recommended" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+                <TextBlock FontSize="13" FontWeight="SemiBold" Text="Customize" />
                 <Grid ColumnSpacing="22" RowSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -71,14 +91,14 @@
                     <StackPanel Spacing="7">
                         <TextBlock Text="Session length" />
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <ToggleButton x:Name="Goal10Button" MinWidth="52" Content="10" Tag="10" Click="SessionGoalPreset_Click" />
-                            <ToggleButton x:Name="Goal20Button" MinWidth="52" Content="20" Tag="20" Click="SessionGoalPreset_Click" />
-                            <ToggleButton x:Name="Goal30Button" MinWidth="52" Content="30" Tag="30" Click="SessionGoalPreset_Click" />
-                            <NumberBox x:Name="SessionGoalBox" Width="112" Minimum="5" Maximum="100" SmallChange="5" Value="20" SpinButtonPlacementMode="Inline" ValueChanged="SessionGoalBox_ValueChanged" />
+                            <ToggleButton x:Name="Goal10Button" MinWidth="52" Content="10" Tag="10" AutomationProperties.Name="Set session length to 10 words" Click="SessionGoalPreset_Click" />
+                            <ToggleButton x:Name="Goal20Button" MinWidth="52" Content="20" Tag="20" AutomationProperties.Name="Set session length to 20 words" Click="SessionGoalPreset_Click" />
+                            <ToggleButton x:Name="Goal30Button" MinWidth="52" Content="30" Tag="30" AutomationProperties.Name="Set session length to 30 words" Click="SessionGoalPreset_Click" />
+                            <NumberBox x:Name="SessionGoalBox" Width="112" Minimum="1" Maximum="100" SmallChange="5" Value="20" SpinButtonPlacementMode="Inline" ValueChanged="SessionGoalBox_ValueChanged" />
                         </StackPanel>
                     </StackPanel>
-                    <ComboBox x:Name="SessionWordListBox" Grid.Column="1" MinHeight="36" Header="Wordlist" DisplayMemberPath="Title" />
-                    <ComboBox x:Name="SessionModeBox" Grid.Row="1" MinHeight="36" Header="Word selection" SelectedIndex="0">
+                    <ComboBox x:Name="SessionWordListBox" Grid.Column="1" MinHeight="36" Header="Wordlist" DisplayMemberPath="Title" SelectionChanged="SessionConfiguration_Changed" />
+                    <ComboBox x:Name="SessionModeBox" Grid.Row="1" MinHeight="36" Header="Word selection" SelectedIndex="0" SelectionChanged="SessionConfiguration_Changed">
                         <ComboBoxItem Content="Due and new words" />
                         <ComboBoxItem Content="Difficult words only" />
                     </ComboBox>
@@ -87,12 +107,22 @@
                         <ToggleSwitch x:Name="FocusModeToggle" Header="Hide navigation during the session" IsOn="True" />
                     </StackPanel>
                 </Grid>
-                <Button HorizontalAlignment="Left" MinWidth="180" Style="{StaticResource PrimaryActionButtonStyle}" Click="StartConfiguredSessionButton_Click">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE768;" />
-                        <TextBlock Text="Start session" />
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="3" VerticalAlignment="Center">
+                        <TextBlock x:Name="CustomSessionSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                        <TextBlock x:Name="NoEligibleWordsText" Style="{StaticResource PremiumCaptionTextStyle}" Foreground="{StaticResource PremiumWarningBrush}" Visibility="Collapsed" />
                     </StackPanel>
-                </Button>
+                    <Button x:Name="StartConfiguredSessionButton" Grid.Column="1" MinWidth="180" Style="{StaticResource PrimaryActionButtonStyle}" AutomationProperties.Name="Start configured review session" Click="StartConfiguredSessionButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE768;" />
+                            <TextBlock Text="Start session" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
             </StackPanel>
         </Border>
 
@@ -156,13 +186,13 @@
                             <TextBlock Text="Listen" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="KnowButton" Grid.Column="2" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Mark known, 1" Click="KnowButton_Click">
+                    <Button x:Name="KnowButton" Grid.Column="2" Style="{StaticResource SuccessActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Mark known, 1" AutomationProperties.HelpText="Reveal the meaning before rating your recall." Click="KnowButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE73E;" />
                             <TextBlock Text="Know" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="LaterButton" Grid.Column="3" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Review later, 2" Click="LaterButton_Click">
+                    <Button x:Name="LaterButton" Grid.Column="3" Style="{StaticResource WarningActionButtonStyle}" HorizontalAlignment="Stretch" AutomationProperties.Name="Review later, 2" AutomationProperties.HelpText="Reveal the meaning before rating your recall." Click="LaterButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE916;" />
                             <TextBlock Text="Later" />
@@ -184,12 +214,12 @@
                 <TextBlock HorizontalAlignment="Center" Text="Session complete" FontSize="30" FontWeight="SemiBold" />
                 <TextBlock x:Name="SessionSummaryText" HorizontalAlignment="Center" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                 <TextBlock x:Name="SessionBreakdownText" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16" />
-                <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Content="Start another session" Click="RestartSessionButton_Click" />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Content="Start another session" AutomationProperties.Name="Configure another review session" Click="RestartSessionButton_Click" />
             </StackPanel>
         </Border>
 
         <Grid Grid.Row="2">
-            <TextBlock x:Name="StatusText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="StatusText" AutomationProperties.LiveSetting="Polite" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
             <TextBlock HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Space reveal   1 know   2 later   3 skip" />
         </Grid>
     </Grid>

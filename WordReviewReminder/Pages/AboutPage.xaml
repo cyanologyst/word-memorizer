@@ -9,10 +9,10 @@
     Loaded="Page_Loaded">
 
     <ScrollViewer Background="{StaticResource PremiumPageBackgroundBrush}">
-        <StackPanel Padding="24,18,24,24" Spacing="14">
+        <StackPanel Padding="{StaticResource StandardPagePadding}" Spacing="14">
             <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="About" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Product information, documentation, and local storage" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="About" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Product information, documentation, and local storage" />
             </StackPanel>
 
             <Border Padding="24" Style="{StaticResource PremiumPanelStyle}">

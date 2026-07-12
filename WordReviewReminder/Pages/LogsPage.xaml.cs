@@ -64,6 +64,12 @@ public sealed partial class LogsPage : Page
             })
             .ToList();
         LogsView.ItemsSource = timeline;
+        LogsView.Visibility = timeline.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyLogsPanel.Visibility = timeline.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyLogsTitle.Text = App.Data.RecentEvents.Count == 0 ? "No review history yet" : "No matching review events";
+        EmptyLogsMessage.Text = App.Data.RecentEvents.Count == 0
+            ? "Complete a review and the result will appear here."
+            : "Choose another event type to broaden the results.";
         StatusText.Text = $"{timeline.Count} visible events - {App.Data.RecentEvents.Count} total";
     }
 
@@ -80,6 +86,7 @@ public sealed partial class LogsPage : Page
         if (!File.Exists(App.Data.Store.LogsPath))
         {
             StatusText.Text = "No log file yet";
+            App.Feedback.Show("Nothing to export", "Complete a review first, then export its history.");
             return;
         }
 
@@ -96,8 +103,17 @@ public sealed partial class LogsPage : Page
             return;
         }
 
-        File.Copy(App.Data.Store.LogsPath, file.Path, overwrite: true);
-        StatusText.Text = "Exported";
+        try
+        {
+            File.Copy(App.Data.Store.LogsPath, file.Path, overwrite: true);
+            StatusText.Text = "Exported";
+            App.Feedback.Success("Logs exported", $"Review history was saved to {file.Name}.");
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = "Export failed";
+            App.Feedback.Error("Export failed", exception.Message);
+        }
     }
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)

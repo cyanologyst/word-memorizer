@@ -179,6 +179,21 @@ public sealed class AppDataService
         return _scheduler.PickNextWord(filtered, Progress, Settings, now);
     }
 
+    public ReviewSessionPlan PlanReviewSession(
+        int requestedGoal,
+        string? wordListId = null,
+        bool difficultOnly = false,
+        DateTimeOffset? now = null)
+    {
+        return ReviewSessionPlanner.Create(
+            WordLists,
+            Progress,
+            now ?? DateTimeOffset.Now,
+            requestedGoal,
+            wordListId,
+            difficultOnly);
+    }
+
     public DateTimeOffset? GetNextReminderAt(DateTimeOffset now)
     {
         return _scheduler.GetNextReminderAt(Settings, now);
@@ -294,6 +309,12 @@ public sealed class AppDataService
         Settings = settings;
         await Store.SaveSettingsAsync(settings);
         SettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task SaveLastPageAsync(string pageTag)
+    {
+        Settings.LastPageTag = pageTag;
+        await Store.SaveSettingsAsync(Settings);
     }
 
     public async Task ImportWordListAsync(string filePath)

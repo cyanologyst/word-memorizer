@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WordReviewReminder.Services;
 
 namespace WordReviewReminder.Pages;
 
@@ -40,6 +41,33 @@ public sealed partial class StatisticsPage : Page
         MissedRepeater.ItemsSource = missed;
         NoMissesText.Visibility = missed.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ActivityRepeater.ItemsSource = App.Data.GetWeeklyActivity();
+        ApplyResponsiveLayout(ActualWidth);
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        ApplyResponsiveLayout(e.NewSize.Width);
+    }
+
+    private void ApplyResponsiveLayout(double width)
+    {
+        var compact = width < UiLayout.MediumPageWidth;
+
+        HeaderActionColumn.Width = compact ? new GridLength(0) : new GridLength(330);
+        Grid.SetRow(NextActionCard, compact ? 1 : 0);
+        Grid.SetColumn(NextActionCard, compact ? 0 : 1);
+        NextActionCard.Margin = compact ? new Thickness(0) : new Thickness(0);
+
+        MetricColumn3.Width = compact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        MetricColumn4.Width = compact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        Grid.SetRow(DueNowCard, compact ? 1 : 0);
+        Grid.SetColumn(DueNowCard, compact ? 0 : 2);
+        Grid.SetRow(TotalActiveCard, compact ? 1 : 0);
+        Grid.SetColumn(TotalActiveCard, compact ? 1 : 3);
+
+        InsightColumn2.Width = compact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        Grid.SetRow(NeedsAttentionCard, compact ? 1 : 0);
+        Grid.SetColumn(NeedsAttentionCard, compact ? 0 : 1);
     }
 
     private static void RenderMastery(TextBlock label, ProgressBar bar, int value, int total)

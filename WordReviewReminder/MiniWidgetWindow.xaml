@@ -27,10 +27,10 @@
                 <TextBlock x:Name="MetaText" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <Button Width="40" Height="36" ToolTipService.ToolTip="Open Review Mode" Click="ReviewButton_Click">
+                <Button Width="40" Height="36" AutomationProperties.Name="Open Review Mode" ToolTipService.ToolTip="Open Review Mode" Click="ReviewButton_Click">
                     <FontIcon Glyph="&#xE768;" />
                 </Button>
-                <Button Width="40" Height="36" ToolTipService.ToolTip="Snooze reminders">
+                <Button Width="40" Height="36" AutomationProperties.Name="Snooze reminders" ToolTipService.ToolTip="Snooze reminders">
                     <FontIcon Glyph="&#xE769;" />
                     <Button.Flyout>
                         <MenuFlyout>

@@ -10,7 +10,7 @@
     SizeChanged="Page_SizeChanged">
 
     <ScrollViewer Background="{StaticResource GlassBaseBrush}" HorizontalScrollBarVisibility="Disabled">
-        <Grid MaxWidth="1280" Padding="24,18,24,24" HorizontalAlignment="Stretch">
+        <Grid MaxWidth="1280" Padding="{StaticResource StandardPagePadding}" HorizontalAlignment="Stretch">
             <StackPanel Spacing="14">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
@@ -30,7 +30,8 @@
 
                         <StackPanel Spacing="12">
                             <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Dashboard" />
-                            <TextBlock Style="{StaticResource PremiumBodyTextStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Today&apos;s command center for keeping words warm in memory" />
+                            <TextBlock x:Name="DailyBriefingText" Style="{StaticResource PremiumPageSubtitleStyle}" Text="Preparing today&apos;s recommended review" />
+                            <TextBlock x:Name="DailyBriefingReasonText" Style="{StaticResource PremiumCaptionTextStyle}" />
                             <StackPanel x:Name="HeaderChips" Orientation="Horizontal" Spacing="10">
                                 <Border Padding="10,5" Background="{StaticResource PremiumAccentSoftBrush}" CornerRadius="14">
                                     <TextBlock x:Name="NextReminderChipText" FontSize="12" Text="Next in 5 min" />
@@ -39,16 +40,16 @@
                                     <TextBlock x:Name="DailyGoalChipText" FontSize="12" Text="Daily goal active" />
                                 </Border>
                                 <Border Padding="10,5" Background="{StaticResource PremiumLayerBrush}" CornerRadius="14">
-                                    <TextBlock x:Name="ModeChipText" FontSize="12" Text="Popup + toast" />
+                                    <TextBlock x:Name="StreakChipText" FontSize="12" Text="Start a streak" />
                                 </Border>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" Click="ReviewNowButton_Click">
+                            <Button x:Name="ReviewNowButton" Style="{StaticResource PrimaryActionButtonStyle}" MinWidth="180" AutomationProperties.Name="Start recommended review now" Click="ReviewNowButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="9">
                                     <FontIcon Glyph="&#xE768;" />
-                                    <TextBlock Text="Review now" />
+                                    <TextBlock x:Name="ReviewNowButtonText" Text="Review now" />
                                 </StackPanel>
                             </Button>
                             <Button Width="40" Height="40" Padding="0" AutomationProperties.Name="More dashboard actions" ToolTipService.ToolTip="More dashboard actions">
@@ -56,6 +57,7 @@
                                 <Button.Flyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem Text="Open mini widget" Click="MiniButton_Click" />
+                                        <MenuFlyoutItem Text="Customize review session" Click="CustomizeReviewButton_Click" />
                                         <MenuFlyoutItem Text="Pause reminders for 30 minutes" Click="PauseQuickButton_Click" />
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem Text="Refresh dashboard" Click="RefreshButton_Click" />
@@ -79,9 +81,9 @@
 
                     <Border Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Active words" />
-                            <TextBlock x:Name="ActiveWordsText" Style="{StaticResource MetricValueTextStyle}" />
-                            <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Enabled across lists" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due for review" />
+                            <TextBlock x:Name="DueReviewText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Scheduled and ready" />
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
@@ -93,16 +95,16 @@
                     </Border>
                     <Border x:Name="StreakCard" Grid.Column="2" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Streak" />
-                            <TextBlock x:Name="StreakText" Style="{StaticResource MetricValueTextStyle}" />
-                            <TextBlock x:Name="StreakHintText" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Difficult" />
+                            <TextBlock x:Name="DifficultWordsText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Needs deliberate practice" />
                         </StackPanel>
                     </Border>
                     <Border x:Name="DueCard" Grid.Column="3" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                         <StackPanel Spacing="8">
-                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="Due now" />
-                            <TextBlock x:Name="DueNowText" Style="{StaticResource MetricValueTextStyle}" />
-                            <TextBlock x:Name="NextReminderText" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextWrapping="NoWrap" />
+                            <TextBlock Style="{StaticResource MetricLabelTextStyle}" Text="New" />
+                            <TextBlock x:Name="NewWordsText" Style="{StaticResource MetricValueTextStyle}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Not reviewed yet" />
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -158,6 +160,14 @@
                                     </DataTemplate>
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
+                            <TextBlock
+                                x:Name="NoEnabledListsText"
+                                HorizontalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="No wordlists are enabled. Open Wordlists to choose one."
+                                TextAlignment="Center"
+                                TextWrapping="WrapWholeWords"
+                                Visibility="Collapsed" />
                         </StackPanel>
                     </Border>
                 </Grid>

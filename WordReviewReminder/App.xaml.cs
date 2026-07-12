@@ -18,6 +18,7 @@ public partial class App : Application
 {
     private Window? _window;
     public static AppDataService Data { get; } = new();
+    public static AppFeedbackService Feedback { get; } = new();
     public static Window? MainWindow { get; private set; }
     
     /// <summary>

@@ -217,6 +217,7 @@ public sealed partial class SettingsPage : Page
             VoiceName = VoiceBox.SelectedItem?.ToString(),
             SpeechRate = SpeechRateSlider.Value,
             DefaultSessionSize = Math.Max(5, (int)DefaultSessionSizeBox.Value),
+            LastPageTag = App.Data.Settings.LastPageTag,
             PopupLeft = App.Data.Settings.PopupLeft,
             PopupTop = App.Data.Settings.PopupTop
         };
@@ -224,6 +225,7 @@ public sealed partial class SettingsPage : Page
         await App.Data.SaveSettingsAsync(settings);
         StartupService.SetStartWithWindows(settings.StartWithWindows);
         StatusText.Text = "Saved";
+        App.Feedback.Success("Settings saved", "Reminder and review preferences are up to date.");
         UpdatePreview(markDirty: false);
         await Task.Delay(850);
         await HideSaveBarAsync();
@@ -297,8 +299,17 @@ public sealed partial class SettingsPage : Page
             return;
         }
 
-        await App.Data.BackupService.CreateAsync(file.Path);
-        StatusText.Text = "Backup created";
+        try
+        {
+            await App.Data.BackupService.CreateAsync(file.Path);
+            StatusText.Text = "Backup created";
+            App.Feedback.Success("Backup created", $"Your local data was saved to {file.Name}.");
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = "Backup failed";
+            App.Feedback.Error("Backup failed", exception.Message);
+        }
     }
 
     private async void RestoreButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -326,9 +337,18 @@ public sealed partial class SettingsPage : Page
             return;
         }
 
-        await App.Data.BackupService.RestoreAsync(file.Path);
-        await App.Data.InitializeAsync();
-        Page_Loaded(this, new RoutedEventArgs());
-        StatusText.Text = "Backup restored";
+        try
+        {
+            await App.Data.BackupService.RestoreAsync(file.Path);
+            await App.Data.InitializeAsync();
+            Page_Loaded(this, new RoutedEventArgs());
+            StatusText.Text = "Backup restored";
+            App.Feedback.Success("Backup restored", "Local wordlists, progress, and settings were reloaded.");
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = "Restore failed";
+            App.Feedback.Error("Restore failed", exception.Message);
+        }
     }
 }

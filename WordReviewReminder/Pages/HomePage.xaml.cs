@@ -7,6 +7,7 @@ namespace WordReviewReminder.Pages;
 public sealed partial class HomePage : Page
 {
     private MiniWidgetWindow? _miniWidgetWindow;
+    private ReviewSessionPlan? _recommendedPlan;
 
     public HomePage()
     {
@@ -16,30 +17,34 @@ public sealed partial class HomePage : Page
     public async Task RefreshAsync()
     {
         await App.Data.RefreshAsync();
-        ActiveWordsText.Text = App.Data.TotalWords.ToString("N0");
+        _recommendedPlan = App.Data.PlanReviewSession(App.Data.Settings.DefaultSessionSize);
+        DueReviewText.Text = _recommendedPlan.DueCount.ToString("N0");
         ReviewedTodayText.Text = $"{App.Data.ReviewedToday:N0}/{App.Data.DailyGoalCount}";
         DailyGoalBar.Value = App.Data.DailyGoalProgress;
         DailyGoalChipText.Text = App.Data.ReviewedToday >= App.Data.DailyGoalCount
             ? "Daily goal complete"
             : $"{Math.Max(0, App.Data.DailyGoalCount - App.Data.ReviewedToday):N0} left today";
-        StreakText.Text = $"{App.Data.ReviewStreakDays:N0}d";
-        StreakHintText.Text = App.Data.ReviewStreakDays > 0 ? "Momentum active" : "Start a streak";
-        DueNowText.Text = App.Data.DueNowCount.ToString("N0");
-        NextReminderText.Text = App.Data.IsQuietTime(DateTimeOffset.Now)
-            ? "Quiet hours"
-            : $"{App.Data.Settings.ReminderIntervalMinutes} min";
+        DifficultWordsText.Text = _recommendedPlan.DifficultCount.ToString("N0");
+        NewWordsText.Text = _recommendedPlan.NewCount.ToString("N0");
         NextReminderChipText.Text = App.Data.IsPaused(DateTimeOffset.Now)
             ? $"Paused until {App.Data.PausedUntil?.ToLocalTime():HH:mm}"
             : App.Data.IsQuietTime(DateTimeOffset.Now)
                 ? "Quiet hours active"
                 : $"Next in {App.Data.Settings.ReminderIntervalMinutes} min";
-        ModeChipText.Text = App.Data.Settings.NotificationMode switch
-        {
-            NotificationMode.Popup => "Popup mode",
-            NotificationMode.Toast => "Toast mode",
-            _ => "Popup + toast"
-        };
-        EnabledListsRepeater.ItemsSource = App.Data.WordLists.Where(list => list.IsEnabled).ToList();
+        StreakChipText.Text = App.Data.ReviewStreakDays == 0
+            ? "Start a streak"
+            : $"{App.Data.ReviewStreakDays:N0} day streak";
+        DailyBriefingText.Text = _recommendedPlan.HasEligibleWords
+            ? $"{_recommendedPlan.Options.Goal} words | about {_recommendedPlan.EstimatedMinutes} min | {_recommendedPlan.DueCount} due | {_recommendedPlan.NewCount} new"
+            : "No enabled words are available for review";
+        DailyBriefingReasonText.Text = _recommendedPlan.Reason;
+        ReviewNowButton.IsEnabled = _recommendedPlan.HasEligibleWords;
+        ReviewNowButtonText.Text = _recommendedPlan.HasEligibleWords
+            ? $"Review {_recommendedPlan.Options.Goal} words"
+            : "Review unavailable";
+        var enabledLists = App.Data.WordLists.Where(list => list.IsEnabled).ToList();
+        EnabledListsRepeater.ItemsSource = enabledLists;
+        NoEnabledListsText.Visibility = enabledLists.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ActivityRepeater.ItemsSource = App.Data.GetWeeklyActivity();
     }
 
@@ -83,6 +88,18 @@ public sealed partial class HomePage : Page
     }
 
     private void ReviewNowButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_recommendedPlan is { HasEligibleWords: true } plan)
+        {
+            (App.MainWindow as MainWindow)?.StartReviewSession(plan.Options);
+        }
+        else
+        {
+            App.Feedback.Show("No words are ready", _recommendedPlan?.Reason ?? "Enable a wordlist to begin.");
+        }
+    }
+
+    private void CustomizeReviewButton_Click(object sender, RoutedEventArgs e)
     {
         (App.MainWindow as MainWindow)?.NavigateTo("review");
     }

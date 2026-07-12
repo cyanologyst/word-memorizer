@@ -9,37 +9,45 @@
     Loaded="Page_Loaded"
     SizeChanged="Page_SizeChanged">
 
-    <Grid Padding="24,18,24,24" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="{StaticResource StandardPagePadding}" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid ColumnSpacing="16">
+        <Grid x:Name="HeaderGrid" ColumnSpacing="16" RowSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition x:Name="HeaderActionColumn" Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Wordlists" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Import, enable, and maintain local JSON vocabulary databases" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Wordlists" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Import, enable, and maintain local JSON vocabulary databases" />
             </StackPanel>
-            <CommandBar Grid.Column="1" Background="Transparent" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
+            <CommandBar x:Name="PageCommandBar" Grid.Column="1" Background="Transparent" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
                 <AppBarButton Icon="Import" Label="Import" Click="ImportButton_Click" />
                 <AppBarButton Icon="Add" Label="Add word" Click="AddWordButton_Click" />
                 <AppBarButton Icon="Edit" Label="Edit" Click="EditWordButton_Click" />
-                <AppBarButton Icon="Delete" Label="Delete" Click="DeleteWordButton_Click" />
+                <AppBarButton Icon="Delete" Label="Delete" Foreground="{StaticResource PremiumDangerBrush}" Click="DeleteWordButton_Click" />
                 <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
             </CommandBar>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="14">
+        <Grid x:Name="ContentGrid" Grid.Row="1" ColumnSpacing="14" RowSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="ListsColumn" Width="240" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="WordsColumn" Width="*" />
                 <ColumnDefinition x:Name="PreviewColumn" Width="280" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="ListsRow" Height="*" />
+                <RowDefinition x:Name="WordsRow" Height="0" />
+            </Grid.RowDefinitions>
 
             <ListView x:Name="WordListView" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="WordListView_SelectionChanged">
                 <ListView.ItemTemplate>
@@ -66,7 +74,7 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Border Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
+            <Border x:Name="WordsPane" Grid.Column="1" Padding="16" Style="{StaticResource PremiumPanelStyle}">
                 <Grid RowSpacing="14">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -93,7 +101,8 @@
                         <ToggleSwitch x:Name="EnableSelectedToggle" Grid.Column="1" Header="Enabled" Toggled="EnableSelectedToggle_Toggled" />
                     </Grid>
                     <AutoSuggestBox x:Name="SearchBox" Grid.Row="1" PlaceholderText="Search words, meanings, pronunciation, or part of speech" TextChanged="SearchBox_TextChanged" QueryIcon="Find" />
-                    <ListView x:Name="WordsView" Grid.Row="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="WordsView_SelectionChanged">
+                    <Grid Grid.Row="2">
+                    <ListView x:Name="WordsView" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="WordsView_SelectionChanged">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -122,6 +131,14 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                        <Border x:Name="EmptyWordsPanel" Margin="8" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <FontIcon Glyph="&#xE8D2;" FontSize="24" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="EmptyWordsTitle" Style="{StaticResource EmptyStateTitleStyle}" Text="No words in this list" />
+                                <TextBlock x:Name="EmptyWordsMessage" MaxWidth="360" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Add a word or import a populated wordlist." TextAlignment="Center" TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -141,7 +158,7 @@
                         </Border>
                     </StackPanel>
                     <TextBlock Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Text="Select a row to inspect it before editing or deleting." TextWrapping="WrapWholeWords" />
-                    <Button HorizontalAlignment="Stretch" Click="OpenWordDetailsButton_Click">
+                    <Button HorizontalAlignment="Stretch" AutomationProperties.Name="Open selected word details" Click="OpenWordDetailsButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE946;" />
                             <TextBlock Text="Open rich details" />
@@ -149,8 +166,16 @@
                     </Button>
                 </StackPanel>
             </Border>
+
+            <Border x:Name="NoWordlistsPanel" Grid.RowSpan="2" Grid.ColumnSpan="3" Margin="0" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                <StackPanel Spacing="10" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE8D2;" FontSize="28" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Style="{StaticResource EmptyStateTitleStyle}" Text="Your vocabulary library is empty" />
+                    <TextBlock MaxWidth="440" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Import a .wordlist.json file or add your first personal word." TextAlignment="Center" TextWrapping="WrapWholeWords" />
+                </StackPanel>
+            </Border>
         </Grid>
 
-        <TextBlock x:Name="StatusText" Grid.Row="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <TextBlock x:Name="StatusText" Grid.Row="2" AutomationProperties.LiveSetting="Polite" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </Grid>
 </Page>

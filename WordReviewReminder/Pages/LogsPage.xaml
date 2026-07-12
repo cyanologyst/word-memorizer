@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Loaded="Page_Loaded">
 
-    <Grid Padding="24,18,24,20" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
+    <Grid Padding="{StaticResource CompactPagePadding}" RowSpacing="14" Background="{StaticResource PremiumPageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -21,8 +21,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Logs" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Recent review activity and exportable history" />
+                <TextBlock Style="{StaticResource PremiumPageTitleStyle}" Text="Logs" />
+                <TextBlock Style="{StaticResource PremiumPageSubtitleStyle}" Text="Recent review activity and exportable history" />
             </StackPanel>
             <ComboBox x:Name="FilterBox" Grid.Column="1" MinWidth="160" Header="Event type" SelectionChanged="FilterBox_SelectionChanged">
                 <ComboBoxItem Content="All events" />
@@ -85,14 +85,21 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <Border x:Name="EmptyLogsPanel" Grid.Row="1" Margin="16" Style="{StaticResource EmptyStatePanelStyle}" Visibility="Collapsed">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE823;" FontSize="24" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="EmptyLogsTitle" Style="{StaticResource EmptyStateTitleStyle}" Text="No review history yet" />
+                        <TextBlock x:Name="EmptyLogsMessage" MaxWidth="420" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Complete a review and the result will appear here." TextAlignment="Center" TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 
         <CommandBar Grid.Row="2" Background="Transparent" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="False">
             <AppBarButton Icon="Save" Label="Export logs" AutomationProperties.Name="Export logs as JSON Lines" Click="ExportButton_Click" />
-            <AppBarButton Icon="Refresh" Label="Refresh" Click="RefreshButton_Click" />
+            <AppBarButton Icon="Refresh" Label="Refresh" AutomationProperties.Name="Refresh review history" Click="RefreshButton_Click" />
             <CommandBar.Content>
-                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Name="StatusText" AutomationProperties.LiveSetting="Polite" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </CommandBar.Content>
         </CommandBar>
     </Grid>
